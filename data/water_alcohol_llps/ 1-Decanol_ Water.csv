@@ -1,0 +1,15 @@
+(1) 1-Decanol;C10H22O⁠; [112-30-1],"19R. Stephenson and J. Stuart, J. Chem. Eng. Data31, 56 (1986).",,,,
+(2) Water;H2O⁠; [7732-18-5],"37K. Kinoshita, H. Ishikawa, and K. Shinoda, Bull. Chem. Soc. Jpn.31, 1081 (1958).",,,,
+,,,"70S. Tokunaga, M. Manabe, and M. Koda, Mem. Niihama Technical College, Sci. Eng.16, 96 (1980).",,
+,,,"120J. C. Galan, J. M. M. Moreno, R. T. Valle, and A. R. Segado, An. Quim., Ser. A85, 273 (1989).",,
+,,,"155I. K. Zhuravleva, E. F. Zhuravlev, and N. G. Lomakina, Zh. Fiz. Khim.51, 1700 (1977).",,
+,,,"158C. C. Addison and S. K. Hutchinson, J. Chem. Soc,1949, 3387 (1949).",,
+Reference liquid–liquid equilibrium data,,,,,
+Water rich phase,Alcohol rich phase,,,,
+T(K),"x1,exp","x1,calc",T(K),"x2,exp","x2,calc"
+293.15,4e-06,4.1199999999999995e-06,283.65,0.240 ,0.247
+298.15,4e-06,4.129999999999999e-06,293.15,0.236 ,0.247
+,,,303.15,0.257 ,0.248
+,,,308.15,0.255 ,0.250
+,,,313.15,0.252 ,0.251
+,,,323.15,0.247 ,0.255

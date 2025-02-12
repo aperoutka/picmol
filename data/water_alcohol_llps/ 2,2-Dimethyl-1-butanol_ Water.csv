@@ -1,0 +1,8 @@
+"(1) 2,2-Dimethyl-1-butanol;C6H14O⁠; [1185-33-7]","88P. M. Ginnings and R. Baum, J. Am. Chem. Soc.59, 1111 (1937).",,
+(2) Water;H2O⁠; [7732-18-5],,,
+Reference liquid–liquid equilibrium data,,,
+T(K),Water rich phase,Alcohol rich phase,
+"x1,exp","x1,calc","x2,calc",
+293.15,0.00146,0.00146,0.213
+298.15,0.00135,0.00139,0.220
+303.15,0.00126,0.00134,0.226
