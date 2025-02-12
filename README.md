@@ -1,5 +1,5 @@
 
-# PICMOL: PHASE INSTABILITY CALCULATOR FOR MOLECULAR DESIGN
+# PICMOL: Phas Instability Calculator for MOLecular design
 
 ## Features
 
