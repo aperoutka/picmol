@@ -1,0 +1,13 @@
+[project]
+name = "picmol"
+version = "0.0.1"
+authors = [{name = "Allison Peroutka"},]
+description = "a python package for phase Kirkwood-Buff theory and thermodynamic modeling for liquid-liquid equilibria calculations"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3"
+]
+
+[project.urls]
+Honepage = "https://github.com/aperoutka/picmol"
