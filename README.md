@@ -1,13 +1,13 @@
 
-# PICMOL: PHASE INSTABILITY CALCULATOR FOR MOLECULAR DESIGN
+# PICMOL: Phase Instability Calculator for Molecular Design
 
 ## Features
 
-- fragments molecules into UNIFAC subgroups
-- support for UNIFAC, UNIQUAC, NRTL, and Flory-Huggins thermodynamic models
-    - phase diagram calculations    
-    - I(q=0) calculations from small angle X-ray scattering
-
+- calculates Kirkwood-Buff Integrals (KBI) from radial distribution functions
+- support for UNIFAC, UNIQUAC, NRTL, and FH thermodynamic models
+- phase diagram calculator for LLE applications
+- calculation of Io in small-angle X-ray scattering
+  
 ## Environment Variables
 
 To run this project, create an anaconda environment from environment.yml
