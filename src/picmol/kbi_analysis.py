@@ -6,7 +6,7 @@ import argparse
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
-from .picmol import ThermoModel, KBI, KBIPlotter, PhaseDiagramPlotter #relative import
+from . import ThermoModel, KBI, KBIPlotter, PhaseDiagramPlotter
 
 def main():
   parser = argparse.ArgumentParser(description='PICMOL: A Phase Instability Calculator for Molecular Design')

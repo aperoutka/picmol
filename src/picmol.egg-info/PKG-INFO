@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: picmol
-Version: 0.0.4
+Version: 0.0.5
 Summary: a python package for phase Kirkwood-Buff theory and thermodynamic modeling for liquid-liquid equilibria calculations
 Author: Allison Peroutka
 Project-URL: Homepage, https://github.com/aperoutka/picmol
