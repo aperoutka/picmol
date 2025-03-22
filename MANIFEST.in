@@ -1,4 +1,10 @@
-recursive-include picmol/data/*.csv 
-recursive-include picmol/models/unifac_subgroups/*.csv 
-recursive-include picmol/models/unifac_subgroups/*.tsv 
+include LICENCE
+include README.md
+include environment.yml
+include pyproject.toml
 
+recursive-include picmol *.py *.csv *.tsv *.txt
+
+recursive-exclude dist *
+recursive-exclude tests *
+recursive-exclude tutorials *

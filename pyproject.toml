@@ -1,6 +1,10 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "picmol"
-version = "0.0.3"
+version = "0.0.4"
 authors = [{name = "Allison Peroutka"},]
 description = "a python package for phase Kirkwood-Buff theory and thermodynamic modeling for liquid-liquid equilibria calculations"
 readme = "README.md"
@@ -8,9 +12,12 @@ requires-python = ">=3.9"
 classifiers = [
   "Programming Language :: Python :: 3"
 ]
-include_package_data=True,
-package_data={'': ['data/*.csv', 'models/unifac_subgroups/*.csv', models/unifac_subgroups/*.tsv']}
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+mypkg = ["*.txt", "*.csv", "*.tsv]
 
 [project.urls]
 Homepage = "https://github.com/aperoutka/picmol"
