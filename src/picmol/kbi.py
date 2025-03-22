@@ -126,7 +126,7 @@ class KBI:
 
 	def setup_kbi_folders(self):
 		'''create folders for kbi analysis'''
-		mkdr(f"{self.prj_path}figures/")
+		mkdr(f"{self.prj_path}/figures/")
 		self.kbi_dir = mkdr(f"{self.prj_path}/figures/{self.kbi_fig_dirname}/")
 		self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method/")
 		self.kbi_indiv_fig_dir = mkdr(f"{self.kbi_method_dir}/indiv_kbi/")
@@ -137,7 +137,7 @@ class KBI:
 		sys_mols = []
 		sys_total_num_mols = 0
 		sys_mol_nums_by_component = {}
-		with open(f"{sys_parent_dir}{sys}/{sys}.top", "r") as top:
+		with open(f"{sys_parent_dir}/{sys}/{sys}.top", "r") as top:
 			lines = top.readlines()
 			for l, line in enumerate(lines):
 				# get line that contains "molecules"
@@ -409,7 +409,7 @@ class KBI:
 				for j, mol_2 in enumerate(list(self.mol_nums_by_component[sys].keys())):
 					if i <= j:
 						# read rdf file
-						rdf_file = glob.glob(f"{self.prj_path}{sys}/{self.rdf_dir}/*{mol_1}*{mol_2}*")[0]
+						rdf_file = glob.glob(f"{self.prj_path}/{sys}/{self.rdf_dir}/*{mol_1}*{mol_2}*")[0]
 						r, g = np.loadtxt(rdf_file, comments=["@", "#"], unpack=True)
 						r = r[:-3]
 						g = g[:-3]

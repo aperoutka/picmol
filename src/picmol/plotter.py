@@ -393,7 +393,7 @@ class PhaseDiagramPlotter:
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
     if self.model.save_dir is not None:
-      plt.savefig(f"{self.model.save_dir}{self.model.model_name}_Gmix_bin_spin_{basis}frac.png")
+      plt.savefig(f"{self.model.save_dir}/{self.model.model_name}_Gmix_bin_spin_{basis}frac.png")
     if show_fig:
       plt.show()
     else:
@@ -428,7 +428,7 @@ class PhaseDiagramPlotter:
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
     if self.model.save_dir is not None:
-      plt.savefig(f"{self.model.save_dir}{self.model.model_name}_Gmix_binodal_spinodal_selectpts_{basis}frac.png")
+      plt.savefig(f"{self.model.save_dir}/{self.model.model_name}_Gmix_binodal_spinodal_selectpts_{basis}frac.png")
     if show_fig == True:
       plt.show()
     else:
@@ -459,7 +459,7 @@ class PhaseDiagramPlotter:
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}{self.model.model_name}_phase_diagram_Gmix_heatmap_{basis}frac.png')
+      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_Gmix_heatmap_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -509,7 +509,7 @@ class PhaseDiagramPlotter:
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}{self.model.model_name}_phase_diagram_I0_heatmap_{basis}frac.png')
+      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_I0_heatmap_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -569,7 +569,7 @@ class PhaseDiagramPlotter:
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}{self.model.model_name}_phase_diagram_I0_heatmap_widomline_{basis}frac.png')
+      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_I0_heatmap_widomline_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -608,7 +608,7 @@ class PhaseDiagramPlotter:
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}{self.model.model_name}_phase_diagram_{basis}frac.png')
+      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -642,7 +642,7 @@ class PhaseDiagramPlotter:
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}{self.model.model_name}_phase_diagram_widomline_{basis}frac.png')
+      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_widomline_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -674,7 +674,7 @@ class PhaseDiagramPlotter:
     cbar = fig.colorbar(tp, ax=ax, aspect=25, label='$\Delta G_{mix}$ [kJ mol$^{-1}$]')
 
     if plot_spbi:
-      figname = f'{self.model.save_dir}{self.model.model_name}_GM_spbi_at_{T_plot}K.png'
+      figname = f'{self.model.save_dir}/{self.model.model_name}_GM_spbi_at_{T_plot}K.png'
       if self.model.model_name != 'unifac':
         sp_arr = np.array(self.model.x_sp[T_ind])
         ax.plot(sp_arr[:,0], sp_arr[:,1], sp_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='none')
@@ -682,7 +682,7 @@ class PhaseDiagramPlotter:
       bi_arr = self.model.x_bi[T_ind]
       ax.plot(bi_arr[:,0], bi_arr[:,1], bi_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='full')
     else:
-      figname = f'{self.model.save_dir}{self.model.model_name}_GM_at_{T_plot}K.png'
+      figname = f'{self.model.save_dir}/{self.model.model_name}_GM_at_{T_plot}K.png'
 
     ax.set_tlabel(xtext)
     ax.set_llabel(ytext)
@@ -741,7 +741,7 @@ class PhaseDiagramPlotter:
     cbar.ax.minorticks_on()
 
     if plot_spbi:
-      figname = f'{self.model.save_dir}{self.model.model_name}_Io_spbi_at_{T_plot}K.png'
+      figname = f'{self.model.save_dir}/{self.model.model_name}_Io_spbi_at_{T_plot}K.png'
       if self.model.model_name != 'unifac':
         sp_arr = np.array(self.model.x_sp[T_ind])
         ax.plot(sp_arr[:,0], sp_arr[:,1], sp_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='none')
@@ -749,7 +749,7 @@ class PhaseDiagramPlotter:
       bi_arr = self.model.x_bi[T_ind]
       ax.plot(bi_arr[:,0], bi_arr[:,1], bi_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='full')
     else:
-      figname = f'{self.model.save_dir}{self.model.model_name}_Io_at_{T_plot}K.png'
+      figname = f'{self.model.save_dir}/{self.model.model_name}_Io_at_{T_plot}K.png'
 
 
     ax.set_tlabel(xtext)
@@ -798,7 +798,7 @@ class PhaseDiagramPlotter:
     ax.raxis.set_major_locator(MultipleLocator(0.10))
 
     if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}{self.model.model_name}_binodals_temperature_dependence.png')
+      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_binodals_temperature_dependence.png')
     if show_fig:
       plt.show()
     else:
