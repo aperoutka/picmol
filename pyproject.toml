@@ -13,11 +13,5 @@ classifiers = [
   "Programming Language :: Python :: 3"
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-data]
-mypkg = ["*.txt", "*.csv", "*.tsv]
-
 [project.urls]
 Homepage = "https://github.com/aperoutka/picmol"

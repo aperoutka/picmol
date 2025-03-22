@@ -3,7 +3,7 @@ include README.md
 include environment.yml
 include pyproject.toml
 
-recursive-include picmol *.py *.csv *.tsv *.txt
+recursive-include src/picmol *.py *.csv *.tsv *.mplstyle
 
 recursive-exclude dist *
 recursive-exclude tests *
