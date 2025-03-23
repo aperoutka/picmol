@@ -1,4 +1,4 @@
-# picmol: Molecular Simulation Analysis and Phase Equilibria Calculations
+# picmol: Phase Instability Calculator for MOLecular design
 
 `picmol` is a `Python` library designed to streamline the analysis of molecular dynamics simulations, focusing on the application of Kirkwood-Buff (KB) theory for the calculation of activity coefficients, excess thermodynamic properties, and liquid-liquid equilibria (LLE).
 
