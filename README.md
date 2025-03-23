@@ -4,7 +4,6 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://tldrlegal.com/license/mit-license)
 ![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue)
-[![PyPIversion](https://badge.fury.io/py/picmol.svg)](https://badge.fury.io/py/picmol)
 
 ## Key Features:
 
