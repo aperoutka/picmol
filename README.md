@@ -65,6 +65,24 @@ Installing picmol package.
 pip install .
 ```
 
+## File Structure Requirements
+
+To use the Picmol package, your project directory should be structured as follows:
+
+**Explanation:**
+
+* **`project_directory/`**: This is the root directory for your `picmol` project.
+* **`system1/`, `system2/`, etc.:** Each subdirectory within the `project_directory` represents a separate simulation system you want to analyze.
+* **`rdf/`**: Inside each system directory, you must have an `rdf` subdirectory. This directory should contain all the radial distribution function (RDF) `.xvg` files that you want to analyze with `picmol`.
+* **`.edr` file**: Each system directory must also contain the `.edr` file from the NPT production run of your simulation.
+* **`.top` file**: Similarly, each system directory must contain the `.top` topology file corresponding to the system.
+
+**Important Notes:**
+
+* Ensure that the `.edr`, `.top`, and `.xvg` files are correctly placed within their respective system directories.
+* The naming convention of your RDF files (`rdf1.xvg`, `rdf2.xvg`, etc.) is flexible, but ensure molecular names (same as in `.top` file) are in filename.
+* `picmol` expects this specific file structure to function correctly.
+
 ## Examples
 
 `picmol` includes support for a command line interface, and example is provided below where the only argument different from default values is the name for rdf file directory.
