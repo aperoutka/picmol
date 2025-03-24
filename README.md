@@ -23,7 +23,7 @@
     * Generates phase diagrams for visual analysis.
       
 * **Small-Angle X-ray Scattering (SAXS) Support:**
-    * Includes functionality to calculate Io from SAXS data, providing valuable structural information.
+    * Includes functionality to calculate SAXS Io, providing valuable structural information and comparison to experimental techniques.
       
 * **Visualization Tools:**
     * Offers comprehensive visualization capabilities for both Kirkwood-Buff analysis results and LLE phase diagrams, aiding in data interpretation.
@@ -32,20 +32,11 @@
 
 `picmol` provides a cohesive workflow that bridges the gap between molecular dynamics simulations and phase equilibria calculations. It enables users to:
 
-1.  **Analyze MD simulations:** Use Kirkwood-Buff theory to derive interaction parameters.
-2.  **Fit thermodynamic models:** Fit the derived parameters to suitable thermodynamic models.
+1.  **Analyze MD simulations:** Use Kirkwood-Buff theory to derive excess thermodynamic properties.
+2.  **Fit thermodynamic models:** Fit interaction parameters to suitable thermodynamic models.
 3.  **Calculate LLE:** Predict liquid-liquid equilibria and generate phase diagrams.
-4.  **Analyze SAXS data:** Derive Io values from SAXS data.
+4.  **Analyze SAXS data:** Derive SAXS Io values from free energy curvature.
 5.  **Visualize results:** Generate informative plots for analysis and presentation.
-
-## Applications
-
-`picmol` is a valuable tool for researchers and engineers working in fields such as:
-
-* Chemical engineering
-* Materials science
-* Pharmaceutical development
-* Polymer science
 
 ## Installation
 
