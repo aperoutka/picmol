@@ -5,7 +5,8 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://tldrlegal.com/license/mit-license)
 ![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue)
 
-## Key Features:
+
+## Key Features
 
 * **Kirkwood-Buff Integration:**
     * Calculates activity coefficients and excess thermodynamic properties from molecular dynamics simulations using Kirkwood-Buff theory.
@@ -27,7 +28,7 @@
 * **Visualization Tools:**
     * Offers comprehensive visualization capabilities for both Kirkwood-Buff analysis results and LLE phase diagrams, aiding in data interpretation.
 
-## Workflow:
+## Workflow
 
 `picmol` provides a cohesive workflow that bridges the gap between molecular dynamics simulations and phase equilibria calculations. It enables users to:
 
@@ -37,7 +38,7 @@
 4.  **Analyze SAXS data:** Derive Io values from SAXS data.
 5.  **Visualize results:** Generate informative plots for analysis and presentation.
 
-## Applications:
+## Applications
 
 `picmol` is a valuable tool for researchers and engineers working in fields such as:
 
@@ -46,7 +47,7 @@
 * Pharmaceutical development
 * Polymer science
 
-## Getting Started:
+## Installation
 
 `picmol` can be installed from cloning github repository.
 
@@ -64,7 +65,7 @@ Installing picmol package.
 pip install .
 ```
 
-## Examples:
+## Examples
 
 `picmol` includes support for a command line interface, and example is provided below where the only argument different from default values is the name for rdf file directory.
 
