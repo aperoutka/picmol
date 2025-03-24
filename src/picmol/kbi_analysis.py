@@ -44,7 +44,7 @@ def main():
   if args.run_thermo.lower() == 'true':
 
     # create thermodynamic model
-    print('initializing thermodynamic model')
+    print(f'initializing {args.thermo_model} model')
     tmodel = ThermoModel(model_name=args.thermo_model, KBIModel=kbi_obj, dT=args.dT, Tmin=args.Tmin, Tmax=args.Tmax)
 
     print('performing temperature scaling')
