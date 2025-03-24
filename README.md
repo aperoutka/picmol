@@ -51,11 +51,15 @@
 Creating an anaconda environment with dependencies.
 
 ```python
+git clone 
+```
+
+```python
 conda env create -f environment.yml
 ```
 
 ```python
-pip install picmol
+pip install .
 ```
 
 ## Examples:
