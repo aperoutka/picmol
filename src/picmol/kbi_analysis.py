@@ -18,6 +18,7 @@ def main():
   parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'kgv'], help='KBI method name (default: adj)')
   parser.add_argument('--start_time', type=float, default=100, help='Time in ns to start averaging (default: 100)')
   parser.add_argument('--end_time', type=float, default=None, help='Time in ns to end averaging (default: end of trajectory)')
+  parser.add_argument('--run_thermo', type=bool, default=True, help='Perform thermodynamic analysis? (default: True)')
   parser.add_argument('--thermo_model', type=str, default='quartic', choices=['quartic', 'uniquac', 'unifac', 'nrtl', 'fh'], help='Thermodynamic model name for LLE calculation (default: quartic)')
   parser.add_argument('--Tmin', type=float, default=150, help='Minimum Temp (K) for temperature sacling (default: 150)')
   parser.add_argument('--Tmax', type=float, default=400, help='Maximum Temp (K) for temperature scaling (default: 400)')
@@ -39,17 +40,20 @@ def main():
   kbi_plotter = KBIPlotter(kbi_obj)
   kbi_plotter.make_figures()
 
-  # create thermodynamic model
-  print('initializing thermodynamic model')
-  tmodel = ThermoModel(model_name=args.thermo_model, KBIModel=kbi_obj, dT=args.dT, Tmin=args.Tmin, Tmax=args.Tmax)
+  # only run thermodynamic model if specified
+  if args.run_thermo:
 
-  print('performing temperature scaling')
-  tmodel.temperature_scaling()
+    # create thermodynamic model
+    print('initializing thermodynamic model')
+    tmodel = ThermoModel(model_name=args.thermo_model, KBIModel=kbi_obj, dT=args.dT, Tmin=args.Tmin, Tmax=args.Tmax)
 
-  # create phase diagram figures
-  print('creating figures')
-  tmodel_plotter = PhaseDiagramPlotter(tmodel)
-  tmodel_plotter.make_figures()
+    print('performing temperature scaling')
+    tmodel.temperature_scaling()
+
+    # create phase diagram figures
+    print('creating figures')
+    tmodel_plotter = PhaseDiagramPlotter(tmodel)
+    tmodel_plotter.make_figures()
 
 if __name__ == "__main__":
   main()
