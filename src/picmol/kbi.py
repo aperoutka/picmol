@@ -596,52 +596,56 @@ class KBI:
 
 	@property
 	def gammas(self):
-		'''	numerical integration of activity coefs.'''
+		''' numerical integration of activity coefs.'''
 		dlny = self.dlngamma_dxs
 		int_dlny_dx = np.zeros(self.z.shape)
 
 		for i, mol in enumerate(self.unique_mols):
-			x = self.z[:,i]
-			dlnyi = dlny[:,i]
+			x = self.z[:, i]
+			dlnyi = dlny[:, i]
 
 			# determine if ref state is pure component
 			ref_state = self._get_ref_state(mol)
 			if ref_state == "pure_component":
-				initial_x = [1,0]
+				initial_x = [1, 0]
 				sort_idx = -1
 			else:
-				initial_x = [0,0]
+				initial_x = [0, 0]
 				sort_idx = 1
 
 			# set up array
-			int_arr = np.zeros((self.z.shape[0]+1,3))
-			int_arr[:-1,0] = x
-			int_arr[:-1,1] = dlnyi
-			int_arr[-1,:2] = initial_x
+			int_arr = np.zeros((self.z.shape[0] + 1, 3))
+			int_arr[:-1, 0] = x
+			int_arr[:-1, 1] = dlnyi
+			int_arr[-1, :2] = initial_x
 			# sort based on mol frac
-			sorted_inds = np.argsort(int_arr[:,0])[::sort_idx]
+			sorted_inds = np.argsort(int_arr[:, 0])[::sort_idx]
 			int_arr = int_arr[sorted_inds]
 
 			# numerical integration
-			y0=0
-			for j in range(1, self.z.shape[0]+1):
+			y0 = 0
+			for j in range(1, self.z.shape[0] + 1):
 				if j > 1:
-					y0 = int_arr[j-1, 2]
+					y0 = int_arr[j - 1, 2]
 				# uses midpoint rule, ie., trapezoid method for numerical integration
-				int_arr[j,2] = y0 + 0.5*(int_arr[j,1]+int_arr[j-1,1])*(int_arr[j,0]-int_arr[j-1,0])
-		
+				int_arr[j, 2] = y0 + 0.5 * (int_arr[j, 1] + int_arr[j - 1, 1]) * (int_arr[j, 0] - int_arr[j - 1, 0])
+
 			# delete pure component point
-			x0_idx = np.where(int_arr[:,0] == initial_x[0])[0][0]
+			x0_idx = np.where(int_arr[:, 0] == initial_x[0])[0][0]
 			int_arr = np.delete(int_arr, x0_idx, axis=0)
 
-			# make sure gammas idx matches initial x idx 
-			if x[0] != int_arr[0,0]:
-				# case for flipping
-				int_arr = int_arr[::-1]
+			# Ensure gammas index matches initial x index
+			if not np.array_equal(x, int_arr[:, 0]):  # Check if x and integrated x match
+				# Create a dictionary to map x values to integrated values
+				x_to_integrated = {val: integrated for val, integrated in zip(int_arr[:, 0], int_arr[:, 2])}
+				# Reconstruct the integrated array in the original order of x
+				reordered_integrated = np.array([x_to_integrated[val] for val in x])
+				# get exponential and add to array
+				int_dlny_dx[:, i] = np.exp(reordered_integrated)
+			else:
+				int_dlny_dx[:, i] = np.exp(int_arr[:, 2])
 
-			int_dlny_dx[:,i] = np.exp(int_arr[:,2])
 		return int_dlny_dx
-
 
 	@property
 	def G_ex(self):
