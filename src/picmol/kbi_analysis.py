@@ -18,7 +18,7 @@ def main():
   parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'kgv'], help='KBI method name (default: adj)')
   parser.add_argument('--start_time', type=float, default=100, help='Time in ns to start averaging (default: 100)')
   parser.add_argument('--end_time', type=float, default=None, help='Time in ns to end averaging (default: end of trajectory)')
-  parser.add_argument('--run_thermo', type=str, default='true', help='Perform thermodynamic analysis? (default: true)')
+  parser.add_argument('--run_thermo', type=str, default='true', choices=['true', 'false'], help='Perform thermodynamic analysis? (default: true)')
   parser.add_argument('--thermo_model', type=str, default='quartic', choices=['quartic', 'uniquac', 'unifac', 'nrtl', 'fh'], help='Thermodynamic model name for LLE calculation (default: quartic)')
   parser.add_argument('--Tmin', type=float, default=150, help='Minimum Temp (K) for temperature sacling (default: 150)')
   parser.add_argument('--Tmax', type=float, default=400, help='Maximum Temp (K) for temperature scaling (default: 400)')
