@@ -14,7 +14,7 @@ from scipy.constants import R, pi
 
 from .get_molecular_properties import load_molecular_properties
 from .models.uniquac import UNIQUAC_RQ, fit_du_to_Hmix
-from .models import UNIQUAC, UNIFAC, QuarticModel, COSMORSModel, FH
+from .models import UNIQUAC, UNIFAC, QuarticModel, FH
 from .models.cem import PointDisc
 from .conversions import mol2vol
 
