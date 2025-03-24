@@ -619,8 +619,8 @@ class KBI:
 			int_arr[:-1, 1] = dlnyi
 			int_arr[-1, :2] = initial_x
 			# sort based on mol frac
-			sorted_inds = np.argsort(int_arr[:, 0])[::sort_idx]
-			int_arr = int_arr[sorted_inds]
+			sorted_idxs = np.argsort(int_arr[:, 0])[::sort_idx]
+			int_arr = int_arr[sorted_idxs]
 
 			# numerical integration
 			y0 = 0
@@ -633,18 +633,13 @@ class KBI:
 			# delete pure component point
 			x0_idx = np.where(int_arr[:, 0] == initial_x[0])[0][0]
 			int_arr = np.delete(int_arr, x0_idx, axis=0)
+			# get indices of filtered values
+			filtered_sorted_idxs = np.delete(sorted_idxs, np.where(sorted_idxs==max(sorted_idxs))[0][0], axis=0)
 
-			# Ensure gammas index matches initial x index
-			if not np.array_equal(x, int_arr[:, 0]):  # Check if x and integrated x match
-				# Create a dictionary to map x values to integrated values
-				x_to_integrated = {val: integrated for val, integrated in zip(int_arr[:, 0], int_arr[:, 2])}
-				# Reconstruct the integrated array in the original order of x
-				reordered_integrated = np.array([x_to_integrated[val] for val in x])
-				# get exponential and add to array
-				int_dlny_dx[:, i] = np.exp(reordered_integrated)
-			else:
-				int_dlny_dx[:, i] = np.exp(int_arr[:, 2])
-
+			# revert back to original indices
+			int_arr = int_arr[filtered_sorted_idxs]
+			int_dlny_dx[:, i] = np.exp(int_arr[:, 2])
+		
 		return int_dlny_dx
 
 	@property
