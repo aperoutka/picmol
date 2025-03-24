@@ -63,7 +63,7 @@ pip install picmol
 `picmol` includes support for a command line interface, here is an example of displaying the argument options.
 
 ```python
-python -m picmol.kbi_analysis -h 
+python -m picmol.kbi_analysis --rdf_dir rdf_files_npt
 ```
 
 Alternatively, this could be run from inside a python script.
