@@ -93,8 +93,7 @@ tmodel_plotter.make_figures()
 Predicting LLE with UNIFAC, doesn't require KB model because its a predictive method. 
 
 ```python
-import pandas as pd
-from picmol import Tc_search, load_molecular_properties
+from picmol import load_molecular_properties
 
 # load molecular properties
 molec_info = load_molecular_properties('mol_name')
@@ -111,7 +110,6 @@ tmodel.temperature_scaling()
 Estimating critical temperatures for a binary system with UNIFAC.
 
 ```python
-import pandas as pd
 from picmol import Tc_search, load_molecular_properties
 
 # load molecular properties
