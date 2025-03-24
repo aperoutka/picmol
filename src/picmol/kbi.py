@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import glob
-from scipy.integrate import trapz
+import glob, copy
+from scipy.integrate import trapz, quad
 from scipy.optimize import curve_fit
 import os, warnings
 warnings.filterwarnings('ignore')
@@ -41,7 +41,7 @@ class KBI:
 			kbi_method: str = "adj", 
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
-			avg_end_time = None
+			avg_end_time = None,
 		):
 
 		# assumes folder organization is: project / systems / rdfs
@@ -55,7 +55,7 @@ class KBI:
 			self.avg_end_time = round(1000 * avg_end_time) # end time in [ps] for enthalpy, volume, density averaging
 		else:
 			self.avg_end_time = None
-
+		
 		# get kbi method: raw, adj, kgv
 		self.kbi_method = kbi_method.lower()
 		self.kbi_fig_dirname = kbi_fig_dirname
@@ -215,7 +215,7 @@ class KBI:
 	@property
 	def mol_class_dict(self):
 		return {mol: self.properties_by_molid["mol_class"][mol] for mol in self.unique_mols}
-	
+
 	@property
 	def mol_smiles_dict(self):
 		return {mol: self.properties_by_molid["smiles"][mol] for mol in self.unique_mols}
@@ -231,10 +231,6 @@ class KBI:
 	@property
 	def smiles(self):
 		return self.properties_by_molid["smiles"].values
-
-	@property
-	def cosmors_name(self):
-		return self.mol_by_identifier["cosmo_name"].to_numpy()
 
 	def assign_solute_mol(self):
 		'''finds the molecule that should be considered as solute; priority goes to: 1. extracant, 2. modifier, 3. solute, 4. solvent'''
@@ -583,41 +579,69 @@ class KBI:
 	def dlngamma_dxs(self):
 		return self.dmu_dxs - 1/self.z
 	
+	def _get_ref_state(self, mol):
+		# get mol index
+		i = np.where(self.unique_mols == mol)[0][0] 
+		# get max mol fr at each composition
+		comp_max = self.z.max(axis=1) 
+		# get mask for max mol frac at each composition
+		is_max = self.z[:,i] == comp_max 
+		# check if the mol is largest mol frac at any composition
+		# if mol is max at any composition -- it can't be a solute
+		if np.any(is_max):
+			return "pure_component" 
+		# if solute use infinite dilution reference state
+		else:
+			return "inf_dilution"
+
 	@property
 	def gammas(self):
-		'''numerical integration of activity coefs. '''		
+		'''	numerical integration of activity coefs.'''
 		dlny = self.dlngamma_dxs
-		int_dlny_dx = np.zeros((self.z.shape[0], 2, self.z.shape[1]))
+		int_dlny_dx = np.zeros(self.z.shape)
+
 		for i, mol in enumerate(self.unique_mols):
 			x = self.z[:,i]
 			dlnyi = dlny[:,i]
+
+			# determine if ref state is pure component
+			ref_state = self._get_ref_state(mol)
+			if ref_state == "pure_component":
+				initial_x = [1,0]
+				sort_idx = -1
+			else:
+				initial_x = [0,0]
+				sort_idx = 1
+
 			# set up array
 			int_arr = np.zeros((self.z.shape[0]+1,3))
 			int_arr[:-1,0] = x
 			int_arr[:-1,1] = dlnyi
-			int_arr[-1,:2] = [1,0]
-			# sort into descending order based on mol frac
-			sorted_inds = np.argsort(int_arr[:,0])[::-1]
+			int_arr[-1,:2] = initial_x
+			# sort based on mol frac
+			sorted_inds = np.argsort(int_arr[:,0])[::sort_idx]
 			int_arr = int_arr[sorted_inds]
 
-			# now perform calculation
+			# numerical integration
 			y0=0
 			for j in range(1, self.z.shape[0]+1):
 				if j > 1:
 					y0 = int_arr[j-1, 2]
 				# uses midpoint rule, ie., trapezoid method for numerical integration
 				int_arr[j,2] = y0 + 0.5*(int_arr[j,1]+int_arr[j-1,1])*(int_arr[j,0]-int_arr[j-1,0])
+		
+			# delete pure component point
+			x0_idx = np.where(int_arr[:,0] == initial_x[0])[0][0]
+			int_arr = np.delete(int_arr, x0_idx, axis=0)
 
-			x0_ind = np.where(int_arr[:,0] == 1.)[0][0]
-			int_arr = np.delete(int_arr, x0_ind, axis=0)
-			# if starting at small x, flip back
-			if x[0] < x[-1]:
+			# make sure gammas idx matches initial x idx 
+			if x[0] != int_arr[0,0]:
+				# case for flipping
 				int_arr = int_arr[::-1]
 
-			int_dlny_dx[:,:,i] = np.array([self.z[:,self.solute_loc], np.exp(int_arr[:,2])]).T
-		
-		gammas = int_dlny_dx[:,1,:]
-		return gammas
+			int_dlny_dx[:,i] = np.exp(int_arr[:,2])
+		return int_dlny_dx
+
 
 	@property
 	def G_ex(self):
@@ -831,20 +855,6 @@ class KBI:
 	@property
 	def quartic_Smix(self):
 		return self.quartic_model.Smix_func(self.T_sim)
-
-	@property
-	def cosmors_model(self):
-		return COSMORSModel(identifiers=self.cosmors_name, z=self.z_plot)
-	
-	@property
-	def cosmors_Hmix(self):
-		lngamma_H = self.cosmors_model.ln_gammas_enthalpic(self.T_sim)
-		return self.Rc * self.T_sim * (np.sum(self.z_plot * lngamma_H, axis=1))
-	
-	@property
-	def cosmors_Smix(self):
-		lngamma_S = self.cosmors_model.ln_gammas_entropic(self.T_sim)
-		return self.Rc * self.T_sim * (np.sum(self.z_plot * lngamma_S, axis=1)) + self.cosmors_model.GID(self.T_sim)
 
 
 	

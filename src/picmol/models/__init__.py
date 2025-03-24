@@ -6,7 +6,6 @@ from .nrtl import NRTL
 from .uniquac import UNIQUAC
 from .unifac import UNIFAC
 from .numerical import QuarticModel
-from .cosmors import COSMORSModel
 
 
 __all__ = [
@@ -15,5 +14,4 @@ __all__ = [
 	"UNIQUAC",
 	"UNIFAC",
 	"QuarticModel",
-	"COSMORSModel"
 ]

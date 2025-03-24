@@ -8,7 +8,7 @@ import scipy.optimize as sco
 from scipy import constants
 from copy import copy
 
-from .models import FH, NRTL, UNIQUAC, UNIFAC, QuarticModel, COSMORSModel
+from .models import FH, NRTL, UNIQUAC, UNIFAC, QuarticModel
 from .models.unifac import get_unifac_version
 from .get_molecular_properties import load_molecular_properties, search_molecule
 from .models.cem import CEM
@@ -211,7 +211,6 @@ class ThermoModel:
 			"uniquac": UNIQUAC, 
 			"unifac": UNIFAC, 
 			"quartic": QuarticModel, 
-			"cosmors": COSMORSModel,
 		}
 		self.model_name = model_name.lower()
 		self.model_type = model_map[self.model_name]
@@ -227,9 +226,6 @@ class ThermoModel:
 		# quartic model
 		elif self.model_type == QuarticModel:
 			self.model = self.model_type(z_data=KBIModel.z, Hmix=KBIModel.Hmix, Sex=KBIModel.S_ex, molar_vol=self.molar_vol)
-		# cosmors model
-		elif self.model_type == COSMORSModel:
-			self.model = self.model_type(self.cosmo_name)
 		# fh and nrtl model
 		else: 
 			self.model = self.model_type(smiles=self.smiles, IP=self.IP)
@@ -305,10 +301,6 @@ class ThermoModel:
 	@property
 	def mol_name(self):
 		return self.mol_by_identifier["mol_name"].to_numpy()
-
-	@property
-	def cosmo_name(self):
-		return self.mol_by_identifier["cosmo_name"].to_numpy()
 	
 	@property
 	def mol_class(self):
@@ -378,8 +370,6 @@ class ThermoModel:
 		self.v_bi = np.full((len(self.T_values), self.num_comp), fill_value=np.nan)
 		
 		for t, T in enumerate(self.T_values):
-			if self.model_type == COSMORSModel:
-				print(f"T: {T} K [{t}/{len(self.T_values)}]")
 			# set variables to nan
 			sp1, sp2, bi1, bi2 = np.empty(4)*np.nan
 
@@ -440,12 +430,8 @@ class ThermoModel:
 				
 		# get critical point
 		# find where there is the smallest difference between the spinodal values
-		if self.model_type == COSMORSModel:
-			nan_mask = ~np.isnan(self.x_bi[:,0]) & ~np.isnan(self.x_bi[:,1])
-			x_filter = self.x_bi[nan_mask]
-		else:
-			nan_mask = ~np.isnan(self.x_sp[:,0]) & ~np.isnan(self.x_sp[:,1])
-			x_filter = self.x_sp[nan_mask]
+		nan_mask = ~np.isnan(self.x_sp[:,0]) & ~np.isnan(self.x_sp[:,1])
+		x_filter = self.x_sp[nan_mask]
 		T_values_filter = self.T_values[nan_mask]
 		crit_ind = np.abs(x_filter[:,0]-x_filter[:,1]).argmin()
 		self.critical_point(x_filter[crit_ind,:], T_values_filter[crit_ind])
@@ -475,7 +461,7 @@ class ThermoModel:
 				GM = self.model.GM()
 				det_Hij = self.model.det_Hij()
 				gammas = self.model.gammas()
-			elif self.model_name in ["uniquac", "cosmors", "quartic"]:
+			elif self.model_name in ["uniquac", "quartic"]:
 				GM = self.model.GM(T)
 				det_Hij = self.model.det_Hij(T)
 				gammas = self.model.gammas(T)

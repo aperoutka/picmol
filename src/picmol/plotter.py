@@ -345,10 +345,9 @@ class PhaseDiagramPlotter:
         self.binary_gmix_selectpts(basis=basis)
         self.binary_phase_diagram_Gmix_heatmap(basis=basis)
         self.binary_phase_diagram(basis=basis)
-        if self.model.model_name != "cosmors":
-          self.binary_phase_diagram_I0_heatmap(basis=basis)
-          self.binary_phase_diagram_I0_heatmap_widomline(basis=basis)
-          self.binary_phase_diagram_widomline(basis=basis)
+        self.binary_phase_diagram_I0_heatmap(basis=basis)
+        self.binary_phase_diagram_I0_heatmap_widomline(basis=basis)
+        self.binary_phase_diagram_widomline(basis=basis)
 
     elif self.model.num_comp == 3:
       self.ternary_GM(T, plot_spbi=False, colormap=colormap, num_contours=num_contours)
