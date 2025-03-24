@@ -60,10 +60,16 @@ pip install picmol
 
 ## Examples:
 
-`picmol` includes support for a command line interface, here is an example of displaying the argument options.
+`picmol` includes support for a command line interface, and example is provided below where the only argument different from default values is the name for rdf file directory.
 
 ```python
 python -m picmol.kbi_analysis --rdf_dir rdf_files_npt
+```
+
+To print a list of all arguments and their default values, use the following.
+
+```python
+python -m picmol.kbi_analysis -h
 ```
 
 Alternatively, this could be run from inside a python script.
