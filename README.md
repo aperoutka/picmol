@@ -48,15 +48,17 @@
 
 ## Getting Started:
 
-Creating an anaconda environment with dependencies.
+`picmol` can be installed from cloning github repository.
 
 ```python
-git clone 
+git clone https://github.com/aperoutka/picmol.git
 ```
+Creating an anaconda environment with `picmol` dependencies.
 
 ```python
 conda env create -f environment.yml
 ```
+Installing picmol package.
 
 ```python
 pip install .
