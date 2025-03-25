@@ -517,31 +517,44 @@ class KBI:
 				B[:,i,j] = rho_i * rho_j * self.G_matrix[:,i,j] + rho_i * kd_ij
 		return B
 
+	@property
+	def B_inv(self):
+		'''get inverse of matrix B'''
+		return np.linalg.inv(self.B_matrix)
+
 	@property 
-	def det_B_matrix(self):
+	def B_det(self):
 		'''get determinant of matrix B'''
 		return np.linalg.det(self.B_matrix)
 	
 	@property
 	def cofactors_Bij(self):
 		'''get the cofactors of matrix B'''
-		B_ij = np.full((self.z.shape[0], len(self.unique_mols), len(self.unique_mols), len(self.unique_mols)-1, len(self.unique_mols)-1), fill_value=np.nan)
-		for i in range(len(self.unique_mols)):
-			for j in range(len(self.unique_mols)):
-				BB = (-1)**(i+j) * np.delete(np.delete(self.B_matrix, i, axis=1), j, axis=2)
-				B_ij[:,i,j] = BB.reshape(B_ij[:,i,j].shape)
-		return B_ij
-	
+		B_ij = np.zeros((self.z.shape[0], len(self.unique_mols), len(self.unique_mols), len(self.unique_mols), len(self.unique_mols)))
+		for z_index in range(self.z.shape[0]):
+			B_ij[z_index] = self.B_det[z_index] * self.B_inv[z_index].T
+		B_ij_tr = np.einsum('ijklm->ilmjk', B_ij)[:,:,:,:-1,:-1]
+		return B_ij_tr
+
 	@property
-	def dmu_dxs(self):
-		'''chemical potential derivatives'''
-		b_lower = np.zeros(self.z.shape[0])
+	def rho_ij(self):
+		'''product of rho's between two components'''
+		_rho_mat = np.zeros((self.z.shape[0], len(self.unique_mols), len(self.unique_mols)))
 		for i, mol_1 in enumerate(self.unique_mols):
 			rho_i = self.df_comp[f'rho_{mol_1}'].to_numpy()
 			for j, mol_2 in enumerate(self.unique_mols):
 				rho_j = self.df_comp[f'rho_{mol_2}'].to_numpy()
-				b_lower += rho_i * rho_j * np.linalg.det(self.cofactors_Bij[:,i,j])
-		
+				_rho_mat[:, i, j] = rho_i * rho_j
+		return _rho_mat
+	
+	@property
+	def dmu_dxs(self):
+		'''chemical potential derivatives'''
+		b_lower = np.zeros(self.z.shape[0]) # this matches!!
+		for z_index in range(self.z.shape[0]):
+			cofactors = self.B_det[z_index] * self.B_inv[z_index].T
+			b_lower[z_index] = np.einsum('ij,ij->', self.rho_ij[z_index], cofactors)
+
 		# get system properties
 		V = self.df_comp["box_vol"].to_numpy()
 		n_tot = self.df_comp["n_tot"].to_numpy()
@@ -552,12 +565,10 @@ class KBI:
 			for b in range(len(self.unique_mols)):
 				b_upper = np.zeros(self.z.shape[0])
 				for i, mol_1 in enumerate(self.unique_mols):
-					rho_i = self.df_comp[f'rho_{mol_1}'].to_numpy()
 					for j, mol_2 in enumerate(self.unique_mols):
-						rho_j = self.df_comp[f'rho_{mol_2}'].to_numpy()
-						b_upper += rho_i * rho_j * np.linalg.det((self.cofactors_Bij[:,a,b]*self.cofactors_Bij[:,i,j] - self.cofactors_Bij[:,i,a]*self.cofactors_Bij[:,j,b]))
+						b_upper += self.rho_ij[:,i,j] * np.linalg.det((self.cofactors_Bij[:,a,b]*self.cofactors_Bij[:,i,j] - self.cofactors_Bij[:,i,a]*self.cofactors_Bij[:,j,b]))
 				b_frac = b_upper/b_lower
-				dmu_dN[:,a,b] = b_frac/(V*self.det_B_matrix)
+				dmu_dN[:,a,b] = b_frac/(V*self.B_det)
 		
 		# convert to mol fraction
 		dmu_dxs = np.full((self.z.shape[0],len(self.unique_mols)-1, len(self.unique_mols)-1), fill_value=np.nan)
