@@ -532,7 +532,7 @@ class KBI:
 		'''get the cofactors of matrix B'''
 		B_ij = np.zeros((self.z.shape[0], len(self.unique_mols), len(self.unique_mols), len(self.unique_mols), len(self.unique_mols)))
 		for z_index in range(self.z.shape[0]):
-			B_ij[z_index] = self.B_det[z_index] * self.B_inv[z_index].T
+			B_ij[z_index] = self.B_det[z_index] * self.B_inv[z_index]
 		B_ij_tr = np.einsum('ijklm->ilmjk', B_ij)[:,:,:,:-1,:-1]
 		return B_ij_tr
 
@@ -552,7 +552,7 @@ class KBI:
 		'''chemical potential derivatives'''
 		b_lower = np.zeros(self.z.shape[0]) # this matches!!
 		for z_index in range(self.z.shape[0]):
-			cofactors = self.B_det[z_index] * self.B_inv[z_index].T
+			cofactors = self.B_det[z_index] * self.B_inv[z_index]
 			b_lower[z_index] = np.einsum('ij,ij->', self.rho_ij[z_index], cofactors)
 
 		# get system properties
