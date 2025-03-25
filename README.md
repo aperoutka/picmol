@@ -71,6 +71,7 @@ To use the Picmol package, your project directory should be structured as follow
 **Important Notes:**
 
 * Ensure that the `.edr`, `.top`, and `.xvg` files are correctly placed within their respective system directories.
+* RDF directory name should be the same for each system.
 * The naming convention of your RDF files (`rdf1.xvg`, `rdf2.xvg`, etc.) is flexible, but ensure molecular names (same as in `.top` file) are in filename.
 * `picmol` expects this specific file structure to function correctly.
 
