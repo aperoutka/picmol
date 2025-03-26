@@ -620,7 +620,7 @@ class KBI:
 		for i, mol in enumerate(self.unique_mols):
 			x = self.z[:, i]
 			dlnyi = dlny[:, i]
-
+		
 			# determine if ref state is pure component
 			ref_state = self._get_ref_state(mol)
 			if ref_state == "pure_component":
@@ -656,7 +656,7 @@ class KBI:
 			# revert back to original indices
 			int_arr = int_arr[filtered_sorted_idxs]
 			int_dlny_dx[:, i] = np.exp(int_arr[:, 2])
-		
+
 		return int_dlny_dx
 
 	@property
