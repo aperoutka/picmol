@@ -1,3 +1,4 @@
+import enum
 import numpy as np
 import pandas as pd
 import glob, copy
@@ -10,7 +11,7 @@ from functools import partial
 from pathlib import Path
 plt.style.use(Path(__file__).parent / 'presentation.mplstyle')
 
-from scipy.constants import R, pi
+from scipy.constants import R, pi, N_A
 
 from .get_molecular_properties import load_molecular_properties
 from .models.uniquac import UNIQUAC_RQ, fit_du_to_Hmix
@@ -78,6 +79,7 @@ class KBI:
 
 		# get gas constant in kJ/mol-K
 		self.Rc = R / 1000 # kJ / mol K
+		self.N_A = N_A
 
 
 	def get_time_average(self, time, arr):
@@ -223,6 +225,10 @@ class KBI:
 	@property
 	def molar_vol(self):
 		return self.properties_by_molid["molar_vol"].to_numpy()
+	
+	@property
+	def n_electrons(self):
+		return self.properties_by_molid["n_electrons"].to_numpy()
 
 	@property
 	def mw(self):
@@ -505,7 +511,7 @@ class KBI:
 					if i != j:
 						G[:,j,i] = G[:,i,j]
 		return G
-
+	
 	@property
 	def B_matrix(self):
 		B = np.full((self.z.shape[0],len(self.unique_mols), len(self.unique_mols)), fill_value=np.nan)
