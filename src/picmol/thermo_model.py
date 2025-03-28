@@ -500,6 +500,8 @@ class ThermoModel:
 		v_I0_max = np.full((len(self.T_values), self.num_comp), fill_value=np.nan)
 		df_I0_max = pd.DataFrame(columns=['T', 'I0'])
 		df_I0 = pd.DataFrame()
+		df_I0['x'] = self.z[:,self.solute_loc]
+		df_I0['v'] = self.v[:,self.solute_loc]
 
 		for t, T in enumerate(self.T_values):
 			S0 = kb * T * V_bar_i0 / self.d2GM[t]
