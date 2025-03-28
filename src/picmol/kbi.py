@@ -165,13 +165,15 @@ class KBI:
 		mol_nums_by_component = {sys: {} for sys in self.systems}
 		for sys in self.systems:
 			sys_mols, sys_total_num_mols, sys_mol_nums_by_component = self.read_top(sys_parent_dir=self.prj_path, sys=sys)
-			mols_present.append(sys_mols)
+			for mol in sys_mols:
+				if mol not in mols_present:
+					mols_present.append(mol)
 			total_num_mols[sys] = sys_total_num_mols
 			mol_nums_by_component[sys] = sys_mol_nums_by_component
 		# get unique mols in the system
-		unique_mols = np.unique(mols_present)
+		# unique_mols = np.unique(mols_present)
 		self.top_info = {
-			"unique_mols": unique_mols, 
+			"unique_mols": mols_present, 
 			"mol_nums_by_component": mol_nums_by_component, 
 			"total_num_mols": total_num_mols
 		}
@@ -183,7 +185,7 @@ class KBI:
 			self.top_info
 		except AttributeError:
 			self.extract_sys_info_from_top()
-		return self.top_info["unique_mols"]
+		return np.array(self.top_info["unique_mols"])
 		
 	@property
 	def mol_nums_by_component(self):
@@ -275,7 +277,8 @@ class KBI:
 	@property
 	def solute_loc(self):
 		'''get index of solute molecule'''
-		return np.where(self.unique_mols==self.solute)[0][0]
+		unique_mol_list = list(self.unique_mols)
+		return unique_mol_list.index(self.solute)
 	
 	@property
 	def solute_name(self):
@@ -290,7 +293,6 @@ class KBI:
 		})
 		sys_df = sys_df.sort_values("mols").reset_index(drop=True)
 		self.systems = sys_df["systems"].to_list()
-
 
 	def system_compositions(self):
 		"""get system properties at each composition"""
@@ -406,11 +408,17 @@ class KBI:
 			# create kbi dataframe for each system for storing kbi's as a function of r
 			df_kbi_sys = pd.DataFrame()
 			# iterate through all possible molecular combinations with no repeats
-			for i, mol_1 in enumerate(list(self.mol_nums_by_component[sys].keys())):
-				for j, mol_2 in enumerate(list(self.mol_nums_by_component[sys].keys())):
+			for i, mol_1 in enumerate(self.unique_mols):
+				for j, mol_2 in enumerate(self.unique_mols):
 					if i <= j:
-						# read rdf file
-						rdf_file = glob.glob(f"{self.prj_path}/{sys}/{self.rdf_dir}/*{mol_1}*{mol_2}*")[0]
+						# check that both molecules are in system
+						if (mol_1 not in self.mol_nums_by_component[sys].keys()) or (mol_2 not in self.mol_nums_by_component[sys].keys()):
+							continue
+						try:
+							rdf_file = glob.glob(f"{self.prj_path}/{sys}/{self.rdf_dir}/*{mol_1}*{mol_2}*")[0]
+						except:
+							rdf_file = glob.glob(f"{self.prj_path}/{sys}/{self.rdf_dir}/*{mol_2}*{mol_1}*")[0]
+
 						r, g = np.loadtxt(rdf_file, comments=["@", "#"], unpack=True)
 						r = r[:-3]
 						g = g[:-3]
@@ -597,7 +605,7 @@ class KBI:
 	
 	def _get_ref_state(self, mol):
 		# get mol index
-		i = np.where(self.unique_mols == mol)[0][0] 
+		i = list(self.unique_mols).index(mol)
 		# get max mol fr at each composition
 		comp_max = self.z.max(axis=1) 
 		# get mask for max mol frac at each composition
