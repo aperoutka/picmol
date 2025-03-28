@@ -438,14 +438,14 @@ class ThermoModel:
 
 		# creates pd.DataFrame obj and save
 		if self.save_dir is not None:
-			df = pd.DataFrame(index=self.T_values)
-			df.index.name = "T"
+			df = pd.DataFrame()
+			df["T"] = self.T_values
 			for i in range(self.num_comp):
 				df[f"x_sp{i+1}"] = self.x_sp[:,i]
 				df[f"v_sp{i+1}"] = self.v_sp[:,i]
 				df[f"x_bi{i+1}"] = self.x_bi[:,i]
 				df[f"v_bi{i+1}"] = self.v_bi[:,i]
-			df.to_csv(f"{self.save_dir}{self.model_name}_phase_instability_values.csv", index=True)
+			df.to_csv(f"{self.save_dir}{self.model_name}_phase_instability_values.csv", index=False)
 
 
 	def _do_multicomp_temperature_scaling(self):
