@@ -15,7 +15,7 @@ def main():
   parser.add_argument('--pure_component_path', default=os.path.abspath(os.path.join(os.getcwd(), os.pardir, 'pure_components')), help='Path to pure component directory (default: parent_dir/pure_components)')
   parser.add_argument('--rdf_dir', type=str, default='rdf_files', help='Name for rdf directory in each system (default: rdf_files)')
   parser.add_argument('--kbi_dir', type=str, default='kbi_analysis', help='Name for directory for kbi analysis (default: kbi_analysis)')
-  parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'kgv'], help='KBI method name (default: adj)')
+  parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'gvdv', 'kgv'], help='KBI method name (default: adj)')
   parser.add_argument('--start_time', type=float, default=100, help='Time in ns to start averaging for volume and enthalpy calculation (default: 100)')
   parser.add_argument('--end_time', type=float, default=None, help='Time in ns to end averaging for volume and enthalpy calculation (default: end of trajectory)')
   parser.add_argument('--run_thermo', type=str, default='true', choices=['true', 'false'], help='Perform thermodynamic analysis? (default: true)')

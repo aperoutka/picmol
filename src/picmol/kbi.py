@@ -366,7 +366,7 @@ class KBI:
 		elif method.lower() == 'raw':
 			h = g_filt - 1
 		# for no damping
-		elif method.lower() in ['ganguly', 'vdv', 'kgv']:
+		elif method.lower() in ['gvdv', 'kgv']:
 			# number of solvent molecules
 			Nj = N_mol2
 			# 1-volume ratio
