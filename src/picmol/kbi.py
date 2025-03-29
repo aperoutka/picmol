@@ -360,13 +360,13 @@ class KBI:
 		# get spacing between datapoints
 		dr = 0.002 # GROMACS default
 		# adjustment: ie., correct for g(r) != 1 at R
-		if method == 'adj':
+		if method.lower() == 'adj':
 			h = g_filt - avg
 		# no correction
-		elif method == 'raw':
+		elif method.lower() == 'raw':
 			h = g_filt - 1
-		# apply damping function
-		elif 'kgv' in method:
+		# for no damping
+		elif method.lower() in ['ganguly', 'vdv', 'kgv']:
 			# number of solvent molecules
 			Nj = N_mol2
 			# 1-volume ratio
@@ -376,13 +376,18 @@ class KBI:
 			dNij = trapz(cn, x=r_filt, dx=dr)	
 			# g(r) correction using Ganguly - van der Vegt approach
 			g_gv_correct = g_filt * Nj * vr / (Nj * vr - dNij - kd) 
-			# combo of g(r) correction with damping function K. 
-			damp_k = (1 - (3*r_filt)/(2*r_max) + r_filt**3/(2*r_max**3))
-			h = damp_k * (g_gv_correct - 1)
+			# apply damping function
+			if 'kgv' in method:
+				# combo of g(r) correction with damping function K. 
+				damp_k = (1 - (3*r_filt)/(2*r_max) + r_filt**3/(2*r_max**3))
+				h = damp_k * (g_gv_correct - 1)
+			# otherwise don't damp g(r)
+			else:
+				h = g_gv_correct - 1
 		
 		f = 4 * pi * r_filt**2 * h
 		kbi_nm3 = trapz(f, x=r_filt, dx=dr)
-		kbi_cm3_mol = trapz(f, x=r_filt, dx=dr) * rho_mol1 * 1000 / c_mol1
+		kbi_cm3_mol = kbi_nm3 * rho_mol1 * 1000 / c_mol1
 
 		return kbi_nm3, kbi_cm3_mol
 
