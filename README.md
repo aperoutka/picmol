@@ -151,13 +151,16 @@ To add a molecule to `molecular_properties.csv`.
 
 ```python
 from picmol import add_molecule
+"""
+mol_name: molecule name
+mol_id: molecule id in simulation .top file
+density: liquid density (g/mL) at 298.15 K
+mol_class: "extractant", "modifier", "solute", or "solvent"
+smiles: SMILES string for RDkit interfacing and UNIFAC modeling
 
-# mol_name: molecule name
-# mol_id: molecular id in simulations
-# density: liquid density at 298.15 K
-# mol_class: "extractant", "modifier", "solute", or "solvent"
-# smiles: SMILES string for UNIFAC modeling
-
+Default is to calculate molar volume from experimental mass density
+If density is not entered, molar volume will be calculated from RDkit and the mass density will be calculated from molar volume
+"""
 add_molecule(mol_name, mol_id, density, mol_class, smiles)
 ```
 
