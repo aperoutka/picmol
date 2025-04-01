@@ -83,12 +83,12 @@ class KBIPlotter:
   def x_basis(self, basis):
     # get xlabel for figure and column label in df for mol frac / vol frac basis
     if basis.lower() == "mol":
-      zplot = self.model.z
-      xplot = self.model.z[:,self.model.solute_loc_corr].flatten()
+      zplot = self.model.zc
+      xplot = self.model.zc[:,self.model.solute_loc_corr].flatten()
       x_lab = 'x'
     else:
-      zplot = self.model.v
-      xplot = self.model.v[:,self.model.solute_loc_corr].flatten()
+      zplot = self.model.vc
+      xplot = self.model.vc[:,self.model.solute_loc_corr].flatten()
       x_lab = '\phi'
     return zplot, xplot, x_lab
 
@@ -199,12 +199,12 @@ class KBIPlotter:
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
     xplot = self.model.z_plot[:,self.model.solute_loc_corr]
     
-    ax[0].scatter(self.model.z[:,self.model.solute_loc_corr], self.model.Hmix, c='k', zorder=10)
+    ax[0].scatter(self.model.zc[:,self.model.solute_loc_corr], self.model.Hmix, c='k', zorder=10)
     ax[0].plot(xplot, self.model.quartic_Hmix, c='k', ls='solid')
     ax[0].plot(xplot, self.model.uniquac_Hmix, c='dodgerblue', ls='dashed')
     ax[0].plot(xplot, self.model.unifac_Hmix, c='limegreen', ls='dotted')
 
-    ax[1].scatter(self.model.z[:,self.model.solute_loc_corr], self.model.nTdSmix, c='k', label='KB + MD', zorder=10)
+    ax[1].scatter(self.model.zc[:,self.model.solute_loc_corr], self.model.nTdSmix, c='k', label='KB + MD', zorder=10)
     ax[1].plot(xplot, self.model.quartic_Smix, c='k', ls='solid', label='Fit')
     ax[1].plot(xplot, self.model.uniquac_Smix, c='dodgerblue', ls='dashed', label='uniquac')
     ax[1].plot(xplot, self.model.unifac_Smix, c='limegreen', ls='dotted', label='unifac')
@@ -213,7 +213,7 @@ class KBIPlotter:
     unif_G = self.model.unifac_Hmix + self.model.unifac_Smix
     quar_G = self.model.quartic_Hmix + self.model.quartic_Smix
 
-    ax[2].scatter(self.model.z[:,self.model.solute_loc_corr], self.model.G_mix_xv, c='k', zorder=10)
+    ax[2].scatter(self.model.zc[:,self.model.solute_loc_corr], self.model.G_mix_xv, c='k', zorder=10)
     ax[2].plot(xplot, quar_G, c='k', ls='solid')
     ax[2].plot(xplot, uniq_G, c='dodgerblue', ls='dashed')
     ax[2].plot(xplot, unif_G, c='limegreen', ls='dotted')
