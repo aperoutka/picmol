@@ -749,7 +749,7 @@ class KBI:
 	@property
 	def mol_names_corr(self):
 		'''correct molecule names for geom mean'''
-		mol_names = list(self.mol_names_dict.values())
+		mol_names = list(self.mol_name_dict.values())
 		return self._correct_names(self, mol_names)
 	
 	@property
