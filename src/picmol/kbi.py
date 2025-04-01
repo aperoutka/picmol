@@ -744,13 +744,13 @@ class KBI:
 	@property
 	def unique_mols_corr(self):
 		'''correct molecule ids for geom mean'''
-		return self._correct_gammas(self, self.unique_mols)
+		return self._correct_gammas(self.unique_mols)
 	
 	@property
 	def mol_names_corr(self):
 		'''correct molecule names for geom mean'''
 		mol_names = list(self.mol_name_dict.values())
-		return self._correct_names(self, mol_names)
+		return self._correct_names(mol_names)
 	
 	@property
 	def solute_corr(self):
