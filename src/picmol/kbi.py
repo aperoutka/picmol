@@ -254,38 +254,36 @@ class KBI:
 	def assign_solute_mol(self):
 		'''finds the molecule that should be considered as solute; priority goes to: 
 		1. extracant, 2. modifier, 3. solute, 4. solvent'''
-		
-		if self.solute_mol == None:
+		self._assign_solute_mol = self.solute_mol
+		if self._assign_solute_mol is None:
 			# first check for extractant
 			for mol in self.unique_mols:
 				if self.mol_class_dict[mol] == 'extractant':
-					self.solute_mol = mol
+					self._assign_solute_mol = mol
 			# then check for modifier
-			if self.solute_mol is None:
+			if self._assign_solute_mol is None:
 				for mol in self.unique_mols:
 					if self.mol_class_dict[mol] == 'modifier':
-						self.solute_mol = mol
+						self._assign_solute_mol = mol
 			# then check for solute
-			if self.solute_mol is None:
+			if self._assign_solute_mol is None:
 				for mol in self.unique_mols:
 					if self.mol_class_dict[mol] == 'solute':
-						self.solute_mol = mol
+						self._assign_solute_mol = mol
 			# then solvent
-			if self.solute_mol is None:
+			if self._assign_solute_mol is None:
 				for mol in self.unique_mols:
 					if self.mol_class_dict[mol] == 'solvent':
-						self.solute_mol = mol
-
-		return self.solute_mol
+						self._assign_solute_mol = mol
 	
 	@property
 	def solute(self):
 		'''get solute mol_id'''
 		try:
-			self.solute_mol
+			self._assign_solute_mol
 		except AttributeError: 
 			self.assign_solute_mol()
-		return self.solute_mol
+		return self._assign_solute_mol
 	
 	@property
 	def solute_loc(self):
