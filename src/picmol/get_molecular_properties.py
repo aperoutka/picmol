@@ -4,8 +4,7 @@ import pandas as pd
 from pathlib import Path
 import sys, os
 
-def add_molecule(mol_name: str, mol_id: str, density: float, mol_class: str, smiles: str):
-	'''mol_class: solute or solvent'''
+def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, density: float = None):
 	mol_obj = Chem.MolFromSmiles(smiles)
 	mol_obj = AllChem.AddHs(mol_obj)
 
@@ -17,13 +16,16 @@ def add_molecule(mol_name: str, mol_id: str, density: float, mol_class: str, smi
 
 	n_electrons = get_electron_number(mol_obj)
 	mol_wt = Chem.Descriptors.MolWt(mol_obj)
-	molarity = 1000*density/mol_wt
-	molar_vol = mol_wt/density
+	mol_charge = Chem.GetFormalCharge(mol_obj)
+	
+	if density is not None:
+		molar_vol = mol_wt/density
+	else:
+		AllChem.EmbedMolecule(mol_obj, useRandomCoords=True)
+		molar_vol = AllChem.ComputeMolVolume(mol_obj)
+		density = mol_wt/molar_vol 
 
-	# get solvent accessible surface area (SASA)
-	AllChem.EmbedMolecule(mol_obj, useRandomCoords=True)
-	radii = rdFreeSASA.classifyAtoms(mol_obj)
-	sasa = rdFreeSASA.CalcSASA(mol_obj, radii=radii)
+	molarity = 1000*density/mol_wt
 
 	new_molecule = {
 		'mol_name': mol_name.upper(),
@@ -33,8 +35,8 @@ def add_molecule(mol_name: str, mol_id: str, density: float, mol_class: str, smi
 		'density': f"{density:.3f}",
 		'molarity': f"{molarity:.3f}",
 		'molar_vol': f"{molar_vol:.3f}",
-		'sasa': f"{sasa:.3f}",
 		'n_electrons': f"{n_electrons:.0f}",
+		'mol_charge': f"{mol_charge:.0f}",
 		'mol_class': mol_class,
 		'smiles': smiles,
 	}

@@ -42,6 +42,8 @@ class KBI:
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
 			avg_end_time = None,
+			solute_mol = None,
+			geom_mean_pairs = [],
 		):
 
 		# assumes folder organization is: project / systems / rdfs
@@ -55,6 +57,12 @@ class KBI:
 			self.avg_end_time = round(1000 * avg_end_time) # end time in [ps] for enthalpy, volume, density averaging
 		else:
 			self.avg_end_time = None
+
+		# specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
+		self.solute_mol = solute_mol
+
+		# geom mean pair should be a list of lists, i.e., which molecules together should be represented with a geometric mean rather than their pure components --> applied after pure component activity coefficient calculation
+		self.geom_mean_pairs = geom_mean_pairs
 		
 		# get kbi method: raw, adj, kgv
 		self.kbi_method = kbi_method.lower()
@@ -230,6 +238,10 @@ class KBI:
 	@property
 	def n_electrons(self):
 		return self.properties_by_molid["n_electrons"].to_numpy()
+	
+	@property
+	def mol_charge(self):
+		return self.properties_by_molid["mol_charge"].to_numpy()
 
 	@property
 	def mw(self):
@@ -240,29 +252,30 @@ class KBI:
 		return self.properties_by_molid["smiles"].values
 
 	def assign_solute_mol(self):
-		'''finds the molecule that should be considered as solute; priority goes to: 1. extracant, 2. modifier, 3. solute, 4. solvent'''
-		solute_mol = None
-		# first check for extractant
-		for mol in self.unique_mols:
-			if self.mol_class_dict[mol] == 'extractant':
-				solute_mol = mol
-		# then check for modifier
-		if solute_mol is None:
+		'''finds the molecule that should be considered as solute; priority goes to: 
+		1. extracant, 2. modifier, 3. solute, 4. solvent'''
+		
+		if self.solute_mol == None:
+			# first check for extractant
 			for mol in self.unique_mols:
-				if self.mol_class_dict[mol] == 'modifier':
-					solute_mol = mol
-		# then check for solute
-		if solute_mol is None:
-			for mol in self.unique_mols:
-				if self.mol_class_dict[mol] == 'solute':
-					solute_mol = mol
-		# then solvent
-		if solute_mol is None:
-			for mol in self.unique_mols:
-				if self.mol_class_dict[mol] == 'solvent':
-					solute_mol = mol
+				if self.mol_class_dict[mol] == 'extractant':
+					self.solute_mol = mol
+			# then check for modifier
+			if self.solute_mol is None:
+				for mol in self.unique_mols:
+					if self.mol_class_dict[mol] == 'modifier':
+						self.solute_mol = mol
+			# then check for solute
+			if self.solute_mol is None:
+				for mol in self.unique_mols:
+					if self.mol_class_dict[mol] == 'solute':
+						self.solute_mol = mol
+			# then solvent
+			if self.solute_mol is None:
+				for mol in self.unique_mols:
+					if self.mol_class_dict[mol] == 'solvent':
+						self.solute_mol = mol
 
-		self.solute_mol = solute_mol
 		return self.solute_mol
 	
 	@property
@@ -669,26 +682,118 @@ class KBI:
 			int_arr = int_arr[filtered_sorted_idxs]
 			int_dlny_dx[:, i] = np.exp(int_arr[:, 2])
 
-		return int_dlny_dx
+		# correct gammas for mean ionic activity coefficient if necessary
+		gammas = self._correct_gammas(int_dlny_dx)
+		return gammas
+	
+	def gamma_geom_mean(self, mol_1, mol_2):
+		mol_1_idx = self.mol_idx(mol=mol_1)
+		mol_2_idx = self.mol_idx(mol=mol_2)
+		zi = self.mol_charge[mol_1_idx]
+		zj = self.mol_charge[mol_2_idx]
+		return (self.gammas[:,mol_1_idx]**(zi) * self.gammas[:,mol_2_idx]**(zj))**(1/(zi+zj))
+	
+	def mol_idx(self, mol):
+		return list(self.unique_mols).index(mol)
+	
+	def _correct_gammas(self, gammas):
+		'''if geometric men activity coeff is present, adjust activity coeffs accordingly'''
+		for i, (mol_1, mol_2) in enumerate(self.geom_mean_pairs):
+			# get geometric mean of two components
+			gamma_ij = self.gamma_geom_mean(mol_1=mol_1, mol_2=mol_2)
+			# get molecule indices for removal
+			mol_1_idx = self.mol_idx(mol=mol_1)
+			mol_2_idx = self.mol_idx(mol=mol_2)
+			# remove gammas of individual components from array
+			gammas = np.delete(gammas, [mol_1_idx, mol_2_idx], axis=1)
+			# add mean-ionic activity coefficient to array
+			gammas = np.column_stack((gammas, gamma_ij))
+		return gammas
+	
+	@property
+	def zc(self):
+		return self._correct_x(self.z)
+	
+	@property
+	def vc(self):
+		return self._correct_x(self.v)
+	
+	def _correct_x(self, x):
+		'''if geometric mean exists also correct the mol fractions'''
+		for i, (mol_1, mol_2) in enumerate(self.geom_mean_pairs):
+			# get molecule indices for removal
+			mol_1_idx = self.mol_idx(mol=mol_1)
+			mol_2_idx = self.mol_idx(mol=mol_2)
+			# get sum of two components
+			sum_x = x[:,mol_1_idx] + x[:,mol_2_idx]
+			# remove individual components from array
+			x = np.delete(x, [mol_1_idx, mol_2_idx], axis=1)
+			# add new component
+			x = np.column_stack((x, sum_x))
+		return x
+	
+	def _correct_names(self, mols):
+		for i, (mol_1, mol_2) in enumerate(self.geom_mean_pairs):
+			mol_1_idx = self.mol_idx(mol=mol_1)
+			mol_2_idx = self.mol_idx(mol=mol_2)
+			new_name = f"{mols[mol_1_idx]}-{mols[mol_2_idx]}"
+			# remove individual names
+			mols = np.delete(mols, [mol_1_idx, mol_2_idx])
+			# add new molecule
+			mols = np.append(mols, new_name)
+		return mols
 
 	@property
+	def unique_mols_corr(self):
+		'''correct molecule ids for geom mean'''
+		return self._correct_gammas(self, self.unique_mols)
+	
+	@property
+	def mol_names_corr(self):
+		'''correct molecule names for geom mean'''
+		mol_names = list(self.mol_names_dict.values())
+		return self._correct_names(self, mol_names)
+	
+	@property
+	def solute_corr(self):
+		'''find solute'''
+		for mol_1 in np.unique(self.geom_mean_pairs):
+			# reassign solute if in geometric mean pairs
+			if mol_1 == self.solute:
+				# find mols that contains solute name
+				for mol_2 in self.unique_mols_corr:
+					# solute found
+					if mol_1 in mol_2:
+						return mol_2
+		# if not found bc empty list return original solute
+		return self.solute
+
+	@property
+	def solute_loc_corr(self):
+		return list(self.unique_mols_corr).index(self.solute_corr)
+	
+	@property
+	def solute_name_corr(self):
+		return self.mol_names_corr[self.solute_loc_corr]
+	
+	@property
 	def G_ex(self):
-		return self.Rc * self.T_sim * (np.log(self.gammas) * self.z).sum(axis=1)
+		return self.Rc * self.T_sim * (np.log(self.gammas) * self.zc).sum(axis=1)
 	
 	def G_id(self, x1_mat, x2_mat):
 		return self.Rc * self.T_sim * (x1_mat * np.log(x2_mat)).sum(axis=1)
 	
 	@property
 	def G_mix_xv(self):
-		return self.G_ex + self.G_id(self.z, self.v)
+		return self.G_ex + self.G_id(self.zc, self.vc)
 
 	@property
 	def G_mix_xx(self):
-		return self.G_ex + self.G_id(self.z, self.z)
+		return self.G_ex + self.G_id(self.zc, self.zc)
 	
 	@property
 	def G_mix_vv(self):
-		return self.G_ex + self.G_id(self.v, self.v)
+		return self.G_ex + self.G_id(self.vc, self.vc)
 
 	@property
 	def Hsim_pc(self):
@@ -785,7 +890,7 @@ class KBI:
 
 		self.nrtl_Gmix = self.G_mix_xv
 		self.nrtl_Gmix0 = add_zeros(self.nrtl_Gmix)
-		fit, pcov = curve_fit(NRTL_GE_fit, self.z, self.nrtl_Gmix)
+		fit, pcov = curve_fit(NRTL_GE_fit, self.zc, self.nrtl_Gmix)
 		tau12, tau21 = fit
 		
 		np.savetxt(f"{self.kbi_method_dir}NRTL_taus_{self.kbi_method.lower()}.txt", [tau12, tau21], delimiter=",") 
@@ -825,7 +930,7 @@ class KBI:
 	def fit_UNIQUAC_IP(self):
 		'''fit du interaction parameter to Hmix (for any number of components)'''
 		self.r, self.q = UNIQUAC_RQ(self.smiles)
-		du = fit_du_to_Hmix(z=self.z, Hmix=self.Hmix, T=self.T_sim, smiles=self.smiles)
+		du = fit_du_to_Hmix(z=self.zc, Hmix=self.Hmix, T=self.T_sim, smiles=self.smiles)
 		np.savetxt(f"{self.kbi_method_dir}UNIQUAC_du_{self.kbi_method.lower()}.txt", du, delimiter=",") 
 		return du
 
@@ -833,7 +938,7 @@ class KBI:
 	def z_plot(self):
 		'''z-matrix for thermoydnamic model evaluations'''
 		num_pts = {2:10, 3:7, 4:6, 5:5, 6:4}
-		point_disc = PointDisc(num_comp=len(self.smiles), recursion_steps=num_pts[len(self.smiles)], load=True, store=False)
+		point_disc = PointDisc(num_comp=self.zc.shape[1], recursion_steps=num_pts[self.zc.shape[1]], load=True, store=False)
 		z_arr = point_disc.points_mfr[1:-1,:]
 		return z_arr 
 
@@ -869,7 +974,7 @@ class KBI:
 	
 	@property
 	def quartic_model(self):
-		quar_model = QuarticModel(z_data=self.z, z=self.z_plot, Hmix=self.Hmix, Sex=self.S_ex, molar_vol=self.molar_vol)
+		quar_model = QuarticModel(z_data=self.zc, z=self.z_plot, Hmix=self.Hmix, Sex=self.S_ex, molar_vol=self.molar_vol)
 		return quar_model
 
 	@property

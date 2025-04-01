@@ -18,6 +18,8 @@ def main():
   parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'gvdv', 'kgv'], help='KBI method name (default: adj)')
   parser.add_argument('--start_time', type=float, default=100, help='Time in ns to start averaging for volume and enthalpy calculation (default: 100)')
   parser.add_argument('--end_time', type=float, default=None, help='Time in ns to end averaging for volume and enthalpy calculation (default: end of trajectory)')
+  parser.add_argument('--solute_mol', type=str, default=None, help='solute mol_id, default preference is: extractant > modifier > solute > solvent (default: None)')
+  parser.add_argument('--geom_mean_pairs', type=list, default=[], help='list of lists containing pairs of mol_ids for mean ionic activity coeffs (default: [])')
   parser.add_argument('--run_thermo', type=str, default='true', choices=['true', 'false'], help='Perform thermodynamic analysis? (default: true)')
   parser.add_argument('--thermo_model', type=str, default='quartic', choices=['quartic', 'uniquac', 'unifac', 'nrtl', 'fh'], help='Thermodynamic model name for LLE calculation. "nrtl" and "fh" are only supported for binary systems; "quartic", "uniquac", "unifac" are supported for multicomponent systems (default: quartic)')
   parser.add_argument('--Tmin', type=float, default=150, help='Minimum Temp (K) for temperature sacling (default: 150)')
@@ -29,7 +31,7 @@ def main():
 
   # initialize kbi object
   print('intializing kbi object')
-  kbi_obj = KBI(prj_path=args.prj_path, pure_component_path=args.pure_component_path, rdf_dir=args.rdf_dir, kbi_method=args.kbi_method, avg_start_time=args.start_time, avg_end_time=args.end_time, kbi_fig_dirname=args.kbi_dir)
+  kbi_obj = KBI(prj_path=args.prj_path, pure_component_path=args.pure_component_path, rdf_dir=args.rdf_dir, kbi_method=args.kbi_method, avg_start_time=args.start_time, avg_end_time=args.end_time, kbi_fig_dirname=args.kbi_dir, solute_mol=args.solute_mol, geom_mean_pairs=args.geom_mean_pairs)
 
   # run kbi analysis
   print('computing kbis')
