@@ -164,6 +164,23 @@ If density is not entered, molar volume will be calculated from RDkit and the ma
 add_molecule(mol_name, mol_id, density, mol_class, smiles)
 ```
 
+Other command line interfaces supported by picmol. The objective of `picmol-kbi_inf` is to calculate KBI in the thermodynamic limit using the approximation developed by [Cortes-Huerto](https://doi.org/10.1063/1.4964779).
+
+```python
+picmol-kbi_inf -h
+```
+And creating the kbi runscripts for the `picmol-kbi_inf` calculation.
+
+```python
+picmol-kbi_runscript -h
+```
+
+For generate rdf runscripts, with the same hierarchy as KBI analysis.
+
+```python
+picmol-rdf_runscript -h
+```
+
 
 
 
