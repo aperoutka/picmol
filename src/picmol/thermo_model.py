@@ -225,7 +225,10 @@ class ThermoModel:
 			self.model = self.model_type(smiles=self.smiles, IP=self.IP)
 		# quartic model
 		elif self.model_type == QuarticModel:
-			self.model = self.model_type(z_data=KBIModel.z, Hmix=KBIModel.Hmix, Sex=KBIModel.S_ex, molar_vol=self.molar_vol)
+			if KBIModel.kbi_method == 'ch':
+				self.model = self.model_type(z_data=KBIModel.z, Hmix=KBIModel.Hmix, Sex=KBIModel.S_ex, molar_vol=self.molar_vol, gid_type='mol')
+			else:
+				self.model = self.model_type(z_data=KBIModel.z, Hmix=KBIModel.Hmix, Sex=KBIModel.S_ex, molar_vol=self.molar_vol, gid_type='vol')
 		# fh and nrtl model
 		else: 
 			self.model = self.model_type(smiles=self.smiles, IP=self.IP)

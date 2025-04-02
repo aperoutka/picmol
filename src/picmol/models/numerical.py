@@ -36,11 +36,12 @@ def get_symbols_sympy_func(expression, xvar: str = 'x'):
 
 
 class QuarticModel:
-  def __init__(self, z_data, Hmix, Sex, molar_vol, z=None):
+  def __init__(self, z_data, Hmix, Sex, molar_vol, z=None, gid_type='vol'):
     self.V0 = molar_vol
     self.rec_steps = 10
     self.Rc = constants.R / 1000
     self.num_comp = len(molar_vol)
+    self.gid_type = gid_type
 
     self.Hmix_vals = add_zeros(Hmix, self.num_comp)
     self.Sex_vals = add_zeros(Sex, self.num_comp)
@@ -173,16 +174,25 @@ class QuarticModel:
     for i in range(1, self.num_comp):
       vbar += f"x{i}*v{i} + "
     vbar += xsum + f"*v{self.num_comp})"
-
-    G = ""
-    for i in range(1, self.num_comp):
-      G += f"x{i} * ln(x{i}*v{i}/{vbar}) + "
-    G += f"{xsum} * ln({xsum}*v{self.num_comp}/{vbar})"
+  
+    if self.gid_type == 'vol':
+      G = ""
+      for i in range(1, self.num_comp):
+        G += f"x{i} * ln(x{i}*v{i}/{vbar}) + "
+      G += f"{xsum} * ln({xsum}*v{self.num_comp}/{vbar})"
+    else:
+      G = ""
+      for i in range(1, self.num_comp):
+        G += f"x{i} * ln(x{i}) + "
+      G += f"{xsum} * ln({xsum})"
     return sympify(G)
 
   def Gid(self, T):
     Gid_py = lambdify(self.Gid_symbols, self.Gid_sympy, 'numpy')
-    Gid_calc = self.Rc * T * Gid_py(*self.x_values, *self.V0)
+    if self.gid_type == 'vol':
+      Gid_calc = self.Rc * T * Gid_py(*self.x_values, *self.V0)
+    else:
+      Gid_calc = self.Rc * T * Gid_py(*self.x_values)
     return Gid_calc
 
   @property
@@ -196,7 +206,10 @@ class QuarticModel:
     df_dx = np.zeros((self.z.shape[0], self.num_comp-1))
     for i in range(self.num_comp-1):
       df_dx_py = lambdify(self.Gid_symbols, self.dGid_sympy[i], 'numpy')
-      df_dx[:,i] = self.Rc * T * df_dx_py(*self.x_values, *self.V0)
+      if self.gid_type == 'vol':
+        df_dx[:,i] = self.Rc * T * df_dx_py(*self.x_values, *self.V0)
+      else:
+        df_dx[:,i] = self.Rc * T * df_dx_py(*self.x_values)
     return df_dx
 
   @property
@@ -213,7 +226,10 @@ class QuarticModel:
     for i in range(self.num_comp-1):
       for j in range(self.num_comp-1):
         d2f_dx2_py = lambdify(self.Gid_symbols, self.d2Gid_sympy[i][j], 'numpy')
-        d2f_dx2[:,i,j] = self.Rc * T * d2f_dx2_py(*self.x_values, *self.V0)
+        if self.gid_type == 'vol':
+          d2f_dx2[:,i,j] = self.Rc * T * d2f_dx2_py(*self.x_values, *self.V0)
+        else:
+          d2f_dx2[:,i,j] = self.Rc * T * d2f_dx2_py(*self.x_values)
     return d2f_dx2
 
   def Hmix_func(self, T):

@@ -6,6 +6,7 @@ from .thermo_model import Tc_search, ThermoModel
 from .plotter import KBIPlotter, PhaseDiagramPlotter
 from .models import UNIQUAC, UNIFAC, NRTL, FH, QuarticModel
 from .kbi import KBI
+from .traj_process import calc_kbi_inf, make_rdf_runscript, make_kbi_runscript
 
 __all__ = [
 	"mol2vol",
@@ -13,5 +14,6 @@ __all__ = [
 	"Tc_search", "ThermoModel",
 	"KBIPlotter", "PhaseDiagramPlotter",
 	"UNIFAC", "UNIQUAC", "NRTL", "FH", "QuarticModel",
-	"KBI"
+	"KBI",
+	"calc_kbi_inf", "make_kbi_runscript", "make_rdf_runscript"
 ]

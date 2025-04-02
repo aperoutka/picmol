@@ -38,6 +38,7 @@ class KBI:
 			prj_path: str, 
 			pure_component_path: str,
 			rdf_dir: str = "rdf_files", 
+			Gij_filename: str = 'Gij_inf.npy',
 			kbi_method: str = "adj", 
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
@@ -51,6 +52,9 @@ class KBI:
 
 		# location of pure component files
 		self.pure_component_dir = pure_component_path
+
+		# Gij_filename: only for Cortes-Huerto kbi method, requires calculating the Gij ahead of time 
+		self.Gij_file = Gij_filename
 
 		self.avg_start_time = round(1000 * avg_start_time) # start time in [ps] for enthalpy, volume, density averaging
 		if avg_end_time is not None:
@@ -409,6 +413,9 @@ class KBI:
 			self.df_comp
 		except AttributeError: 
 			self.system_compositions()
+
+		if self.kbi_method == 'ch':
+			return
 		
 		# create dataframes for each pairwise interaction
 		df_kbi = pd.DataFrame()
@@ -525,14 +532,19 @@ class KBI:
 		except AttributeError: 
 			self.system_compositions()
 		G = np.full((self.z.shape[0], len(self.unique_mols), len(self.unique_mols)), fill_value=np.nan)
-		for i, mol_1 in enumerate(self.unique_mols):
-			for j, mol_2 in enumerate(self.unique_mols):
-				if i <= j:
-					# fill matrix with kbi values in nm^3
-					G[:,i,j] = 	self.df_kbi[f'G_{mol_1}_{mol_2}_nm3'].to_numpy()
-					# the matrix should be symmetrical
-					if i != j:
-						G[:,j,i] = G[:,i,j]
+		if self.kbi_method != 'ch':
+			for i, mol_1 in enumerate(self.unique_mols):
+				for j, mol_2 in enumerate(self.unique_mols):
+					if i <= j:
+						# fill matrix with kbi values in nm^3
+						G[:,i,j] = 	self.df_kbi[f'G_{mol_1}_{mol_2}_nm3'].to_numpy()
+						# the matrix should be symmetrical
+						if i != j:
+							G[:,j,i] = G[:,i,j]
+		else:
+			for s, sys in enumerate(self.systems):
+				Gij_sys = np.load(self.Gij_file)
+				G[s,:,:] = Gij_sys
 		return G
 	
 	@property
