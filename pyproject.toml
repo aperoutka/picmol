@@ -18,6 +18,4 @@ Homepage = "https://github.com/aperoutka/picmol"
 
 [project.scripts]
 picmol-kbi = "picmol.kbi_analysis:main"
-picmol-kbi_inf = "picmol.traj_process.calc_kbi_inf:main"
-picmol-kbi_runscript = "picmol.traj_process.make_kbi_runscript:main"
-picmol-rdf_runscript = "picmol.traj_process.make_rdf_runscript:main"
+picmol-rdf = "picmol.traj_process.make_rdf_runscript:main"

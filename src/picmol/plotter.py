@@ -32,7 +32,8 @@ class KBIPlotter:
   def make_figures(self):
     '''creates figures based on number of components in system'''
     # kbi integral as a function of r
-    self.make_indiv_kbi_plots()
+    self.make_indiv_kbi_plots() # running kbi
+    self.plot_kbi_inf() # kbi extrapolation to infinity (thermodynamic limit)
 
     for basis in ["mol", "vol"]:
       # kbi values & activities
@@ -75,8 +76,40 @@ class KBIPlotter:
             ax[ij_combo].set_xlabel('$r$ [nm]')
             ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name_corr}}}$")
             ij_combo += 1
-      ax[0].set_ylabel('$G_{ij}$ [cm$^3$ mol$^{-1}$]')
+      ax[0].set_ylabel('$G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
       plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi.png')
+      plt.close()
+
+  def plot_kbi_inf(self):
+    ''' create kbi plots for extrapolating to the thermodynamic limit'''
+    try:
+      self.model.df_kbi
+    except AttributeError: 
+      self.model.kbi_analysis()
+
+    for s, sys in enumerate(self.model.systems):
+      fig, ax = plt.subplots(1, self.model.ij_combo, figsize=(12, 4), sharex=True)
+      ij_combo = 0
+      for i, mol_1 in enumerate(self.model.unique_mols):
+        for j, mol_2 in enumerate(self.model.unique_mols):
+          if i <= j:
+            # get kbi's as a function of r
+            df_kbi_sys = getattr(self.model, f"kbi_{s}")
+            V_cell = (df_kbi_sys["r"])**3
+            L = (V_cell/self.model.df_comp.loc[s, 'box_vol'])**(1/3) # box length in nm, for extrapolation to thermodynamic limit
+            Gij_R = df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol']
+            ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
+            Gij, Fij, b = self.model._extrapolate_kbi(L, Gij_R)
+            L_fit = L[np.abs(L - self.model.rkbi_min).argmin():]
+            ax[ij_combo].plot(L_fit, self.model.fGij_inf(L_fit, Gij, Fij, b),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
+            ax[ij_combo].legend(fontsize=11)
+            # figure properties
+            ax[ij_combo].set_xlim(L.min(), L.max())
+            ax[ij_combo].set_xlabel('$\lambda$')
+            ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name_corr}}}$")
+            ij_combo += 1
+      ax[0].set_ylabel('$\lambda$ $G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
+      plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi_inf.png')
       plt.close()
 
 
