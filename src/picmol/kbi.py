@@ -65,7 +65,10 @@ class KBI:
 		self.rkbi_min = rkbi_min
 
 		# specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
-		self.solute_mol = solute_mol
+		self._solute = solute_mol
+		if self._solute is None:
+			self._solute = self._assign_solute_mol
+
 
 		# geom mean pair should be a list of lists, i.e., which molecules together should be represented with a geometric mean rather than their pure components --> applied after pure component activity coefficient calculation
 		self.geom_mean_pairs = geom_mean_pairs
@@ -93,6 +96,25 @@ class KBI:
 		# get gas constant in kJ/mol-K
 		self.Rc = R / 1000 # kJ / mol K
 		self.N_A = N_A
+
+		# initialize properties for KBI analysis
+		self._extract_sys_info_from_top() # extract top info for each system; this will be used to get molecular numbers, etc.
+		self._unique_mols = np.array(self._top_info["unique_mols"])
+
+		self._mol_name_dict = {mol: self.properties_by_molid["mol_name"][mol] for mol in self.unique_mols}
+
+		try:
+			self._df_comp
+		except AttributeError:
+			self._system_compositions() 
+
+		# get mol fractions from kbi system compositions
+		z_mat = np.empty((self.df_comp.shape[0], len(self.unique_mols)))
+		for i, mol in enumerate(self.unique_mols):
+			z_mat[:,i] = self.df_comp[f'x_{mol}'].to_numpy()
+		
+		self._z = z_mat
+		self._v = mol2vol(self.z, self.molar_vol) # get volume of each system based on the molecular volumes and compositions
 
 
 	def _get_edr_file(self, sys):
@@ -201,15 +223,16 @@ class KBI:
 			"total_num_mols": total_num_mols
 		}
 
+
 	@property
 	def unique_mols(self):
 		'''unique mol_ids in project'''
-		try:
-			self._top_info
-		except AttributeError:
-			self._extract_sys_info_from_top()
-		return np.array(self._top_info["unique_mols"])
-		
+		return self._unique_mols
+
+	@unique_mols.setter
+	def unique_mols(self, value):
+		self._unique_mols = value
+
 	@property
 	def mol_nums_by_component(self):
 		'''molecule numbers of individual components'''
@@ -236,8 +259,12 @@ class KBI:
 	
 	@property
 	def mol_name_dict(self):
-		return {mol: self.properties_by_molid["mol_name"][mol] for mol in self.unique_mols}
-		
+		return self._mol_name_dict
+
+	def add_molname_to_dict(self, mol_id, mol_name):
+		if mol not in self._mol_name_dict.keys():
+			self._mol_name_dict[mol_id] = mol_name
+
 	@property
 	def mol_class_dict(self):
 		return {mol: self.properties_by_molid["mol_class"][mol] for mol in self.unique_mols}
@@ -245,9 +272,22 @@ class KBI:
 	@property
 	def mol_smiles_dict(self):
 		return {mol: self.properties_by_molid["smiles"][mol] for mol in self.unique_mols}
-	
+
 	@property
 	def molar_vol(self):
+		'''get molar volumes for each molecule, try with md results first and if np.nan, use experimental values from molecular_properties.csv'''
+		V0 = np.zeros(len(self.unique_mols)) # initialize array for molar volumes
+		for i, mol in enumerate(self.unique_mols):
+			# try to get molar volume from simulation results first
+			if np.isnan(self.md_molar_vol[i]):
+				# fallback to experimental values
+				V0[i] = self.exp_molar_vol[i]
+			else:
+				V0[i] = self.md_molar_vol[i]
+		return V0
+	
+	@property
+	def exp_molar_vol(self):
 		return self.properties_by_molid["molar_vol"].to_numpy()
 	
 	@property
@@ -266,50 +306,45 @@ class KBI:
 	def smiles(self):
 		return self.properties_by_molid["smiles"].values
 
-	def assign_solute_mol(self):
+	@property
+	def _assign_solute_mol(self):
 		'''finds the molecule that should be considered as solute; priority goes to: 
 		1. extracant, 2. modifier, 3. solute, 4. solvent'''
-		self._assign_solute_mol = self.solute_mol
-		if self._assign_solute_mol is None:
-			# first check for extractant
-			for mol in self.unique_mols:
-				if self.mol_class_dict[mol] == 'extractant':
-					self._assign_solute_mol = mol
-			# then check for modifier
-			if self._assign_solute_mol is None:
-				for mol in self.unique_mols:
-					if self.mol_class_dict[mol] == 'modifier':
-						self._assign_solute_mol = mol
-			# then check for solute
-			if self._assign_solute_mol is None:
-				for mol in self.unique_mols:
-					if self.mol_class_dict[mol] == 'solute':
-						self._assign_solute_mol = mol
-			# then solvent
-			if self._assign_solute_mol is None:
-				for mol in self.unique_mols:
-					if self.mol_class_dict[mol] == 'solvent':
-						self._assign_solute_mol = mol
+		# first check for extractant
+		for mol in self.unique_mols:
+			if self.mol_class_dict[mol] == 'extractant':
+				return mol
+		# then check for modifier
+		for mol in self.unique_mols:
+			if self.mol_class_dict[mol] == 'modifier':
+				return mol
+		# then check for solute
+		for mol in self.unique_mols:
+			if self.mol_class_dict[mol] == 'solute':
+				return mol
+		# then solvent
+		for mol in self.unique_mols:
+			if self.mol_class_dict[mol] == 'solvent':
+				return mol
 	
 	@property
 	def solute(self):
 		'''get solute mol_id'''
-		try:
-			self._assign_solute_mol
-		except AttributeError: 
-			self.assign_solute_mol()
-		return self._assign_solute_mol
+		return self._solute
+	
+	@solute.setter
+	def solute(self, value):
+		self._solute = value
 	
 	@property
 	def solute_loc(self):
 		'''get index of solute molecule'''
-		unique_mol_list = list(self.unique_mols)
-		return unique_mol_list.index(self.solute)
+		return self._mol_idx(mol=self.solute)
 	
 	@property
 	def solute_name(self):
 		'''get name of solute molecule'''
-		return self.mol_name_dict[self.solute]
+		return self._mol_name_dict[self.solute]
 	
 	def _sort_systems(self):
 		'''sort systems based on molar fraction'''
@@ -518,18 +553,19 @@ class KBI:
 	
 	@property
 	def z(self):
-		try:
-			self.df_comp
-		except AttributeError: 
-			self._system_compositions()
-		z_mat = np.empty((self.df_comp.shape[0], len(self.unique_mols)))
-		for i, mol in enumerate(self.unique_mols):
-			z_mat[:,i] = self.df_comp[f'x_{mol}'].to_numpy()
-		return z_mat
+		return self._z
+
+	@z.setter
+	def z(self, value):
+		self._z = value
 
 	@property
 	def v(self):
-		return mol2vol(self.z, self.molar_vol)
+		return self._v
+	
+	@v.setter
+	def v(self, value):
+		self._v = value
 	
 	@property
 	def v0(self):
@@ -716,6 +752,12 @@ class KBI:
 
 		# correct gammas for mean ionic activity coefficient if necessary
 		gammas = self._correct_gammas(int_dlny_dx)
+		# correct other properties that depend on geometric means
+		self.z = self._correct_x(self.z) # correct the mol fractions 
+		self.v = self._correct_x(self.v) # correct the vol fractions 
+		self.unique_mols = self._correct_mols(self.unique_mols) # correct the unique mols 
+		self.solute = self._correct_solute(self.solute) # reassign solute 
+
 		return gammas
 	
 	def _gamma_geom_mean(self, mol_1, mol_2):
@@ -742,14 +784,6 @@ class KBI:
 			gammas = np.column_stack((gammas, gamma_ij))
 		return gammas
 	
-	@property
-	def zc(self):
-		return self._correct_x(self.z)
-	
-	@property
-	def vc(self):
-		return self._correct_x(self.v)
-	
 	def _correct_x(self, x):
 		'''if geometric mean exists also correct the mol fractions'''
 		for i, (mol_1, mol_2) in enumerate(self.geom_mean_pairs):
@@ -764,68 +798,52 @@ class KBI:
 			x = np.column_stack((x, sum_x))
 		return x
 	
-	def _correct_names(self, mols):
+	def _correct_mols(self, mols):
 		for i, (mol_1, mol_2) in enumerate(self.geom_mean_pairs):
 			mol_1_idx = self._mol_idx(mol=mol_1)
 			mol_2_idx = self._mol_idx(mol=mol_2)
-			new_name = f"{mols[mol_1_idx]}-{mols[mol_2_idx]}"
+			new_mol_id = f"{mols[mol_1_idx]}-{mols[mol_2_idx]}"
+			new_mol_name = f"{self.mol_name_dict[mol_1]}-{self.mol_name_dict[mol_2]}" 
 			# remove individual names
 			mols = np.delete(mols, [mol_1_idx, mol_2_idx])
-			# add new molecule
-			mols = np.append(mols, new_name)
+			# add new molecule to mol_name_dict
+			self.add_molname_to_dict(mol_id=new_mol_id, mol_name=new_mol_name)
 		return mols
 
-	@property
-	def unique_mols_corr(self):
-		'''correct molecule ids for geom mean'''
-		return self._correct_gammas(self.unique_mols)
-	
-	@property
-	def mol_names_corr(self):
-		'''correct molecule names for geom mean'''
-		mol_names = list(self.mol_name_dict.values())
-		return self._correct_names(mol_names)
-	
-	@property
-	def solute_corr(self):
+	def _correct_solute(self, solute):
 		'''find solute'''
-		for mol_1 in np.unique(self.geom_mean_pairs):
-			# reassign solute if in geometric mean pairs
-			if mol_1 == self.solute:
-				# find mols that contains solute name
-				for mol_2 in self.unique_mols_corr:
-					# solute found
-					if mol_1 in mol_2:
-						return mol_2
-		# if not found bc empty list return original solute
-		return self.solute
-
-	@property
-	def solute_loc_corr(self):
-		return list(self.unique_mols_corr).index(self.solute_corr)
-	
-	@property
-	def solute_name_corr(self):
-		return self.mol_names_corr[self.solute_loc_corr]
+		# get unique mols from the geometric mean pairs
+		unique_mols_gm = np.unique(self.geom_mean_pairs)
+		if len(unique_mols_gm) > 0 and solute in unique_mols_gm:
+			# if solute is in the geometric mean pairs, find the corresponding geometric mean molecule
+			for mol_1 in unique_mols_gm:
+				if mol_1 == solute:
+					# find mols that contains solute name
+					for mol_2 in self.unique_mols:
+						if mol_1 in mol_2:
+							return mol_2
+		# if solute not in geometric mean pairs or no geometric mean pairs, return the original solute
+		else:
+			return solute
 	
 	@property
 	def G_ex(self):
-		return self.Rc * self.T_sim * (np.log(self.gammas) * self.zc).sum(axis=1)
+		return self.Rc * self.T_sim * (np.log(self.gammas) * self.z).sum(axis=1)
 	
 	def G_id(self, x1_mat, x2_mat):
 		return self.Rc * self.T_sim * (x1_mat * np.log(x2_mat)).sum(axis=1)
 	
 	@property
 	def G_mix_xv(self):
-		return self.G_ex + self.G_id(self.zc, self.vc)
+		return self.G_ex + self.G_id(self.z, self.v)
 
 	@property
 	def G_mix_xx(self):
-		return self.G_ex + self.G_id(self.zc, self.zc)
+		return self.G_ex + self.G_id(self.z, self.z)
 	
 	@property
 	def G_mix_vv(self):
-		return self.G_ex + self.G_id(self.vc, self.vc)
+		return self.G_ex + self.G_id(self.v, self.v)
 
 	@property
 	def Hsim_pc(self):
@@ -839,7 +857,6 @@ class KBI:
 				mols_present, total_num_mols, mol_nums_by_component = self._read_top(sys_parent_dir=self.pure_component_dir, sys=sys)
 				# get npt edr files for system properties; volume, enthalpy.
 				npt_edr_file = self._get_edr_file(sys=sys)
-
 				# get simulation enthalpy
 				if os.path.exists('enthalpy_npt.xvg') == False:
 					os.system(f"echo enthalpy | gmx energy -f {npt_edr_file} -o enthalpy_npt.xvg")
@@ -851,7 +868,7 @@ class KBI:
 		return H_pc
 
 	@property
-	def sim_molar_vol(self):
+	def md_molar_vol(self):
 		# get molar volume of pure components
 		vol = np.zeros(self.unique_mols.size)
 		for i, mol in enumerate(self.unique_mols):
@@ -915,7 +932,7 @@ class KBI:
 
 		self.nrtl_Gmix = self.G_mix_xv
 		self.nrtl_Gmix0 = add_zeros(self.nrtl_Gmix)
-		fit, pcov = curve_fit(NRTL_GE_fit, self.zc, self.nrtl_Gmix)
+		fit, pcov = curve_fit(NRTL_GE_fit, self.z, self.nrtl_Gmix)
 		tau12, tau21 = fit
 		
 		np.savetxt(f"{self.kbi_method_dir}NRTL_taus_{self.kbi_method.lower()}.txt", [tau12, tau21], delimiter=",") 
@@ -955,7 +972,7 @@ class KBI:
 	def fit_UNIQUAC_IP(self):
 		'''fit du interaction parameter to Hmix (for any number of components)'''
 		self.r, self.q = UNIQUAC_RQ(self.smiles)
-		du = fit_du_to_Hmix(z=self.zc, Hmix=self.Hmix, T=self.T_sim, smiles=self.smiles)
+		du = fit_du_to_Hmix(z=self.z, Hmix=self.Hmix, T=self.T_sim, smiles=self.smiles)
 		np.savetxt(f"{self.kbi_method_dir}UNIQUAC_du_{self.kbi_method.lower()}.txt", du, delimiter=",") 
 		return du
 
@@ -963,7 +980,7 @@ class KBI:
 	def z_plot(self):
 		'''z-matrix for thermoydnamic model evaluations'''
 		num_pts = {2:10, 3:7, 4:6, 5:5, 6:4}
-		point_disc = PointDisc(num_comp=self.zc.shape[1], recursion_steps=num_pts[self.zc.shape[1]], load=True, store=False)
+		point_disc = PointDisc(num_comp=self.z.shape[1], recursion_steps=num_pts[self.z.shape[1]], load=True, store=False)
 		z_arr = point_disc.points_mfr[1:-1,:]
 		return z_arr 
 
@@ -999,7 +1016,7 @@ class KBI:
 	
 	@property
 	def quartic_model(self):
-		quar_model = QuarticModel(z_data=self.zc, z=self.z_plot, Hmix=self.Hmix, Sex=self.S_ex, molar_vol=self.molar_vol)
+		quar_model = QuarticModel(z_data=self.z, z=self.z_plot, Hmix=self.Hmix, Sex=self.S_ex, molar_vol=self.molar_vol)
 		return quar_model
 
 	@property

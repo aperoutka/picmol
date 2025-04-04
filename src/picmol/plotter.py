@@ -45,7 +45,6 @@ class KBIPlotter:
         # calculated excess parameters
         self.plot_binary_Gex(basis=basis)
         self.plot_binary_excess_contributions(basis=basis)
-        
         # plot fits for thermodynamic interaction parameters
         self.plot_NRTL_IP_fit()
         self.plot_FH_chi_fit()
@@ -74,7 +73,7 @@ class KBIPlotter:
             ax[ij_combo].set_xlim(0, 5)
             ax[ij_combo].set_xticks(ticks=np.arange(0,5.1,1.))
             ax[ij_combo].set_xlabel('$r$ [nm]')
-            ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name_corr}}}$")
+            ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name}}}$")
             ij_combo += 1
       ax[0].set_ylabel('$G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
       plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi.png')
@@ -106,7 +105,7 @@ class KBIPlotter:
             # figure properties
             ax[ij_combo].set_xlim(L.min(), L.max())
             ax[ij_combo].set_xlabel('$\lambda$')
-            ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name_corr}}}$")
+            ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name}}}$")
             ij_combo += 1
       ax[0].set_ylabel('$\lambda$ $G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
       plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi_inf.png')
@@ -116,12 +115,12 @@ class KBIPlotter:
   def x_basis(self, basis):
     # get xlabel for figure and column label in df for mol frac / vol frac basis
     if basis.lower() == "mol":
-      zplot = self.model.zc
-      xplot = self.model.zc[:,self.model.solute_loc_corr].flatten()
+      zplot = self.model.z
+      xplot = self.model.z[:,self.model.solute_loc].flatten()
       x_lab = 'x'
     else:
-      zplot = self.model.vc
-      xplot = self.model.vc[:,self.model.solute_loc_corr].flatten()
+      zplot = self.model.v
+      xplot = self.model.v[:,self.model.solute_loc].flatten()
       x_lab = '\phi'
     return zplot, xplot, x_lab
 
@@ -147,7 +146,7 @@ class KBIPlotter:
     ax.legend(fontsize=10, loc='upper right')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name_corr}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
     ax.set_ylabel(f'$G_{{ij}}$ [cm$^3$ mol$^{{-1}}$]')
     plt.savefig(f'{self.model.kbi_method_dir}composition_KBI_{basis.lower()}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
@@ -206,7 +205,7 @@ class KBIPlotter:
     ax.set_ylim(-0.05, max(self.model.G_ex)+0.05)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name_corr}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
     ax.set_ylabel('$G^E$ $[kJ$ $mol^{-1}]$')
     plt.savefig(f'{self.model.kbi_method_dir}gibbs_excess_energy_{basis}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
@@ -222,7 +221,7 @@ class KBIPlotter:
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name_corr}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
     ax.set_ylabel('Excess Properties $[kJ$ $mol^{-1}]$')
     plt.savefig(f'{self.model.kbi_method_dir}gibbs_excess_properties_{basis}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
@@ -230,14 +229,14 @@ class KBIPlotter:
   def plot_binary_thermo_model_comparisons(self):
     """compare UNIQUAC, UNIFAC, QuarticModel"""
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
-    xplot = self.model.z_plot[:,self.model.solute_loc_corr]
+    xplot = self.model.z_plot[:,self.model.solute_loc]
     
-    ax[0].scatter(self.model.zc[:,self.model.solute_loc_corr], self.model.Hmix, c='k', zorder=10)
+    ax[0].scatter(self.model.z[:,self.model.solute_loc], self.model.Hmix, c='k', zorder=10)
     ax[0].plot(xplot, self.model.quartic_Hmix, c='k', ls='solid')
     ax[0].plot(xplot, self.model.uniquac_Hmix, c='dodgerblue', ls='dashed')
     ax[0].plot(xplot, self.model.unifac_Hmix, c='limegreen', ls='dotted')
 
-    ax[1].scatter(self.model.zc[:,self.model.solute_loc_corr], self.model.nTdSmix, c='k', label='KB + MD', zorder=10)
+    ax[1].scatter(self.model.z[:,self.model.solute_loc], self.model.nTdSmix, c='k', label='KB + MD', zorder=10)
     ax[1].plot(xplot, self.model.quartic_Smix, c='k', ls='solid', label='Fit')
     ax[1].plot(xplot, self.model.uniquac_Smix, c='dodgerblue', ls='dashed', label='uniquac')
     ax[1].plot(xplot, self.model.unifac_Smix, c='limegreen', ls='dotted', label='unifac')
@@ -246,14 +245,14 @@ class KBIPlotter:
     unif_G = self.model.unifac_Hmix + self.model.unifac_Smix
     quar_G = self.model.quartic_Hmix + self.model.quartic_Smix
 
-    ax[2].scatter(self.model.zc[:,self.model.solute_loc_corr], self.model.G_mix_xv, c='k', zorder=10)
+    ax[2].scatter(self.model.z[:,self.model.solute_loc], self.model.G_mix_xv, c='k', zorder=10)
     ax[2].plot(xplot, quar_G, c='k', ls='solid')
     ax[2].plot(xplot, uniq_G, c='dodgerblue', ls='dashed')
     ax[2].plot(xplot, unif_G, c='limegreen', ls='dotted')
 
     ax[0].set_xlim(-0.05,1.05)
     for i in range(3):
-      ax[i].set_xlabel(f'$x_{{{self.model.solute_name_corr}}}$')
+      ax[i].set_xlabel(f'$x_{{{self.model.solute_name}}}$')
     ax[0].set_ylabel(f'$\Delta H_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax[1].set_ylabel(f'$-T\Delta S_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax[2].set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
@@ -269,9 +268,9 @@ class KBIPlotter:
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
     uniq_G = self.model.uniquac_Hmix + self.model.uniquac_Smix
-    ax.plot(self.model.z_plot[:,self.model.solute_loc_corr], uniq_G, linewidth=2.5, color='tab:red', label='UNIQUAC')      
+    ax.plot(self.model.z_plot[:,self.model.solute_loc], uniq_G, linewidth=2.5, color='tab:red', label='UNIQUAC')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.solute_name_corr}}}$')
+    ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
     ymin = np.round(1.1*min([min(uniq_G), min(self.model.G_mix_xv)]), 1)
@@ -308,9 +307,9 @@ class KBIPlotter:
 
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.model.z_plot[:,self.model.solute_loc_corr], Gmix_fit0, linewidth=2.5, color='tab:red', label='NRTL')      
+    ax.plot(self.model.z_plot[:,self.model.solute_loc], Gmix_fit0, linewidth=2.5, color='tab:red', label='NRTL')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.solute_name_corr}}}$')
+    ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
     ymin = np.round(min([min(self.model.G_mix_xv), min(Gmix_fit0)])-0.1, 1)
@@ -340,7 +339,7 @@ class KBIPlotter:
     ax.legend(fontsize=11, loc='upper center')
     ymin = np.round(min([min(self.model.fh_Gmix), min(self.model.G_mix_xv)])-0.1, 1)
     ax.set_ylim(ymin, 0.05)
-    ax.set_xlabel(f'$\phi_{{{self.model.solute_name_corr}}}$')
+    ax.set_xlabel(f'$\phi_{{{self.model.solute_name}}}$')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.2))
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
@@ -352,9 +351,9 @@ class KBIPlotter:
 
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.model.z_plot[:,self.model.solute_loc_corr], self.model.quartic_Smix + self.model.quartic_Hmix, linewidth=2.5, color='tab:red', label='Quartic')      
+    ax.plot(self.model.z_plot[:,self.model.solute_loc], self.model.quartic_Smix + self.model.quartic_Hmix, linewidth=2.5, color='tab:red', label='Quartic')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.solute_name_corr}}}$')
+    ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
     ymin = np.round(1.1*min(self.model.G_mix_xv), 1)
