@@ -64,12 +64,6 @@ class KBI:
 		# default value, 0.5 -> start at 1/2 max(r) in rdf
 		self.rkbi_min = rkbi_min
 
-		# specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
-		self._solute = solute_mol
-		if self._solute is None:
-			self._solute = self._assign_solute_mol
-
-
 		# geom mean pair should be a list of lists, i.e., which molecules together should be represented with a geometric mean rather than their pure components --> applied after pure component activity coefficient calculation
 		self.geom_mean_pairs = geom_mean_pairs
 		
@@ -87,8 +81,6 @@ class KBI:
 
 		# for folder to be considered a system, it needs to have a .top file
 		self.systems = [sys for sys in os.listdir(self.prj_path) if os.path.isdir(os.path.join(self.prj_path,sys)) and f"{sys}.top" in os.listdir(f"{self.prj_path}/{sys}/")]
-		# sort systems so in order by solute moleclule number
-		self._sort_systems()
 
 		# get number of systems in project
 		self.n_sys = len(self.systems)
@@ -100,6 +92,14 @@ class KBI:
 		# initialize properties for KBI analysis
 		self._extract_sys_info_from_top() # extract top info for each system; this will be used to get molecular numbers, etc.
 		self._unique_mols = np.array(self._top_info["unique_mols"])
+
+		# specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
+		self._solute = solute_mol
+		if self._solute is None:
+			self._solute = self._assign_solute_mol
+
+		# sort systems so in order by solute moleclule number
+		self._sort_systems()
 
 		self._mol_name_dict = {mol: self.properties_by_molid["mol_name"][mol] for mol in self.unique_mols}
 

@@ -94,12 +94,17 @@ class KBIPlotter:
           if i <= j:
             # get kbi's as a function of r
             df_kbi_sys = getattr(self.model, f"kbi_{s}")
-            V_cell = (df_kbi_sys["r"])**3
-            L = (V_cell/self.model.df_comp.loc[s, 'box_vol'])**(1/3) # box length in nm, for extrapolation to thermodynamic limit
             Gij_R = df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol']
-            ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
-            Gij, Fij, b = self.model._extrapolate_kbi(L, Gij_R)
+            r = df_kbi_sys["r"]
+
+            V_cell = (4/3)*np.pi*r**3 # volume of the spherical cell (for the integration)
+            A_cell = 4*np.pi*r**2 # surface area of the cell
+            L = V_cell/(6*A_cell)
+            min_L_idx = np.abs(r/r.max() - self.model.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
+            Gij, Fij, b = self.model._extrapolate_kbi(L, Gij_R, min_L_idx)
             L_fit = L[np.abs(L - self.model.rkbi_min).argmin():]
+
+            ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
             ax[ij_combo].plot(L_fit, self.model.fGij_inf(L_fit, Gij, Fij, b),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
             ax[ij_combo].legend(fontsize=11)
             # figure properties
