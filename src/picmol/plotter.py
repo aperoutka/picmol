@@ -102,7 +102,7 @@ class KBIPlotter:
             L = V_cell/(6*A_cell)
             min_L_idx = np.abs(r/r.max() - self.model.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
             Gij, Fij, b = self.model._extrapolate_kbi(L, Gij_R, min_L_idx)
-            L_fit = L[np.abs(L - self.model.rkbi_min).argmin():]
+            L_fit = L[min_L_idx:]
 
             ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
             ax[ij_combo].plot(L_fit, self.model.fGij_inf(L_fit, Gij, Fij, b),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
@@ -139,20 +139,19 @@ class KBIPlotter:
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    kbi_label = f'$G_{{{self.model.kbi_method.upper()}}}$' 
     colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
     ij = 0
     for i, mol_1 in enumerate(self.model.unique_mols):
       for j, mol_2 in enumerate(self.model.unique_mols):
         if i <= j:
-          ax.scatter(xplot, self.model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{kbi_label} {self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}')
+          ax.scatter(xplot, self.model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}')
           ij += 1
 
     ax.legend(fontsize=10, loc='upper right')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
-    ax.set_ylabel(f'$G_{{ij}}$ [cm$^3$ mol$^{{-1}}$]')
+    ax.set_ylabel(f'$G_{{ij}}^{{\infty}}$ [cm$^3$ mol$^{{-1}}$]')
     plt.savefig(f'{self.model.kbi_method_dir}composition_KBI_{basis.lower()}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
 
