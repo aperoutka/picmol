@@ -39,7 +39,7 @@ class KBI:
 			pure_component_path: str,
 			rdf_dir: str = "rdf_files", 
 			kbi_method: str = "adj", 
-			rkbi_min: float = 0.25,
+			rkbi_min: float = 0.5,
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
 			avg_end_time = None,
@@ -61,7 +61,7 @@ class KBI:
 
 		# get min value for kbi extrapolation
 		# this is the minimum value of rkbi to use for extrapolation; this should be set based on the system being studied
-		# default value, 0.25 -> start at quarter box size; ie., 1/2 max r in rdf
+		# default value, 0.5 -> start at 1/2 max(r) in rdf
 		self.rkbi_min = rkbi_min
 
 		# specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
@@ -360,7 +360,7 @@ class KBI:
 			df_comp.fillna(0, inplace=True)
 
 			# save to csv
-			df_comp.to_csv(f'{self.kbi_dir}_system_compositions.csv', index=False)
+			df_comp.to_csv(f'{self.kbi_dir}system_compositions.csv', index=False)
 
 			self.df_comp = df_comp
 
@@ -417,13 +417,12 @@ class KBI:
 	def fGij_inf(self, l, Gij, Fij, b):
 		return Gij*l + Fij + b/l
 
-	def _extrapolate_kbi(self, L, rkbi):
+	def _extrapolate_kbi(self, L, rkbi, min_L_idx):
 		'''extrapolate kbi values to the thermodynamic limit'''
 		x = L 
 		y = L * rkbi 
-		start_idx = np.abs(x - self.rkbi_min).argmin()
-		x_fit = x[start_idx:]
-		y_fit = y[start_idx:]
+		x_fit = x[min_L_idx:]
+		y_fit = y[min_L_idx:]
 
 		params, pcov = curve_fit(self.fGij_inf, xdata=x_fit, ydata=y_fit)
 		return params
@@ -485,11 +484,14 @@ class KBI:
 							kbi_cm3_mol_r[k] = kbi_cm3_mol_sum
 							kbi_nm3_r[k] = kbi_nm3_sum
 
-						V_cell = r[:-1]**3
-						L = (V_cell/self.df_comp.loc[s, 'box_vol'])**(1/3)
+						V_cell = (4/3)*pi*r[:-1]**3 # volume of the spherical cell (for the integration)
+						A_cell = 4*pi*r[:-1]**2 # surface area of the cell
+						L = V_cell/(6*A_cell)
+
+						min_L_idx = np.abs(r[:-1]/r.max() - self.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
 						
-						Gij_inf_nm3, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r)
-						Gij_inf_cm3_mol, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r)
+						Gij_inf_nm3, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
+						Gij_inf_cm3_mol, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
 
 						# add kbi values to nested dictionaries
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_nm3'] = Gij_inf_nm3
@@ -550,7 +552,7 @@ class KBI:
 		''' create a symmetric matrix from KBI values '''
 		try:
 			self.df_kbi
-		except:
+		except AttributeError:
 			self.kbi_analysis()
 		try:
 			self.df_comp
