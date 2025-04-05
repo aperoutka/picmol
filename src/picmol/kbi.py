@@ -142,11 +142,6 @@ class KBI:
 			# average temperatures over time
 			time, T = np.loadtxt('temperature.xvg', comments=["#", "@"], unpack=True)
 			sys_Tsims[s] = self._get_time_average(time, T)
-		# write temperature to .txt
-		with open(f'{self.kbi_dir}Tsim.txt', 'w') as f:
-			f.write('system,T_actual\n')
-			for t, T in enumerate(sys_Tsims):
-				f.write(f'{self.systems[t]},{T:.4f}\n')
 		self._sys_Tsims = sys_Tsims # save to instance variable for later use
 		return self._sys_Tsims
 
@@ -253,7 +248,7 @@ class KBI:
 		return self._mol_name_dict
 
 	def add_molname_to_dict(self, mol_id, mol_name):
-		if mol not in self._mol_name_dict.keys():
+		if mol_id not in self._mol_name_dict.keys():
 			self._mol_name_dict[mol_id] = mol_name
 
 	@property
@@ -355,7 +350,7 @@ class KBI:
 			os.chdir(f"{self.prj_path}/{sys}/")
 			# get system volume
 			if os.path.exists('volume.xvg') == False:
-				os.system(f"echo volume | gmx energy -f {npt_edr_file} -o volume.xvg")
+				os.system(f"echo volume | gmx energy -f {self._get_edr_file(sys=sys)} -o volume.xvg")
 			time, V = np.loadtxt('volume.xvg', comments=["#", "@"], unpack=True)
 			vol[s] = self._get_time_average(time, V)
 		return vol
@@ -373,7 +368,8 @@ class KBI:
 			time, H_sys = np.loadtxt('enthalpy_npt.xvg', comments=["#", "@"], unpack=True)
 			H[s] = self._get_time_average(time, H_sys)/self.total_num_mols[sys]
 		return H
-
+	
+	@property
 	def _n_mol(self):
 		'''calculate molecule numbers for each component in system'''
 		n_mol = np.zeros((self.n_sys, len(self.unique_mols))) # initialize array for molecule numbers
@@ -385,21 +381,25 @@ class KBI:
 					n_mol[s,i] = 0 # if molecule not found
 		return n_mol
 
+	@property
 	def _z_mat(self):
 		'''get mol fraction matrix from system compositions'''
-		return self._n_mol / self._n_mol.sum(axis=1)
+		return self._n_mol / self._n_mol.sum(axis=1)[:,np.newaxis]
 
+	@property
 	def _v_mat(self):
 		'''convert z_mat to vol fraction matrix'''
 		return mol2vol(self._z_mat, self.molar_vol)
 
+	@property
 	def _c_mat(self):
 		'''calculate molarity (mol/L) of each molecule in system'''
 		return self._rho_mat * (10**24) / N_A
 
+	@property
 	def _rho_mat(self):
 		'''calculate the number density for each molecule in system'''
-		return self._n_mol / self._box_vol_nm3
+		return self._n_mol / self._box_vol_nm3[:,np.newaxis]
 
 	def _system_compositions(self):
 		"""get system properties at each composition"""
@@ -553,6 +553,12 @@ class KBI:
 						# add kbi values to nested dictionaries
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_nm3'] = Gij_inf_nm3
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_cm3_mol'] = Gij_inf_cm3_mol
+
+						# save to dataframe for plotting purposes
+						df_kbi_sys["r"] = r[:-1]
+						df_kbi_sys[f'G_{mol_1}_{mol_2}_nm3'] = kbi_nm3_r
+						df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol'] = kbi_cm3_mol_r
+						setattr(self, f'kbi_{s}', df_kbi_sys)
 
 		df_kbi.to_csv(f"{self.kbi_method_dir}kbis.csv", index=False)
 		self.df_kbi = df_kbi
