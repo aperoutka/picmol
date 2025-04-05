@@ -102,19 +102,8 @@ class KBI:
 		self._sort_systems()
 
 		self._mol_name_dict = {mol: self.properties_by_molid["mol_name"][mol] for mol in self.unique_mols}
-
-		try:
-			self._df_comp
-		except AttributeError:
-			self._system_compositions() 
-
-		# get mol fractions from kbi system compositions
-		z_mat = np.empty((self.df_comp.shape[0], len(self.unique_mols)))
-		for i, mol in enumerate(self.unique_mols):
-			z_mat[:,i] = self.df_comp[f'x_{mol}'].to_numpy()
-		
-		self._z = z_mat
-		self._v = mol2vol(self.z, self.molar_vol) # get volume of each system based on the molecular volumes and compositions
+		self._z = self._z_mat # get mol fraction matrix of each system
+		self._v = self._v_mat # convert mol fraction matrix to vol fraction
 
 
 	def _get_edr_file(self, sys):
@@ -140,7 +129,6 @@ class KBI:
 		else:
 			return np.mean(arr[start_ind:])
 
-
 	def _get_simulation_temps(self):
 		'''get actual simulation temperature for each system'''
 		sys_Tsims = np.zeros(self.n_sys)
@@ -159,16 +147,20 @@ class KBI:
 			f.write('system,T_actual\n')
 			for t, T in enumerate(sys_Tsims):
 				f.write(f'{self.systems[t]},{T:.4f}\n')
-		self._Tsim_all_systems = sys_Tsims
-		return self._Tsim_all_systems
+		self._sys_Tsims = sys_Tsims # save to instance variable for later use
+		return self._sys_Tsims
+
+	@property
+	def _simulation_temps(self):
+		try:
+			self._sys_Tsims
+		except AttributeError:
+			self._get_simulation_temps()
+		return self._sys_Tsims
 
 	@property
 	def T_sim(self):
-		try:
-			self._Tsim_all_systems
-		except AttributeError:
-			self._get_simulation_temps()
-		return round(np.mean(self._Tsim_all_systems))
+		return round(np.mean(self._simulation_temps))
 
 	def _setup_kbi_folders(self):
 		'''create folders for kbi analysis'''
@@ -176,7 +168,6 @@ class KBI:
 		self.kbi_dir = mkdr(f"{self.prj_path}/figures/{self.kbi_fig_dirname}/")
 		self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method/")
 		self.kbi_indiv_fig_dir = mkdr(f"{self.kbi_method_dir}/indiv_kbi/")
-		self.kbi_indiv_data_dir = mkdr(f"{self.kbi_method_dir}/kbi_data/")
 
 	def _read_top(self, sys_parent_dir, sys):
 		'''extract molecules and number of molecules in top file'''
@@ -208,7 +199,7 @@ class KBI:
 		mols_present = []
 		total_num_mols = {sys: 0 for sys in self.systems}
 		mol_nums_by_component = {sys: {} for sys in self.systems}
-		for sys in self.systems:
+		for s, sys in enumerate(self.systems):
 			sys_mols, sys_total_num_mols, sys_mol_nums_by_component = self._read_top(sys_parent_dir=self.prj_path, sys=sys)
 			for mol in sys_mols:
 				if mol not in mols_present:
@@ -355,48 +346,81 @@ class KBI:
 		sys_df = sys_df.sort_values("mols").reset_index(drop=True)
 		self.systems = sys_df["systems"].to_list()
 
-	def _system_compositions(self):
-		"""get system properties at each composition"""
-		df_comp = pd.DataFrame()
-
+	@property
+	def _box_vol_nm3(self):
+		'''calculate the average box volume in nm^3 for each system'''
+		vol = np.zeros(self.n_sys)
 		for s, sys in enumerate(self.systems):
 			# change to system directory
 			os.chdir(f"{self.prj_path}/{sys}/")
-			# get mols present in system
-			mols_present = list(self.mol_nums_by_component[sys].keys())
-
-			# get npt edr files for system properties; volume, enthalpy.
-			npt_edr_file = self._get_edr_file(sys=sys)
-			
-			# get box volume in simulation
+			# get system volume
 			if os.path.exists('volume.xvg') == False:
 				os.system(f"echo volume | gmx energy -f {npt_edr_file} -o volume.xvg")
 			time, V = np.loadtxt('volume.xvg', comments=["#", "@"], unpack=True)
-			box_vol_nm3 = self._get_time_average(time, V)
+			vol[s] = self._get_time_average(time, V)
+		return vol
 
-			# get simulation enthalpy
+	@property
+	def Hsim(self):
+		'''calculate the average enthalpy for each system'''
+		H = np.zeros(self.n_sys)
+		for s, sys in enumerate(self.systems):
+			# change to system directory
+			os.chdir(f"{self.prj_path}/{sys}/")
+			# get system enthalpy
 			if os.path.exists('enthalpy_npt.xvg') == False:
-				os.system(f"echo enthalpy | gmx energy -f {npt_edr_file} -o enthalpy_npt.xvg")
-			time, H = np.loadtxt('enthalpy_npt.xvg', comments=["#", "@"], unpack=True)
-			Hsim_kJ = self._get_time_average(time, H)/self.total_num_mols[sys]
+				os.system(f"echo enthalpy | gmx energy -f {self._get_edr_file(sys=sys)} -o enthalpy_npt.xvg")
+			time, H_sys = np.loadtxt('enthalpy_npt.xvg', comments=["#", "@"], unpack=True)
+			H[s] = self._get_time_average(time, H_sys)/self.total_num_mols[sys]
+		return H
 
+	def _n_mol(self):
+		'''calculate molecule numbers for each component in system'''
+		n_mol = np.zeros((self.n_sys, len(self.unique_mols))) # initialize array for molecule numbers
+		for s, sys in enumerate(self.systems):
+			for i, mol in enumerate(self.unique_mols):
+				try:
+					n_mol[s,i] = self.mol_nums_by_component[sys][mol]
+				except:
+					n_mol[s,i] = 0 # if molecule not found
+		return n_mol
+
+	def _z_mat(self):
+		'''get mol fraction matrix from system compositions'''
+		return self._n_mol / self._n_mol.sum(axis=1)
+
+	def _v_mat(self):
+		'''convert z_mat to vol fraction matrix'''
+		return mol2vol(self._z_mat, self.molar_vol)
+
+	def _c_mat(self):
+		'''calculate molarity (mol/L) of each molecule in system'''
+		return self._rho_mat * (10**24) / N_A
+
+	def _rho_mat(self):
+		'''calculate the number density for each molecule in system'''
+		return self._n_mol / self._box_vol_nm3
+
+	def _system_compositions(self):
+		"""get system properties at each composition"""
+		df_comp = pd.DataFrame()
+		for s, sys in enumerate(self.systems):
 			# add properties to dataframe
-			df_comp.loc[s, "systems"] = sys
-			for m, mol in enumerate(mols_present):
-				df_comp.loc[s, f"x_{mol}"] = self.mol_nums_by_component[sys][mol] / self.total_num_mols[sys]
-				df_comp.loc[s, f"phi_{mol}"] = (self.mol_nums_by_component[sys][mol] * self.molar_vol[m]) / sum(np.array(list(self.mol_nums_by_component[sys].values())) * self.molar_vol)
-				df_comp.loc[s, f"c_{mol}_M"] = (self.mol_nums_by_component[sys][mol] / box_vol_nm3) * (10**24) / (6.022E+23)
-				df_comp.loc[s, f'rho_{mol}'] = self.mol_nums_by_component[sys][mol] / box_vol_nm3
-				df_comp.loc[s, f'n_{mol}'] = self.mol_nums_by_component[sys][mol]
-			df_comp.loc[s, 'n_tot'] = self.total_num_mols[sys]
-			df_comp.loc[s, 'box_vol'] = box_vol_nm3
-			df_comp.loc[s, 'enthalpy'] = Hsim_kJ
+			df_comp.loc[s, "systems"] = sys # system name
+			df_comp.loc[s, "T_sim"] = round(self._simulation_temps[s], 4) # actual simulation temperature for the system
+			for i, mol in enumerate(self.unique_mols):
+				df_comp.loc[s, f"x_{mol}"] = self._z_mat[s,i] # mole fracation of mol i
+				df_comp.loc[s, f"phi_{mol}"] = self._v_mat[s,i] # volume fraction of mol i
+				df_comp.loc[s, f"c_{mol}_M"] = self._c_mat[s,i] # molarity of mol i (mol/L)
+				df_comp.loc[s, f'rho_{mol}'] = self._rho_mat[s,i] # number density of mol i (nm^-3)
+				df_comp.loc[s, f'n_{mol}'] = self._n_mol[s,i] # number of molecules of mol i in the system
+			df_comp.loc[s, 'n_tot'] = self._n_mol[s].sum() # total number of molecules in the system
+			df_comp.loc[s, 'box_vol'] = self._box_vol_nm3[s] # box volume in nm^3 for the system
+			df_comp.loc[s, 'enthalpy'] = self.Hsim[s] # average enthalpy per molecule in kJ/mol
 			# replace all NaN values with zeros
 			df_comp.fillna(0, inplace=True)
-
 			# save to csv
 			df_comp.to_csv(f'{self.kbi_dir}system_compositions.csv', index=False)
-
 			self.df_comp = df_comp
 
 	def _kbi_fn(self, r, g, r_lo, r_hi, avg, r_max, sys_num, mol_1, mol_2, method):
@@ -434,7 +458,7 @@ class KBI:
 			# g(r) correction using Ganguly - van der Vegt approach
 			g_gv_correct = g_filt * Nj * vr / (Nj * vr - dNij - kd) 
 			# apply damping function
-			if method.lower() in ['kgv', 'kreuger']:
+			if method.lower() in ['kgv']:
 				# combo of g(r) correction with damping function K. 
 				damp_k = (1 - (3*r_filt)/(2*r_max) + r_filt**3/(2*r_max**3))
 				h = damp_k * (g_gv_correct - 1)
@@ -445,11 +469,10 @@ class KBI:
 		f = 4 * pi * r_filt**2 * h
 		kbi_nm3 = trapz(f, x=r_filt, dx=dr)
 		kbi_cm3_mol = kbi_nm3 * rho_mol1 * 1000 / c_mol1
-
 		return kbi_nm3, kbi_cm3_mol
 
-
 	def fGij_inf(self, l, Gij, Fij, b):
+		'''function to fit Gij_R to the infinite dilution limit; this is used for curve fitting'''
 		return Gij*l + Fij + b/l
 
 	def _extrapolate_kbi(self, L, rkbi, min_L_idx):
@@ -458,13 +481,11 @@ class KBI:
 		y = L * rkbi 
 		x_fit = x[min_L_idx:]
 		y_fit = y[min_L_idx:]
-
 		params, pcov = curve_fit(self.fGij_inf, xdata=x_fit, ydata=y_fit)
 		return params
 
 	def kbi_analysis(self):
-		'''perform kbi analysis'''
-		# get system compositions
+		'''calculated KBI values from rdf files'''
 		try:
 			self.df_comp
 		except AttributeError: 
@@ -525,20 +546,13 @@ class KBI:
 
 						min_L_idx = np.abs(r[:-1]/r.max() - self.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
 						
+						# calculate kbis in thermodynamic limit
 						Gij_inf_nm3, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
 						Gij_inf_cm3_mol, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
 
 						# add kbi values to nested dictionaries
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_nm3'] = Gij_inf_nm3
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_cm3_mol'] = Gij_inf_cm3_mol
-
-						# save kbi's as a function of r as csv.
-						df_kbi_sys['r'] = r[:-1]
-						df_kbi_sys[f'G_{mol_1}_{mol_2}_nm3'] = kbi_nm3_r
-						df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol'] = kbi_cm3_mol_r
-						df_kbi_sys.to_csv(f'{self.kbi_indiv_data_dir}{sys}_kbis.csv', index=False)
-						# create attribute for kbis as a function of r for each system
-						setattr(self, f"kbi_{s}", df_kbi_sys)
 
 		df_kbi.to_csv(f"{self.kbi_method_dir}kbis.csv", index=False)
 		self.df_kbi = df_kbi
@@ -566,22 +580,6 @@ class KBI:
 	@v.setter
 	def v(self, value):
 		self._v = value
-	
-	@property
-	def v0(self):
-		v0 = np.zeros((self.v.shape[0]+2, self.v.shape[1]))
-		v0[0,:] = [0,1]
-		v0[1:-1,:] = self.v
-		v0[-1,:] = [1,0]
-		return v0
-	
-	@property
-	def Hsim(self):
-		try:
-			self.df_comp
-		except AttributeError: 
-			self._system_compositions()
-		return self.df_comp["enthalpy"].to_numpy()
 
 	@property
 	def _G_matrix(self):
@@ -691,7 +689,7 @@ class KBI:
 	
 	def _get_ref_state(self, mol):
 		# get mol index
-		i = list(self.unique_mols).index(mol)
+		i = self._mol_idx(mol=mol)
 		# get max mol fr at each composition
 		comp_max = self.z.max(axis=1) 
 		# get mask for max mol frac at each composition
@@ -949,7 +947,7 @@ class KBI:
 		phi = self.v[:,self.solute_loc]
 		self.fh_phi = phi
 
-		N0 = self.properties_by_molid["n_electrons"].to_numpy()
+		N0 = self.molar_vol / self.molar_vol.max() # normalize the molar volumes to get N0 for Flory-Huggins
 
 		def fh_GM(x, chi, Tx):
 			return 8.314E-3 * Tx * (x * np.log(x)/N0[0] + (1-x) * np.log(1-x)/N0[1]) + chi*x*(1-x)

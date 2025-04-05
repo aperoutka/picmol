@@ -282,7 +282,10 @@ class ThermoModel:
 	@property
 	def molar_vol(self):
 		if self.which_molar_vol in ["sim", "calc", "md", "kbi"]:
-			return self.kbi_model.molar_vol
+			try:
+				return self.kbi_model.molar_vol
+			except:
+				return self.exp_molar_vol
 		else:
 			return self.exp_molar_vol
 
