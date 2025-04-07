@@ -155,19 +155,23 @@ class KBIPlotter:
     plt.savefig(f'{self.model.kbi_method_dir}composition_KBI_{basis.lower()}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
 
-  def plot_dln_gammas(self, basis):
+  def plot_dln_gammas(self, basis, ylimits=[]):
     '''derivative of log activity coefficients'''
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
     for i, mol in enumerate(self.model.unique_mols):
-      ax.scatter(zplot[:,i], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+      if zplot.shape[1] > 2:
+        ax.scatter(zplot[:,i], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_i$')
+      else:
+        ax.scatter(zplot[:,self.model.solute_loc], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
     ax.legend(fontsize=11)
     ax.set_xlim(-0.05, 1.05)
-    ax.set_ylim(1.1*self.model.dlngamma_dxs.min(), 1.1*max([0, self.model.dlngamma_dxs.max()]))
+    ax.set_ylim(1.1*self.model.dlngamma_dxs.min(), 1.1*max([0.05, self.model.dlngamma_dxs.max()]))
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_i$')
     ax.set_ylabel('$\partial \ln(\gamma_{i})/\partial x_{i}$')
     plt.savefig(f'{self.model.kbi_method_dir}deriv_activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
@@ -179,12 +183,16 @@ class KBIPlotter:
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
     for i, mol in enumerate(self.model.unique_mols):
-      ax.scatter(zplot[:,i], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+      if zplot.shape[1] > 2:
+        ax.scatter(zplot[:,i], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_i$')
+      else:
+        ax.scatter(zplot[:,self.model.solute_loc], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
     ax.legend(fontsize=11)
     ax.set_xlim(-0.05, 1.05)
     ax.set_ylim(1.1*min([-0.05*(np.log(self.model.gammas).max()), np.log(self.model.gammas).min()]), 1.1*np.log(self.model.gammas.max()))
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_i$')
     ax.set_ylabel('$\ln \gamma_{i}$')
     plt.savefig(f'{self.model.kbi_method_dir}activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
