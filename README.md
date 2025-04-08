@@ -77,16 +77,22 @@ To use the Picmol package, your project directory should be structured as follow
 
 ## Examples
 
-`picmol` includes support for a command line interface, and example is provided below where the only argument different from default values is the name for rdf file directory.
+`picmol` includes support for a command line interface, for rdf generation and kbi analysis.
+
+To print a list of all arguments and their default values for RDF and KBI analysis.
 
 ```python
-picmol-kbi --rdf_dir rdf_files_npt
+picmol-rdf -h
 ```
-
-To print a list of all arguments and their default values, use the following.
 
 ```python
 picmol-kbi -h
+```
+
+For KBI analysis where the only argument different from default values is the name for rdf file directory.
+
+```python
+picmol-kbi --rdf_dir rdf_files_npt
 ```
 
 Alternatively, this could be run from inside a python script.
@@ -151,6 +157,7 @@ To add a molecule to `molecular_properties.csv`.
 
 ```python
 from picmol import add_molecule
+
 """
 mol_name: molecule name
 mol_id: molecule id in simulation .top file
@@ -161,15 +168,9 @@ smiles: SMILES string for RDkit interfacing and UNIFAC modeling
 Default is to calculate molar volume from experimental mass density
 If density is not entered, molar volume will be calculated from RDkit and the mass density will be calculated from molar volume
 """
+
 add_molecule(mol_name, mol_id, density, mol_class, smiles)
 ```
-
-For generate rdf runscripts, with the same hierarchy as KBI analysis.
-
-```python
-picmol-rdf -h
-```
-
 
 
 

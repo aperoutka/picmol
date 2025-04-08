@@ -110,7 +110,7 @@ class KBI:
 		# run the KBI analysis
 		self._calculate_kbi()
 		# calculate thermodynamic properties
-		self._calculate_gammas() # this needs to be run to ensure the other properties 
+		self._calculate_gammas() # this needs to be run to ensure geometric means are taken into account for excess property calculation.
 
 	def _get_edr_file(self, sys):
 		'''
