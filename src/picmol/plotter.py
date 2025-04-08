@@ -63,8 +63,8 @@ class KBIPlotter:
     for s, sys in enumerate(self.model.systems):
       fig, ax = plt.subplots(1, self.model.ij_combo, figsize=(12, 4), sharex=True)
       ij_combo = 0
-      for i, mol_1 in enumerate(self.model.unique_mols):
-        for j, mol_2 in enumerate(self.model.unique_mols):
+      for i, mol_1 in enumerate(self.model._top_unique_mols):
+        for j, mol_2 in enumerate(self.model._top_unique_mols):
           if i <= j:
             # get kbi's as a function of r
             df_kbi_sys = getattr(self.model, f"kbi_{s}")
@@ -89,8 +89,8 @@ class KBIPlotter:
     for s, sys in enumerate(self.model.systems):
       fig, ax = plt.subplots(1, self.model.ij_combo, figsize=(12, 4), sharex=True)
       ij_combo = 0
-      for i, mol_1 in enumerate(self.model.unique_mols):
-        for j, mol_2 in enumerate(self.model.unique_mols):
+      for i, mol_1 in enumerate(self.model._top_unique_mols):
+        for j, mol_2 in enumerate(self.model._top_unique_mols):
           if i <= j:
             # get kbi's as a function of r
             df_kbi_sys = getattr(self.model, f"kbi_{s}")
@@ -136,13 +136,17 @@ class KBIPlotter:
     except AttributeError: 
       self.model.kbi_analysis()
 
-    zplot, xplot, x_lab = self.x_basis(basis)
+    _, _, x_lab = self.x_basis(basis)
+    if basis.lower() == "mol":
+      xplot = self.model._top_z[:,self.model._top_solute_loc].flatten()
+    else:
+      xplot = self.model._top_v[:,self.model._top_solute_loc].flatten()
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
+    colors = plt.cm.jet(np.linspace(0,1,len(self.model._top_unique_mols)+1))
     ij = 0
-    for i, mol_1 in enumerate(self.model.unique_mols):
-      for j, mol_2 in enumerate(self.model.unique_mols):
+    for i, mol_1 in enumerate(self.model._top_unique_mols):
+      for j, mol_2 in enumerate(self.model._top_unique_mols):
         if i <= j:
           ax.scatter(xplot, self.model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}')
           ij += 1
@@ -170,13 +174,16 @@ class KBIPlotter:
         ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
     ax.legend(fontsize=11)
     ax.set_xlim(-0.05, 1.05)
-    ax.set_ylim(1.1*self.model.dlngamma_dxs.min(), 1.1*max([0.05, self.model.dlngamma_dxs.max()]))
+    if len(ylimits) > 0:
+      ax.set_ylim(ylimits)
+    else:
+      ax.set_ylim(1.1*self.model.dlngamma_dxs.min(), 1.1*max([0.05, self.model.dlngamma_dxs.max()]))
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\partial \ln(\gamma_{i})/\partial x_{i}$')
     plt.savefig(f'{self.model.kbi_method_dir}deriv_activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
 
-  def plot_ln_gammas(self, basis):
+  def plot_ln_gammas(self, basis, ylimits=[]):
     '''log activity coefficients'''
     zplot, xplot, x_lab = self.x_basis(basis)
 
@@ -191,7 +198,10 @@ class KBIPlotter:
         ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
     ax.legend(fontsize=11)
     ax.set_xlim(-0.05, 1.05)
-    ax.set_ylim(1.1*min([-0.05*(np.log(self.model.gammas).max()), np.log(self.model.gammas).min()]), 1.1*np.log(self.model.gammas.max()))
+    if len(ylimits) > 0:
+      ax.set_ylim(ylimits)
+    else:
+     ax.set_ylim(1.1*min([-0.05*(np.log(self.model.gammas).max()), np.log(self.model.gammas).min()]), 1.1*np.log(self.model.gammas.max()))
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\ln \gamma_{i}$')
     plt.savefig(f'{self.model.kbi_method_dir}activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
@@ -214,7 +224,6 @@ class KBIPlotter:
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     ax.scatter(xplot0, add_zeros(self.model.G_ex), c='m', linewidth=1.8, marker='s')
-    ax.set_ylim(-0.05, max(self.model.G_ex)+0.05)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
@@ -285,8 +294,6 @@ class KBIPlotter:
     ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
-    ymin = np.round(1.1*min([min(uniq_G), min(self.model.G_mix_xv)]), 1)
-    ax.set_ylim(ymin, 0.05)
     plt.savefig(f'{self.model.kbi_method_dir}UNIQUAC_fit_molfrac_{self.model.kbi_method.lower()}.png')
     plt.close()
 
@@ -324,8 +331,6 @@ class KBIPlotter:
     ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
-    ymin = np.round(min([min(self.model.G_mix_xv), min(Gmix_fit0)])-0.1, 1)
-    ax.set_ylim(ymin, 0.05)
     plt.savefig(f'{self.model.kbi_method_dir}NRTL_fit_molfrac_{self.model.kbi_method.lower()}.png')
     plt.close()
 
@@ -349,8 +354,6 @@ class KBIPlotter:
     ax.scatter(pplot, Gmix0, color='k', marker='o', linewidth=1.8, label="Simulated", zorder=10)
     ax.plot(pplot, fh_gmix0, color='tab:red', linewidth=2.5, label='FH')
     ax.legend(fontsize=11, loc='upper center')
-    ymin = np.round(min([min(self.model.fh_Gmix), min(self.model.G_mix_xv)])-0.1, 1)
-    ax.set_ylim(ymin, 0.05)
     ax.set_xlabel(f'$\phi_{{{self.model.solute_name}}}$')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.2))
@@ -368,8 +371,6 @@ class KBIPlotter:
     ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
-    ymin = np.round(1.1*min(self.model.G_mix_xv), 1)
-    ax.set_ylim(ymin, 0.05)
     plt.savefig(f'{self.model.kbi_method_dir}QUARTIC_fit_molfrac_{self.model.kbi_method.lower()}.png')
     plt.close()
 

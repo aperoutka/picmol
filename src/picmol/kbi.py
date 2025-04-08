@@ -90,21 +90,27 @@ class KBI:
 		self.N_A = N_A
 
 		# initialize properties for KBI analysis
-		self._extract_sys_info_from_top() # extract top info for each system; this will be used to get molecular numbers, etc.
-		self._unique_mols = np.array(self._top_info["unique_mols"])
+		self._unique_mols = self._top_unique_mols
 
 		# specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
 		self._solute = solute_mol
 		if self._solute is None:
 			self._solute = self._assign_solute_mol
+		self._top_solute = self._solute # get initial solute
+		self._top_solute_loc = self.solute_loc # get idx of initial solute
 
 		# sort systems so in order by solute moleclule number
 		self._sort_systems()
 
 		self._mol_name_dict = {mol: self.properties_by_molid["mol_name"][mol] for mol in self.unique_mols}
-		self._z = self._z_mat # get mol fraction matrix of each system
-		self._v = self._v_mat # convert mol fraction matrix to vol fraction
-
+		self._z = self._top_z # get mol fraction matrix of each system
+		self._v = self._top_v # convert mol fraction matrix to vol fraction
+	
+	def kbi_analysis(self):
+		# run the KBI analysis
+		self._calculate_kbi()
+		# calculate thermodynamic properties
+		self._calculate_gammas() # this needs to be run to ensure the other properties 
 
 	def _get_edr_file(self, sys):
 		'''
@@ -204,11 +210,18 @@ class KBI:
 		# get unique mols in the system
 		# unique_mols = np.unique(mols_present)
 		self._top_info = {
-			"unique_mols": mols_present, 
+			"unique_mols": np.array(mols_present), 
 			"mol_nums_by_component": mol_nums_by_component, 
 			"total_num_mols": total_num_mols
 		}
 
+	@property
+	def _top_unique_mols(self):
+		try:
+			self._top_info
+		except AttributeError:
+			self._extract_sys_info_from_top()
+		return self._top_info["unique_mols"]
 
 	@property
 	def unique_mols(self):
@@ -372,9 +385,9 @@ class KBI:
 	@property
 	def _n_mol(self):
 		'''calculate molecule numbers for each component in system'''
-		n_mol = np.zeros((self.n_sys, len(self.unique_mols))) # initialize array for molecule numbers
+		n_mol = np.zeros((self.n_sys, len(self._top_unique_mols))) # initialize array for molecule numbers
 		for s, sys in enumerate(self.systems):
-			for i, mol in enumerate(self.unique_mols):
+			for i, mol in enumerate(self._top_unique_mols):
 				try:
 					n_mol[s,i] = self.mol_nums_by_component[sys][mol]
 				except:
@@ -382,22 +395,22 @@ class KBI:
 		return n_mol
 
 	@property
-	def _z_mat(self):
+	def _top_z(self):
 		'''get mol fraction matrix from system compositions'''
 		return self._n_mol / self._n_mol.sum(axis=1)[:,np.newaxis]
 
 	@property
-	def _v_mat(self):
+	def _top_v(self):
 		'''convert z_mat to vol fraction matrix'''
-		return mol2vol(self._z_mat, self.molar_vol)
+		return mol2vol(self._top_z, self.molar_vol)
 
 	@property
-	def _c_mat(self):
+	def _top_c(self):
 		'''calculate molarity (mol/L) of each molecule in system'''
-		return self._rho_mat * (10**24) / N_A
+		return self._top_rho * (10**24) / N_A
 
 	@property
-	def _rho_mat(self):
+	def _top_rho(self):
 		'''calculate the number density for each molecule in system'''
 		return self._n_mol / self._box_vol_nm3[:,np.newaxis]
 
@@ -409,10 +422,10 @@ class KBI:
 			df_comp.loc[s, "systems"] = sys # system name
 			df_comp.loc[s, "T_sim"] = round(self._simulation_temps[s], 4) # actual simulation temperature for the system
 			for i, mol in enumerate(self.unique_mols):
-				df_comp.loc[s, f"x_{mol}"] = self._z_mat[s,i] # mole fracation of mol i
-				df_comp.loc[s, f"phi_{mol}"] = self._v_mat[s,i] # volume fraction of mol i
-				df_comp.loc[s, f"c_{mol}_M"] = self._c_mat[s,i] # molarity of mol i (mol/L)
-				df_comp.loc[s, f'rho_{mol}'] = self._rho_mat[s,i] # number density of mol i (nm^-3)
+				df_comp.loc[s, f"x_{mol}"] = self._top_z[s,i] # mole fracation of mol i
+				df_comp.loc[s, f"phi_{mol}"] = self._top_v[s,i] # volume fraction of mol i
+				df_comp.loc[s, f"c_{mol}_M"] = self._top_c[s,i] # molarity of mol i (mol/L)
+				df_comp.loc[s, f'rho_{mol}'] = self._top_rho[s,i] # number density of mol i (nm^-3)
 				df_comp.loc[s, f'n_{mol}'] = self._n_mol[s,i] # number of molecules of mol i in the system
 			df_comp.loc[s, 'n_tot'] = self._n_mol[s].sum() # total number of molecules in the system
 			df_comp.loc[s, 'box_vol'] = self._box_vol_nm3[s] # box volume in nm^3 for the system
@@ -484,7 +497,7 @@ class KBI:
 		params, pcov = curve_fit(self.fGij_inf, xdata=x_fit, ydata=y_fit)
 		return params
 
-	def kbi_analysis(self):
+	def _calculate_kbi(self):
 		'''calculated KBI values from rdf files'''
 		try:
 			self.df_comp
@@ -593,7 +606,7 @@ class KBI:
 		try:
 			self.df_kbi
 		except AttributeError:
-			self.kbi_analysis()
+			self._calculate_kbi()
 		try:
 			self.df_comp
 		except AttributeError: 
@@ -642,13 +655,13 @@ class KBI:
 	@property
 	def _rho_ij(self):
 		'''product of rho's between two components'''
-		_rho_mat = np.zeros((self.z.shape[0], len(self.unique_mols), len(self.unique_mols)))
+		_top_rho = np.zeros((self.z.shape[0], len(self.unique_mols), len(self.unique_mols)))
 		for i, mol_1 in enumerate(self.unique_mols):
 			rho_i = self.df_comp[f'rho_{mol_1}'].to_numpy()
 			for j, mol_2 in enumerate(self.unique_mols):
 				rho_j = self.df_comp[f'rho_{mol_2}'].to_numpy()
-				_rho_mat[:, i, j] = rho_i * rho_j
-		return _rho_mat
+				_top_rho[:, i, j] = rho_i * rho_j
+		return _top_rho
 	
 	@property
 	def dmu_dxs(self):
@@ -708,8 +721,7 @@ class KBI:
 		else:
 			return "inf_dilution"
 
-	@property
-	def gammas(self):
+	def _calculate_gammas(self):
 		''' numerical integration of activity coefs.'''
 		dlny = self.dlngamma_dxs
 		int_dlny_dx = np.zeros(self.z.shape)
@@ -762,7 +774,15 @@ class KBI:
 		self.unique_mols = self._correct_mols(self.unique_mols) # correct the unique mols 
 		self.solute = self._correct_solute(self.solute) # reassign solute 
 
-		return gammas
+		self._gammas = gammas
+		return self._gammas
+
+	@property
+	def gammas(self):
+		try:
+			return self._gammas
+		except AttributeError:
+			return self._calculate_gammas()
 	
 	def _gamma_geom_mean(self, mol_1, mol_2):
 		mol_1_idx = self._mol_idx(mol=mol_1)
