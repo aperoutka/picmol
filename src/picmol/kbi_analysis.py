@@ -16,6 +16,7 @@ def main():
   parser.add_argument('--rdf_dir', type=str, default='rdf_files', help='Name for rdf directory in each system (default: rdf_files)')
   parser.add_argument('--kbi_dir', type=str, default='kbi_analysis', help='Name for directory for kbi analysis (default: kbi_analysis)')
   parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'gvdv', 'kgv'], help='KBI method name (default: adj)')
+  parser.add_argument('--thermo_limit', type=str, default='false', choices=['true', 'false'], help='extrapolate to the thermodynamic limit? (default: false)')
   parser.add_argument('--rkbi_min', type=str, default='0.5', help='minimum ratio of r/max(r) for KBI extrapolation to thermodynamic limit (default: 0.5, 1/2 r_max from rdf)')
   parser.add_argument('--start_time', type=float, default=100, help='Time in ns to start averaging for volume and enthalpy calculation (default: 100)')
   parser.add_argument('--end_time', type=float, default=None, help='Time in ns to end averaging for volume and enthalpy calculation (default: end of trajectory)')
@@ -32,7 +33,14 @@ def main():
 
   # initialize kbi object
   print('intializing kbi object')
-  kbi_obj = KBI(prj_path=args.prj_path, pure_component_path=args.pure_component_path, rdf_dir=args.rdf_dir, kbi_method=args.kbi_method, avg_start_time=args.start_time, avg_end_time=args.end_time, kbi_fig_dirname=args.kbi_dir, solute_mol=args.solute_mol, geom_mean_pairs=args.geom_mean_pairs, rkbi_min=float(args.rkbi_min))
+
+  # convert thermo_limit to boolean
+  if args.thermo_limit.lower() == 'true':
+    args.thermo_limit = True
+  else:
+    args.thermo_limit = False
+
+  kbi_obj = KBI(prj_path=args.prj_path, pure_component_path=args.pure_component_path, rdf_dir=args.rdf_dir, kbi_method=args.kbi_method, thermo_limit_extraplate=args.thermo_limit, avg_start_time=args.start_time, avg_end_time=args.end_time, kbi_fig_dirname=args.kbi_dir, solute_mol=args.solute_mol, geom_mean_pairs=args.geom_mean_pairs, rkbi_min=float(args.rkbi_min))
 
   # run kbi analysis
   print('computing kbis')

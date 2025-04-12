@@ -33,7 +33,8 @@ class KBIPlotter:
     '''creates figures based on number of components in system'''
     # kbi integral as a function of r
     self.make_indiv_kbi_plots() # running kbi
-    self.plot_kbi_inf() # kbi extrapolation to infinity (thermodynamic limit)
+    if self.model.thermo_limit_extrapolate:
+      self.plot_kbi_inf() # kbi extrapolation to infinity (thermodynamic limit)
 
     for basis in ["mol", "vol"]:
       # kbi values & activities

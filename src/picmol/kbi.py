@@ -38,7 +38,8 @@ class KBI:
 			prj_path: str, 
 			pure_component_path: str,
 			rdf_dir: str = "rdf_files", 
-			kbi_method: str = "adj", 
+			kbi_method: str = "adj",
+			thermo_limit_extraplate: bool = False, 
 			rkbi_min: float = 0.5,
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
@@ -63,6 +64,9 @@ class KBI:
 		# this is the minimum value of rkbi to use for extrapolation; this should be set based on the system being studied
 		# default value, 0.5 -> start at 1/2 max(r) in rdf
 		self.rkbi_min = rkbi_min
+
+		# get bool for extrapolation of kbi values to thermodynamic limit
+		self.thermo_limit_extrapolate = thermo_limit_extraplate
 
 		# geom mean pair should be a list of lists, i.e., which molecules together should be represented with a geometric mean rather than their pure components --> applied after pure component activity coefficient calculation
 		self.geom_mean_pairs = geom_mean_pairs
@@ -470,14 +474,12 @@ class KBI:
 			dNij = trapz(cn, x=r_filt, dx=dr)	
 			# g(r) correction using Ganguly - van der Vegt approach
 			g_gv_correct = g_filt * Nj * vr / (Nj * vr - dNij - kd) 
+			h = g_gv_correct - 1
 			# apply damping function
-			if method.lower() in ['kgv']:
-				# combo of g(r) correction with damping function K. 
-				damp_k = (1 - (3*r_filt)/(2*r_max) + r_filt**3/(2*r_max**3))
-				h = damp_k * (g_gv_correct - 1)
-			# otherwise don't damp g(r)
-			else:
-				h = g_gv_correct - 1
+		if 'kgv' in method.lower() or 'k' in method.lower():
+			# combo of g(r) correction with damping function K. 
+			damp_k = (1 - (3*r_filt)/(2*r_max) + r_filt**3/(2*r_max**3))
+			h *= damp_k
 		
 		f = 4 * pi * r_filt**2 * h
 		kbi_nm3 = trapz(f, x=r_filt, dx=dr)
@@ -552,16 +554,18 @@ class KBI:
 							kbi_nm3_sum += kbi_nm3
 							kbi_cm3_mol_r[k] = kbi_cm3_mol_sum
 							kbi_nm3_r[k] = kbi_nm3_sum
-
-						V_cell = (4/3)*pi*r[:-1]**3 # volume of the spherical cell (for the integration)
-						A_cell = 4*pi*r[:-1]**2 # surface area of the cell
-						L = V_cell/(6*A_cell)
-
-						min_L_idx = np.abs(r[:-1]/r.max() - self.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
 						
 						# calculate kbis in thermodynamic limit
-						Gij_inf_nm3, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
-						Gij_inf_cm3_mol, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
+						if self.thermo_limit_extrapolate:
+							V_cell = (4/3)*pi*r[:-1]**3 # volume of the spherical cell (for the integration)
+							A_cell = 4*pi*r[:-1]**2 # surface area of the cell
+							L = V_cell/(6*A_cell)
+							min_L_idx = np.abs(r[:-1]/r.max() - self.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
+							Gij_inf_nm3, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
+							Gij_inf_cm3_mol, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
+						else:
+							Gij_inf_nm3 = kbi_nm3_sum
+							Gij_inf_cm3_mol = kbi_cm3_mol_sum
 
 						# add kbi values to nested dictionaries
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_nm3'] = Gij_inf_nm3
