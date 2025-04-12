@@ -171,7 +171,10 @@ class KBI:
 		'''create folders for kbi analysis'''
 		mkdr(f"{self.prj_path}/figures/")
 		self.kbi_dir = mkdr(f"{self.prj_path}/figures/{self.kbi_fig_dirname}/")
-		self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method/")
+		if self.thermo_limit_extrapolate:
+			self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method_extrapolate/")
+		else:
+			self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method/")
 		self.kbi_indiv_fig_dir = mkdr(f"{self.kbi_method_dir}/indiv_kbi/")
 
 	def _read_top(self, sys_parent_dir, sys):
