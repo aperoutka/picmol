@@ -1,9 +1,10 @@
+from re import I
 import matplotlib.pyplot as plt 
 import matplotlib as mpl 
 from matplotlib.ticker import MultipleLocator
 from pathlib import Path
 plt.style.use(Path(__file__).parent / 'presentation.mplstyle')
-import os, math
+import os, math, copy
 import numpy as np 
 import plotly.graph_objects as go
 from scipy.spatial import Delaunay
@@ -99,14 +100,13 @@ class KBIPlotter:
             r = df_kbi_sys["r"]
 
             V_cell = (4/3)*np.pi*r**3 # volume of the spherical cell (for the integration)
-            A_cell = 4*np.pi*r**2 # surface area of the cell
-            L = V_cell/(6*A_cell)
+            L = (V_cell/V_cell.max())**(1/3) # normalized L values
             min_L_idx = np.abs(r/r.max() - self.model.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
-            Gij, Fij, b = self.model._extrapolate_kbi(L, Gij_R, min_L_idx)
+            Gij, b = self.model._extrapolate_kbi(L, Gij_R, min_L_idx)
             L_fit = L[min_L_idx:]
 
             ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
-            ax[ij_combo].plot(L_fit, self.model.fGij_inf(L_fit, Gij, Fij, b),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
+            ax[ij_combo].plot(L_fit, self.model.fGij_inf(L_fit, Gij, b),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
             ax[ij_combo].legend(fontsize=11)
             # figure properties
             ax[ij_combo].set_xlim(L.min(), L.max())
@@ -152,7 +152,7 @@ class KBIPlotter:
           ax.scatter(xplot, self.model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}')
           ij += 1
 
-    ax.legend(fontsize=10, loc='upper right')
+    ax.legend(fontsize=10, loc='best', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
@@ -173,12 +173,17 @@ class KBIPlotter:
       else:
         ax.scatter(zplot[:,self.model.solute_loc], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
-    ax.legend(fontsize=11)
+    ax.legend(fontsize=11, loc='lower center', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
     else:
-      ax.set_ylim(1.1*self.model.dlngamma_dxs.min(), 1.1*max([0.05, self.model.dlngamma_dxs.max()]))
+      dg = self.model.dlngamma_dxs.max() - self.model.dlngamma_dxs.min()
+      gamma_min = self.model.dlngamma_dxs.min() - 0.1*dg
+      gamma_max = self.model.dlngamma_dxs.max() + 0.1*dg
+      ymin = min([-0.05, gamma_min])
+      ymax = max([0.05, gamma_max])
+      ax.set_ylim(ymin, ymax)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\partial \ln(\gamma_{i})/\partial x_{i}$')
     plt.savefig(f'{self.model.kbi_method_dir}deriv_activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
@@ -197,12 +202,17 @@ class KBIPlotter:
       else:
         ax.scatter(zplot[:,self.model.solute_loc], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
-    ax.legend(fontsize=11)
+    ax.legend(fontsize=11, loc='upper center', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
     else:
-     ax.set_ylim(1.1*min([-0.05*(np.log(self.model.gammas).max()), np.log(self.model.gammas).min()]), 1.1*np.log(self.model.gammas.max()))
+      dg = np.log(self.model.gammas.max()) - np.log(self.model.gammas.min())
+      gamma_min = np.log(self.model.gammas.min()) - 0.1*dg
+      gamma_max = np.log(self.model.gammas.max()) + 0.1*dg
+      ymin = min([-0.05, gamma_min])
+      ymax = max([0.05, gamma_max])
+      ax.set_ylim(ymin, ymax)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\ln \gamma_{i}$')
     plt.savefig(f'{self.model.kbi_method_dir}activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
@@ -384,15 +394,15 @@ class PhaseDiagramPlotter:
     """ for visualizing phase behavior """
     self.model = model
 
-  def make_figures(self, T=300, colormap='jet', num_contours=20):
+  def make_figures(self, T=300, colormap='jet', num_contours=40):
     if self.model.num_comp == 2:
       for basis in ["mol", "vol"]:
         self.binary_gmix(basis=basis)
         self.binary_gmix_selectpts(basis=basis)
-        self.binary_phase_diagram_Gmix_heatmap(basis=basis)
+        self.binary_phase_diagram_Gmix_heatmap(basis=basis, num_contours=num_contours)
         self.binary_phase_diagram(basis=basis)
-        self.binary_phase_diagram_I0_heatmap(basis=basis)
-        self.binary_phase_diagram_I0_heatmap_widomline(basis=basis)
+        self.binary_phase_diagram_I0_heatmap(basis=basis, num_contours=num_contours)
+        self.binary_phase_diagram_I0_heatmap_widomline(basis=basis, num_contours=num_contours)
         self.binary_phase_diagram_widomline(basis=basis)
 
     elif self.model.num_comp == 3:
@@ -480,7 +490,7 @@ class PhaseDiagramPlotter:
       plt.close()
 
 
-  def binary_phase_diagram_Gmix_heatmap(self, basis: str, num_contours=100, show_fig: bool = False):
+  def binary_phase_diagram_Gmix_heatmap(self, basis: str, num_contours=40, show_fig: bool = False):
 
     x_val, x_lab, sp, bi = self.x_basis(basis)
 
@@ -489,10 +499,7 @@ class PhaseDiagramPlotter:
     ax.tick_params(bottom=False, top=False, left=False, right=False)
 
     cs = ax.contourf(x_val, self.model.T_values, self.model.GM, cmap=plt.cm.jet, levels=num_contours)
-    norm = mpl.colors.Normalize(vmin=cs.cvalues.min(), vmax=cs.cvalues.max())
-    sm = plt.cm.ScalarMappable(norm=norm, cmap=cs.cmap)
-    sm.set_array([])
-    fig.colorbar(sm, ax=ax, orientation='vertical', pad=0.01, format=mpl.ticker.FormatStrFormatter('%.2f'), label='$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
+    fig.colorbar(cs, ax=ax, orientation='vertical', pad=0.01, format=mpl.ticker.FormatStrFormatter('%.2f'), label='$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
 
     ax.plot(sp[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
     ax.plot(sp[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
@@ -510,7 +517,7 @@ class PhaseDiagramPlotter:
     else:
       plt.close()
 
-  def binary_phase_diagram_I0_heatmap(self, ymin: float = 0.01, ymax: float = 1., basis: str = 'vol', num_contours=100, show_fig: bool = False):
+  def binary_phase_diagram_I0_heatmap(self, ymin: float = 0.01, ymax: float = 1., basis: str = 'vol', num_contours=40, show_fig: bool = False):
     
     x_val, x_lab, sp, bi = self.x_basis(basis)
 
@@ -561,13 +568,29 @@ class PhaseDiagramPlotter:
       plt.close()
 
   def widom(self, basis):
+    ''' return widom line for I0 max '''
+    def moving_avg(data, window_size):
+      '''get moving average to smooth the I0 max line'''
+      moving_averages = []
+      for i in range(len(data) - window_size + 1):
+        window = data[i : i + window_size]
+        average = sum(window) / window_size
+        moving_averages.append(average)
+      return moving_averages
+    
     if basis == "mol":
-      return self.model.x_I0_max
+      I0_max = copy.deepcopy(self.model.x_I0_max)
+      for i in range(I0_max.shape[1]):
+        I0_max[1:-1,i] = moving_avg(I0_max[:,i], 3)
+      return I0_max
     else:
-      return self.model.v_I0_max
+      I0_max = copy.deepcopy(self.model.v_I0_max)
+      for i in range(I0_max.shape[1]):
+        I0_max[1:-1,i] = moving_avg(I0_max[:,i], 3)
+      return I0_max
 
 
-  def binary_phase_diagram_I0_heatmap_widomline(self, ymin: float = 0.01, ymax: float = 1., basis: str = 'vol', num_contours=100, show_fig: bool = False):
+  def binary_phase_diagram_I0_heatmap_widomline(self, ymin: float = 0.01, ymax: float = 1., basis: str = 'vol', num_contours=40, show_fig: bool = False):
     
     x_val, x_lab, sp, bi = self.x_basis(basis)
 

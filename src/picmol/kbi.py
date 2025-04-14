@@ -32,15 +32,15 @@ def add_zeros(arr):
 	return f
 
 class KBI:
-
+	"""KBI analysis class for analyzing KBI values from RDF files in a GROMACS project."""
 	def __init__(
 			self, 
 			prj_path: str, 
 			pure_component_path: str,
 			rdf_dir: str = "rdf_files", 
 			kbi_method: str = "adj",
-			thermo_limit_extraplate: bool = False, 
-			rkbi_min: float = 0.5,
+			thermo_limit_extraplate: bool = True, 
+			rkbi_min: float = 0.75,
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
 			avg_end_time = None,
@@ -467,7 +467,7 @@ class KBI:
 		elif method.lower() == 'raw':
 			h = g_filt - 1
 		# for no damping
-		elif method.lower() in ['gvdv', 'kgv', 'gv', 'ganguly', 'vdv']:
+		elif method.lower() in ['gv', 'kgv']:
 			# number of solvent molecules
 			Nj = N_mol2
 			# 1-volume ratio
@@ -489,9 +489,9 @@ class KBI:
 		kbi_cm3_mol = kbi_nm3 * rho_mol1 * 1000 / c_mol1
 		return kbi_nm3, kbi_cm3_mol
 
-	def fGij_inf(self, l, Gij, Fij, b):
+	def fGij_inf(self, l, Gij, b):
 		'''function to fit Gij_R to the infinite dilution limit; this is used for curve fitting'''
-		return Gij*l + Fij + b/l
+		return Gij*l + b
 
 	def _extrapolate_kbi(self, L, rkbi, min_L_idx):
 		'''extrapolate kbi values to the thermodynamic limit'''
@@ -561,11 +561,10 @@ class KBI:
 						# calculate kbis in thermodynamic limit
 						if self.thermo_limit_extrapolate:
 							V_cell = (4/3)*pi*r[:-1]**3 # volume of the spherical cell (for the integration)
-							A_cell = 4*pi*r[:-1]**2 # surface area of the cell
-							L = V_cell/(6*A_cell)
+							L = (V_cell/V_cell.max())**(1/3)
 							min_L_idx = np.abs(r[:-1]/r.max() - self.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
-							Gij_inf_nm3, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
-							Gij_inf_cm3_mol, _, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
+							Gij_inf_nm3, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
+							Gij_inf_cm3_mol, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
 						else:
 							Gij_inf_nm3 = kbi_nm3_sum
 							Gij_inf_cm3_mol = kbi_cm3_mol_sum

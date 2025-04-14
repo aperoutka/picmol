@@ -517,11 +517,11 @@ class ThermoModel:
 				try:
 					if T > self.Tc:
 						df_I0[T] = I0
-						if T % 10 == 0:
-							new_row = {"T": T, "I0": I0_max}
-							df_I0_max = df_I0_max._append(new_row, ignore_index=True)
-							v_I0_max[t] = self.v[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
-							x_I0_max[t] = self.z[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
+						# if T % 10 == 0:
+						new_row = {"T": T, "I0": I0_max}
+						df_I0_max = df_I0_max._append(new_row, ignore_index=True)
+						v_I0_max[t] = self.v[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
+						x_I0_max[t] = self.z[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
 				except:
 					pass
 			
