@@ -1,3 +1,4 @@
+from re import L
 import numpy as np
 import pandas as pd
 import glob, copy
@@ -232,6 +233,10 @@ class KBI:
 	@unique_mols.setter
 	def unique_mols(self, value):
 		self._unique_mols = value
+
+	@property
+	def num_comp(self):
+		return len(self.unique_mols)
 
 	@property
 	def mol_nums_by_component(self):
@@ -491,6 +496,12 @@ class KBI:
 				if i <= j:
 					df_kbi[f'G_{mol_1}_{mol_2}_nm3'] = np.zeros(self.n_sys)
 					df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'] = np.zeros(self.n_sys)
+		
+		# create dict fo storing inf fits
+		self.kbi_inf_fits = {}
+		# storing system lambda values
+		self.lamdba_values = {}
+		self.lamdba_values_fit = {}
 
 		for s, sys in enumerate(self.systems):
 			# create kbi dataframe for each system for storing kbi's as a function of r
@@ -539,8 +550,14 @@ class KBI:
 						else:
 							sys_rkbi_min = self.rkbi_min
 						min_L_idx = np.abs(r[:-1]/r.max() - sys_rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
-						Gij_inf_nm3, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
-						Gij_inf_cm3_mol, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
+						params_nm3 = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
+						Gij_inf_nm3, _ = params_nm3
+						params_cm3_mol = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
+						Gij_inf_cm3_mol, _ = params_cm3_mol
+
+						self.kbi_inf_fits[sys] = np.poly1d(params_cm3_mol)
+						self.lamdba_values[sys] = L
+						self.lamdba_values_fit[sys] = L[min_L_idx:]
 
 						# add kbi values to nested dictionaries
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_nm3'] = Gij_inf_nm3

@@ -99,18 +99,12 @@ class KBIPlotter:
             Gij_R = df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol']
             r = df_kbi_sys["r"]
 
-            V_cell = (4/3)*np.pi*r**3 # volume of the spherical cell (for the integration)
-            L = (V_cell/V_cell.max())**(1/3) # normalized L values
-            if type(self.model.rkbi_min) == list:
-              sys_rkbi_min = self.model.rkbi_min[s]
-            else:
-              sys_rkbi_min = self.model.rkbi_min
-            min_L_idx = np.abs(r/r.max() - sys_rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
-            Gij, b = self.model._extrapolate_kbi(L, Gij_R, min_L_idx)
-            L_fit = L[min_L_idx:]
+            L = self.model.lamdba_values[sys]
+            L_fit = self.model.lamdba_values_fit[sys]
+            inf_coeffs = self.model.kbi_inf_fits[sys]
 
             ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
-            ax[ij_combo].plot(L_fit, self.model.fGij_inf(L_fit, Gij, b),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
+            ax[ij_combo].plot(L_fit, inf_coeffs(L_fit),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
             ax[ij_combo].legend(fontsize=11)
             # figure properties
             ax[ij_combo].set_xlim(L.min(), L.max())
