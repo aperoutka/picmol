@@ -29,7 +29,6 @@ def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, densit
 
 	new_molecule = {
 		'mol_name': mol_name.upper(),
-		'cosmo_name': mol_name.lower(),
 		'mol_id': mol_id.upper(),
 		'mol_wt': f"{mol_wt:.3f}",
 		'density': f"{density:.3f}",

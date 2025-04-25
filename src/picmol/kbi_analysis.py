@@ -16,11 +16,10 @@ def main():
   parser.add_argument('--rdf_dir', type=str, default='rdf_files', help='Name for rdf directory in each system (default: rdf_files)')
   parser.add_argument('--kbi_dir', type=str, default='kbi_analysis', help='Name for directory for kbi analysis (default: kbi_analysis)')
   parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'gv', 'kgv'], help='KBI method name (default: adj)')
-  parser.add_argument('--thermo_limit', type=str, default='true', choices=['true', 'false'], help='extrapolate to the thermodynamic limit? (default: true)')
-  parser.add_argument('--rkbi_min', type=str, default='0.75', help='minimum ratio of r/max(r) for KBI extrapolation to thermodynamic limit (default: 0.75)')
+  parser.add_argument('--rkbi_min', default='0.75', help='minimum ratio of r/max(r) for KBI extrapolation to thermodynamic limit (default: 0.75)')
   parser.add_argument('--start_time', type=float, default=100, help='Time in ns to start averaging for volume and enthalpy calculation (default: 100)')
   parser.add_argument('--end_time', type=float, default=None, help='Time in ns to end averaging for volume and enthalpy calculation (default: end of trajectory)')
-  parser.add_argument('--solute_mol', type=str, default=None, help='solute mol_id, default preference is: extractant > modifier > solute > solvent (default: None)')
+  parser.add_argument('--solute_mol', type=str, default=None, help='solute mol_id, default preference is: solute > extractant > modifier > solvent (default: None)')
   parser.add_argument('--geom_mean_pairs', type=list, default=[], help='list of lists containing pairs of mol_ids for mean ionic activity coeffs (default: [])')
   parser.add_argument('--run_thermo', type=str, default='true', choices=['true', 'false'], help='Perform thermodynamic analysis? (default: true)')
   parser.add_argument('--thermo_model', type=str, default='quartic', choices=['quartic', 'uniquac', 'unifac', 'nrtl', 'fh'], help='Thermodynamic model name for LLE calculation. "nrtl" and "fh" are only supported for binary systems; "quartic", "uniquac", "unifac" are supported for multicomponent systems (default: quartic)')
@@ -34,13 +33,22 @@ def main():
   # initialize kbi object
   print('intializing kbi object')
 
-  # convert thermo_limit to boolean
-  if args.thermo_limit.lower() == 'true':
-    args.thermo_limit = True
-  else:
-    args.thermo_limit = False
+  args.rkbi_min = [float(rkbi_min) for rkbi_min in args.rkbi_min.split(',')]
+  if len(args.rkbi_min) == 1:
+    args.rkbi_min = args.rkbi_min[0]
 
-  kbi_obj = KBI(prj_path=args.prj_path, pure_component_path=args.pure_component_path, rdf_dir=args.rdf_dir, kbi_method=args.kbi_method, thermo_limit_extraplate=args.thermo_limit, avg_start_time=args.start_time, avg_end_time=args.end_time, kbi_fig_dirname=args.kbi_dir, solute_mol=args.solute_mol, geom_mean_pairs=args.geom_mean_pairs, rkbi_min=float(args.rkbi_min))
+  kbi_obj = KBI(
+    prj_path=args.prj_path, 
+    pure_component_path=args.pure_component_path, 
+    rdf_dir=args.rdf_dir, 
+    kbi_method=args.kbi_method, 
+    avg_start_time=args.start_time, 
+    avg_end_time=args.end_time, 
+    kbi_fig_dirname=args.kbi_dir, 
+    solute_mol=args.solute_mol, 
+    geom_mean_pairs=args.geom_mean_pairs, 
+    rkbi_min=args.rkbi_min
+    )
 
   # run kbi analysis
   print('computing kbis')
@@ -56,7 +64,13 @@ def main():
 
     # create thermodynamic model
     print(f'initializing {args.thermo_model} model')
-    tmodel = ThermoModel(model_name=args.thermo_model, KBIModel=kbi_obj, dT=args.dT, Tmin=args.Tmin, Tmax=args.Tmax)
+    tmodel = ThermoModel(
+      model_name=args.thermo_model, 
+      KBIModel=kbi_obj, 
+      dT=args.dT, 
+      Tmin=args.Tmin, 
+      Tmax=args.Tmax
+      )
 
     print('performing temperature scaling')
     tmodel.temperature_scaling()

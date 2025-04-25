@@ -101,7 +101,11 @@ class KBIPlotter:
 
             V_cell = (4/3)*np.pi*r**3 # volume of the spherical cell (for the integration)
             L = (V_cell/V_cell.max())**(1/3) # normalized L values
-            min_L_idx = np.abs(r/r.max() - self.model.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
+            if type(self.model.rkbi_min) == list:
+              sys_rkbi_min = self.model.rkbi_min[s]
+            else:
+              sys_rkbi_min = self.model.rkbi_min
+            min_L_idx = np.abs(r/r.max() - sys_rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
             Gij, b = self.model._extrapolate_kbi(L, Gij_R, min_L_idx)
             L_fit = L[min_L_idx:]
 

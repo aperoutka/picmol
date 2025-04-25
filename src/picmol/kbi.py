@@ -17,6 +17,7 @@ from .models.uniquac import UNIQUAC_RQ, fit_du_to_Hmix
 from .models import UNIQUAC, UNIFAC, QuarticModel, FH
 from .models.cem import PointDisc
 from .conversions import mol2vol
+from .functions import get_solute_molid
 
 
 def mkdr(dir_path):
@@ -39,7 +40,6 @@ class KBI:
 			pure_component_path: str,
 			rdf_dir: str = "rdf_files", 
 			kbi_method: str = "adj",
-			thermo_limit_extraplate: bool = True, 
 			rkbi_min: float = 0.75,
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
@@ -64,9 +64,6 @@ class KBI:
 		# this is the minimum value of rkbi to use for extrapolation; this should be set based on the system being studied
 		# default value, 0.5 -> start at 1/2 max(r) in rdf
 		self.rkbi_min = rkbi_min
-
-		# get bool for extrapolation of kbi values to thermodynamic limit
-		self.thermo_limit_extrapolate = thermo_limit_extraplate
 
 		# geom mean pair should be a list of lists, i.e., which molecules together should be represented with a geometric mean rather than their pure components --> applied after pure component activity coefficient calculation
 		self.geom_mean_pairs = geom_mean_pairs
@@ -99,7 +96,7 @@ class KBI:
 		# specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
 		self._solute = solute_mol
 		if self._solute is None:
-			self._solute = self._assign_solute_mol
+			self._solute = get_solute_molid(self._top_unique_mols, self.mol_class_dict)
 		self._top_solute = self._solute # get initial solute
 		self._top_solute_loc = self.solute_loc # get idx of initial solute
 
@@ -171,10 +168,7 @@ class KBI:
 		'''create folders for kbi analysis'''
 		mkdr(f"{self.prj_path}/figures/")
 		self.kbi_dir = mkdr(f"{self.prj_path}/figures/{self.kbi_fig_dirname}/")
-		if self.thermo_limit_extrapolate:
-			self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method_extrapolate/")
-		else:
-			self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method/")
+		self.kbi_method_dir = mkdr(f"{self.kbi_dir}/{self.kbi_method}_kbi_method/")
 		self.kbi_indiv_fig_dir = mkdr(f"{self.kbi_method_dir}/indiv_kbi/")
 
 	def _read_top(self, sys_parent_dir, sys):
@@ -311,27 +305,6 @@ class KBI:
 	@property
 	def smiles(self):
 		return self.properties_by_molid["smiles"].values
-
-	@property
-	def _assign_solute_mol(self):
-		'''finds the molecule that should be considered as solute; priority goes to: 
-		1. extracant, 2. modifier, 3. solute, 4. solvent'''
-		# first check for extractant
-		for mol in self.unique_mols:
-			if self.mol_class_dict[mol] == 'extractant':
-				return mol
-		# then check for modifier
-		for mol in self.unique_mols:
-			if self.mol_class_dict[mol] == 'modifier':
-				return mol
-		# then check for solute
-		for mol in self.unique_mols:
-			if self.mol_class_dict[mol] == 'solute':
-				return mol
-		# then solvent
-		for mol in self.unique_mols:
-			if self.mol_class_dict[mol] == 'solvent':
-				return mol
 	
 	@property
 	def solute(self):
@@ -539,7 +512,7 @@ class KBI:
 						g = g[:-3]
 						
 						# get r_max and r_avg for kbi input
-						r_avg = r[-1] - 1.
+						r_avg = r[-1] - 0.5
 						# get limit g(r) for r --> R
 						limit_g_not_1 = np.mean(g[r > r_avg])
 						if np.isnan(limit_g_not_1):
@@ -559,15 +532,15 @@ class KBI:
 							kbi_nm3_r[k] = kbi_nm3_sum
 						
 						# calculate kbis in thermodynamic limit
-						if self.thermo_limit_extrapolate:
-							V_cell = (4/3)*pi*r[:-1]**3 # volume of the spherical cell (for the integration)
-							L = (V_cell/V_cell.max())**(1/3)
-							min_L_idx = np.abs(r[:-1]/r.max() - self.rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
-							Gij_inf_nm3, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
-							Gij_inf_cm3_mol, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
+						V_cell = (4/3)*pi*r[:-1]**3 # volume of the spherical cell (for the integration)
+						L = (V_cell/V_cell.max())**(1/3)
+						if type(self.rkbi_min) == list:
+							sys_rkbi_min = self.rkbi_min[s]
 						else:
-							Gij_inf_nm3 = kbi_nm3_sum
-							Gij_inf_cm3_mol = kbi_cm3_mol_sum
+							sys_rkbi_min = self.rkbi_min
+						min_L_idx = np.abs(r[:-1]/r.max() - sys_rkbi_min).argmin() # find the index of the minimum L value to start extrapolation
+						Gij_inf_nm3, _ = self._extrapolate_kbi(L=L, rkbi=kbi_nm3_r, min_L_idx=min_L_idx)
+						Gij_inf_cm3_mol, _ = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
 
 						# add kbi values to nested dictionaries
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_nm3'] = Gij_inf_nm3

@@ -102,15 +102,19 @@ def main():
           line = line.strip()
           if line.split(',')[0] in mols_present:
             com_dict[line.split(',')[0]] = line.split(',')[1]
-      # if molecule ceneter-of-mass doesn't exist exit the script
-      com_not_found_filter = np.ones(len(mols_present))
+     
+      com_not_found_filter = np.ones(len(mols_present), dtype=bool)  # Initialize as boolean True
       for m, mol in enumerate(mols_present):
         if mol in com_dict.keys():
-          com_not_found_filter[m] = 0
-      try:
-        com_not_found = mols_present[bool(com_not_found_filter)]
-      except Exception as e:
-        print(f"Error {e}, center-of-mass of molecules are not defined in ndx_mapped.txt")
+          com_not_found_filter[m] = False  # Set to False if COM is found
+
+      com_not_found = mols_present[com_not_found_filter]
+      
+      # if molecules are present and not in ndx_mapped.txt, exit the script
+      if len(com_not_found) > 0:
+        print(f"Error: Center-of-mass definitions not found for the following molecules in ndx_mapped.txt: {com_not_found}")
+        sys_arg.exit()
+
       ndx_cmd = ''
       for mol in mols_present:
         ndx_cmd += f'{ndx_dict[mol]} & a {com_dict[mol]}\n'
@@ -139,7 +143,7 @@ def main():
     with open(f'runscript_rdf_{sys_name}', 'w') as f:
       f.write(f"""
   #!/bin/bash
-  #PBS -l select=1:ncpus=128:mpiprocs=100:ompthreads=8
+  #PBS -l select=1:ncpus=8:mpiprocs=8:ompthreads=8
   #PBS -A {args.allocation}
   #PBS -l walltime=24:00:00
   #PBS -N {sys_name}_rdf
@@ -159,7 +163,7 @@ def main():
         for j, mol_2 in enumerate(mols_present):
           if i <= j:
             f.write(f"""
-mpirun -np 1 gmx_mpi rdf -f {sys_name}_{args.ensemble}{args.suffix}.xtc -s {sys_name}_{args.ensemble}{args.suffix}.tpr -n {sys_name}_com.ndx -b {t_sta} -e {t_end} -dt {rdf_dt} -ref {mol_ind[i]} -sel {mol_ind[j]} -o {args.rdf_dir}/rdf_{mol_1}_{mol_2}.xvg  
+mpirun -np 1 gmx_mpi rdf -f {sys_name}_{args.ensemble}{args.suffix}.xtc -s {sys_name}_{args.ensemble}{args.suffix}.tpr -n {sys_name}_com.ndx -b {t_sta} -e {t_end} -dt {rdf_dt} -ref {mol_ind[i]} -sel {mol_ind[j]} -o {args.rdf_dir}/rdf_{mol_1}_{mol_2}.xvg &
         """)
     f.write(f"""
 

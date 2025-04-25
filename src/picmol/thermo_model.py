@@ -184,6 +184,9 @@ class ThermoModel:
 			self.identifiers = KBIModel.unique_mols
 			self.identifier_type = "mol_id"
 			self.save_dir = mkdr(f"{KBIModel.kbi_method_dir}/{model_name}/")
+
+			# grab solute from KBIModel
+			self.solute_mol = KBIModel.solute
 			
 			# get interaction parameters
 			self.IP = None
