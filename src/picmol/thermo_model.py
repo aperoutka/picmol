@@ -8,7 +8,6 @@ import scipy.optimize as sco
 from scipy import constants
 from copy import copy
 
-from src.picmol.functions import get_solute_molid
 
 from .models import FH, NRTL, UNIQUAC, UNIFAC, QuarticModel
 from .models.unifac import get_unifac_version
@@ -16,6 +15,7 @@ from .get_molecular_properties import load_molecular_properties, search_molecule
 from .models.cem import CEM
 from .conversions import mol2vol
 from .kbi import mkdr
+from .functions import get_solute_molid
 
 def spinodal_fn(z, Hij):
 	'''gets spinodal from roots of second derivative'''
