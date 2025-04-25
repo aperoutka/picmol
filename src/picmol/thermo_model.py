@@ -213,8 +213,8 @@ class ThermoModel:
 
 		### initialize thermodynamic model
 		# for unifac model
-		self.unif_version = get_unifac_version(unif_version, self.kbi_model.smiles)
 		if self.model_type == UNIFAC:
+			self.unif_version = get_unifac_version('unifac', self.kbi_model.smiles)
 			self.model = self.model_type(T=Tmax, smiles=self.kbi_model.smiles, version=self.unif_version)
 		# uniquac model
 		elif self.model_type == UNIQUAC:
