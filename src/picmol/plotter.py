@@ -27,8 +27,8 @@ def get_cmap(xx, colormap: str = 'jet', levels: int = 40):
 class KBIPlotter:
   def __init__(self, model):
     """ visualizing kbi analysis """
-    self.model = model
-    self.num_comp = len(self.model.unique_mols)
+    self.kbi_model = model
+    self.num_comp = len(self.kbi_model.unique_mols)
     
   def make_figures(self):
     '''creates figures based on number of components in system'''
@@ -57,50 +57,50 @@ class KBIPlotter:
     ''' create plots for each system as a function of r '''
     # if kbi's not found, run kbi_analysis
     try:
-      self.model.df_kbi
+      self.kbi_model.df_kbi
     except AttributeError: 
-      self.model.kbi_analysis()
+      self.kbi_model.kbi_analysis()
 
-    for s, sys in enumerate(self.model.systems):
-      fig, ax = plt.subplots(1, self.model.ij_combo, figsize=(12, 4), sharex=True)
+    for s, sys in enumerate(self.kbi_model.systems):
+      fig, ax = plt.subplots(1, self.kbi_model.ij_combo, figsize=(12, 4), sharex=True)
       ij_combo = 0
-      for i, mol_1 in enumerate(self.model._top_unique_mols):
-        for j, mol_2 in enumerate(self.model._top_unique_mols):
+      for i, mol_1 in enumerate(self.kbi_model._top_unique_mols):
+        for j, mol_2 in enumerate(self.kbi_model._top_unique_mols):
           if i <= j:
             # get kbi's as a function of r
-            df_kbi_sys = getattr(self.model, f"kbi_{s}")
+            df_kbi_sys = getattr(self.kbi_model, f"kbi_{s}")
             ax[ij_combo].plot(df_kbi_sys["r"], df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol'], c="tab:red", linestyle='solid', linewidth=4, alpha=0.7)
             # figure properties
             ax[ij_combo].set_xlim(0, 5)
             ax[ij_combo].set_xticks(ticks=np.arange(0,5.1,1.))
             ax[ij_combo].set_xlabel('$r$ [nm]')
-            ax[ij_combo].set_title(f"{self.model.kbi_model.mol_name_dict[mol_1]}-{self.model.kbi_model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.kbi_model.solute}'][s]:.2f} $\phi_{{{self.model.kbi_model.solute_name}}}$")
+            ax[ij_combo].set_title(f"{self.kbi_model.mol_name_dict[mol_1]}-{self.kbi_model.mol_name_dict[mol_2]}\n{self.kbi_model.df_comp[f'phi_{self.kbi_model.solute}'][s]:.2f} $\phi_{{{self.kbi_model.solute_name}}}$")
             ij_combo += 1
       ax[0].set_ylabel('$G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
-      plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi.png')
+      plt.savefig(f'{self.kbi_model.kbi_indiv_fig_dir}{sys}_kbi.png')
       plt.close()
 
   def plot_kbi_inf(self):
     ''' create kbi plots for extrapolating to the thermodynamic limit'''
     try:
-      self.model.df_kbi
+      self.kbi_model.df_kbi
     except AttributeError: 
-      self.model.kbi_analysis()
+      self.kbi_model.kbi_analysis()
 
-    for s, sys in enumerate(self.model.systems):
-      fig, ax = plt.subplots(1, self.model.ij_combo, figsize=(12, 4), sharex=True)
+    for s, sys in enumerate(self.kbi_model.systems):
+      fig, ax = plt.subplots(1, self.kbi_model.ij_combo, figsize=(12, 4), sharex=True)
       ij_combo = 0
-      for i, mol_1 in enumerate(self.model._top_unique_mols):
-        for j, mol_2 in enumerate(self.model._top_unique_mols):
+      for i, mol_1 in enumerate(self.kbi_model._top_unique_mols):
+        for j, mol_2 in enumerate(self.kbi_model._top_unique_mols):
           if i <= j:
             # get kbi's as a function of r
-            df_kbi_sys = getattr(self.model, f"kbi_{s}")
+            df_kbi_sys = getattr(self.kbi_model, f"kbi_{s}")
             Gij_R = df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol']
             r = df_kbi_sys["r"]
 
-            L = self.model.lamdba_values[sys][f'{mol_1}-{mol_2}']
-            L_fit = self.model.lamdba_values_fit[sys][f'{mol_1}-{mol_2}']
-            inf_coeffs = self.model.kbi_inf_fits[sys][f'{mol_1}-{mol_2}']
+            L = self.kbi_model.lamdba_values[sys][f'{mol_1}-{mol_2}']
+            L_fit = self.kbi_model.lamdba_values_fit[sys][f'{mol_1}-{mol_2}']
+            inf_coeffs = self.kbi_model.kbi_inf_fits[sys][f'{mol_1}-{mol_2}']
             Gij = inf_coeffs[0]
 
             ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
@@ -109,53 +109,53 @@ class KBIPlotter:
             # figure properties
             ax[ij_combo].set_xlim(L.min(), L.max())
             ax[ij_combo].set_xlabel('$\lambda$')
-            ax[ij_combo].set_title(f"{self.model.kbi_model.mol_name_dict[mol_1]}-{self.model.kbi_model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.kbi_model.solute}'][s]:.2f} $\phi_{{{self.model.kbi_model.solute_name}}}$")
+            ax[ij_combo].set_title(f"{self.kbi_model.mol_name_dict[mol_1]}-{self.kbi_model.mol_name_dict[mol_2]}\n{self.kbi_model.df_comp[f'phi_{self.kbi_model.solute}'][s]:.2f} $\phi_{{{self.kbi_model.solute_name}}}$")
             ij_combo += 1
       ax[0].set_ylabel('$\lambda$ $G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
-      plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi_inf.png')
+      plt.savefig(f'{self.kbi_model.kbi_indiv_fig_dir}{sys}_kbi_inf.png')
       plt.close()
 
 
   def x_basis(self, basis):
     # get xlabel for figure and column label in df for mol frac / vol frac basis
     if basis.lower() == "mol":
-      zplot = self.model.z
-      xplot = self.model.z[:,self.model.kbi_model.solute_loc].flatten()
+      zplot = self.kbi_model.z
+      xplot = self.kbi_model.z[:,self.kbi_model.solute_loc].flatten()
       x_lab = 'x'
     else:
-      zplot = self.model.v
-      xplot = self.model.v[:,self.model.kbi_model.solute_loc].flatten()
+      zplot = self.kbi_model.v
+      xplot = self.kbi_model.v[:,self.kbi_model.solute_loc].flatten()
       x_lab = '\phi'
     return zplot, xplot, x_lab
 
   def plot_composition_kbis(self, basis):
     '''kbi integral values as a function of composition'''
     try:
-      self.model.df_kbi
+      self.kbi_model.df_kbi
     except AttributeError: 
-      self.model.kbi_analysis()
+      self.kbi_model.kbi_analysis()
 
     _, _, x_lab = self.x_basis(basis)
     if basis.lower() == "mol":
-      xplot = self.model._top_z[:,self.model._top_solute_loc].flatten()
+      xplot = self.kbi_model._top_z[:,self.kbi_model._top_solute_loc].flatten()
     else:
-      xplot = self.model._top_v[:,self.model._top_solute_loc].flatten()
+      xplot = self.kbi_model._top_v[:,self.kbi_model._top_solute_loc].flatten()
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    colors = plt.cm.jet(np.linspace(0,1,len(self.model._top_unique_mols)+1))
+    colors = plt.cm.jet(np.linspace(0,1,len(self.kbi_model._top_unique_mols)+1))
     ij = 0
-    for i, mol_1 in enumerate(self.model._top_unique_mols):
-      for j, mol_2 in enumerate(self.model._top_unique_mols):
+    for i, mol_1 in enumerate(self.kbi_model._top_unique_mols):
+      for j, mol_2 in enumerate(self.kbi_model._top_unique_mols):
         if i <= j:
-          ax.scatter(xplot, self.model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.model.kbi_model.mol_name_dict[mol_1]}-{self.model.kbi_model.mol_name_dict[mol_2]}')
+          ax.scatter(xplot, self.kbi_model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.kbi_model.mol_name_dict[mol_1]}-{self.kbi_model.mol_name_dict[mol_2]}')
           ij += 1
 
     ax.legend(fontsize=10, loc='best', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$G_{{ij}}^{{\infty}}$ [cm$^3$ mol$^{{-1}}$]')
-    plt.savefig(f'{self.model.kbi_method_dir}composition_KBI_{basis.lower()}frac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}composition_KBI_{basis.lower()}frac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
   def plot_dln_gammas(self, basis, ylimits=[]):
@@ -163,28 +163,28 @@ class KBIPlotter:
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
-    for i, mol in enumerate(self.model.unique_mols):
+    colors = plt.cm.jet(np.linspace(0,1,len(self.kbi_model.unique_mols)+1))
+    for i, mol in enumerate(self.kbi_model.unique_mols):
       if zplot.shape[1] > 2:
-        ax.scatter(zplot[:,i], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
+        ax.scatter(zplot[:,i], self.kbi_model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_i$')
       else:
-        ax.scatter(zplot[:,self.model.kbi_model.solute_loc], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
-        ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
+        ax.scatter(zplot[:,self.kbi_model.solute_loc], self.kbi_model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.legend(fontsize=11, loc='lower center', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
     else:
-      dg = self.model.dlngamma_dxs.max() - self.model.dlngamma_dxs.min()
-      gamma_min = self.model.dlngamma_dxs.min() - 0.1*dg
-      gamma_max = self.model.dlngamma_dxs.max() + 0.1*dg
+      dg = self.kbi_model.dlngamma_dxs.max() - self.kbi_model.dlngamma_dxs.min()
+      gamma_min = self.kbi_model.dlngamma_dxs.min() - 0.1*dg
+      gamma_max = self.kbi_model.dlngamma_dxs.max() + 0.1*dg
       ymin = min([-0.05, gamma_min])
       ymax = max([0.05, gamma_max])
       ax.set_ylim(ymin, ymax)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\partial \ln(\gamma_{i})/\partial x_{i}$')
-    plt.savefig(f'{self.model.kbi_method_dir}deriv_activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}deriv_activity_coefs_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
   def plot_ln_gammas(self, basis, ylimits=[]):
@@ -192,28 +192,28 @@ class KBIPlotter:
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
-    for i, mol in enumerate(self.model.unique_mols):
+    colors = plt.cm.jet(np.linspace(0,1,len(self.kbi_model.unique_mols)+1))
+    for i, mol in enumerate(self.kbi_model.unique_mols):
       if zplot.shape[1] > 2:
-        ax.scatter(zplot[:,i], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
+        ax.scatter(zplot[:,i], np.log(self.kbi_model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_i$')
       else:
-        ax.scatter(zplot[:,self.model.kbi_model.solute_loc], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
-        ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
+        ax.scatter(zplot[:,self.kbi_model.solute_loc], np.log(self.kbi_model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.legend(fontsize=11, loc='upper center', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
     else:
-      dg = np.log(self.model.gammas.max()) - np.log(self.model.gammas.min())
-      gamma_min = np.log(self.model.gammas.min()) - 0.1*dg
-      gamma_max = np.log(self.model.gammas.max()) + 0.1*dg
+      dg = np.log(self.kbi_model.gammas.max()) - np.log(self.kbi_model.gammas.min())
+      gamma_min = np.log(self.kbi_model.gammas.min()) - 0.1*dg
+      gamma_max = np.log(self.kbi_model.gammas.max()) + 0.1*dg
       ymin = min([-0.05, gamma_min])
       ymax = max([0.05, gamma_max])
       ax.set_ylim(ymin, ymax)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\ln \gamma_{i}$')
-    plt.savefig(f'{self.model.kbi_method_dir}activity_coefs_{basis}frac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}activity_coefs_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
   def xplot0(self, basis):
@@ -232,12 +232,12 @@ class KBIPlotter:
     xplot0 = self.xplot0(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    ax.scatter(xplot0, add_zeros(self.model.G_ex), c='m', linewidth=1.8, marker='s')
+    ax.scatter(xplot0, add_zeros(self.kbi_model.G_ex), c='m', linewidth=1.8, marker='s')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel('$G^E$ $[kJ$ $mol^{-1}]$')
-    plt.savefig(f'{self.model.kbi_method_dir}gibbs_excess_energy_{basis}frac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}gibbs_excess_energy_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
   def plot_binary_excess_contributions(self, basis):
@@ -245,50 +245,50 @@ class KBIPlotter:
     xplot0 = self.xplot0(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    ax.scatter(xplot0, add_zeros(self.model.G_ex), c='violet', linewidth=1.8, marker='s', label="$G^E$")
-    ax.scatter(xplot0, add_zeros(self.model.Hmix), c='mediumblue', linewidth=1.8, marker='o', label="$\Delta$ $H_{mix}$")
-    ax.scatter(xplot0, -self.model.T_sim * add_zeros(self.model.S_ex), c='limegreen', linewidth=1.8, marker='^', label="$-TS^E$")
+    ax.scatter(xplot0, add_zeros(self.kbi_model.G_ex), c='violet', linewidth=1.8, marker='s', label="$G^E$")
+    ax.scatter(xplot0, add_zeros(self.kbi_model.Hmix), c='mediumblue', linewidth=1.8, marker='o', label="$\Delta$ $H_{mix}$")
+    ax.scatter(xplot0, -self.kbi_model.T_sim * add_zeros(self.kbi_model.S_ex), c='limegreen', linewidth=1.8, marker='^', label="$-TS^E$")
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel('Excess Properties $[kJ$ $mol^{-1}]$')
-    plt.savefig(f'{self.model.kbi_method_dir}gibbs_excess_properties_{basis}frac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}gibbs_excess_properties_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
   def plot_binary_thermo_model_comparisons(self):
     """compare UNIQUAC, UNIFAC, QuarticModel"""
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
-    xplot = self.model.z_plot[:,self.model.kbi_model.solute_loc]
+    xplot = self.kbi_model.z_plot[:,self.kbi_model.solute_loc]
     
-    ax[0].scatter(self.model.z[:,self.model.kbi_model.solute_loc], self.model.Hmix, c='k', zorder=10)
-    ax[0].plot(xplot, self.model.quartic_Hmix, c='k', ls='solid')
-    ax[0].plot(xplot, self.model.uniquac_Hmix, c='dodgerblue', ls='dashed')
-    ax[0].plot(xplot, self.model.unifac_Hmix, c='limegreen', ls='dotted')
+    ax[0].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.Hmix, c='k', zorder=10)
+    ax[0].plot(xplot, self.kbi_model.quartic_Hmix, c='k', ls='solid')
+    ax[0].plot(xplot, self.kbi_model.uniquac_Hmix, c='dodgerblue', ls='dashed')
+    ax[0].plot(xplot, self.kbi_model.unifac_Hmix, c='limegreen', ls='dotted')
 
-    ax[1].scatter(self.model.z[:,self.model.kbi_model.solute_loc], self.model.nTdSmix, c='k', label='KB + MD', zorder=10)
-    ax[1].plot(xplot, self.model.quartic_Smix, c='k', ls='solid', label='Fit')
-    ax[1].plot(xplot, self.model.uniquac_Smix, c='dodgerblue', ls='dashed', label='uniquac')
-    ax[1].plot(xplot, self.model.unifac_Smix, c='limegreen', ls='dotted', label='unifac')
+    ax[1].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.nTdSmix, c='k', label='KB + MD', zorder=10)
+    ax[1].plot(xplot, self.kbi_model.quartic_Smix, c='k', ls='solid', label='Fit')
+    ax[1].plot(xplot, self.kbi_model.uniquac_Smix, c='dodgerblue', ls='dashed', label='uniquac')
+    ax[1].plot(xplot, self.kbi_model.unifac_Smix, c='limegreen', ls='dotted', label='unifac')
 
-    uniq_G = self.model.uniquac_Hmix + self.model.uniquac_Smix
-    unif_G = self.model.unifac_Hmix + self.model.unifac_Smix
-    quar_G = self.model.quartic_Hmix + self.model.quartic_Smix
+    uniq_G = self.kbi_model.uniquac_Hmix + self.kbi_model.uniquac_Smix
+    unif_G = self.kbi_model.unifac_Hmix + self.kbi_model.unifac_Smix
+    quar_G = self.kbi_model.quartic_Hmix + self.kbi_model.quartic_Smix
 
-    ax[2].scatter(self.model.z[:,self.model.kbi_model.solute_loc], self.model.G_mix_xv, c='k', zorder=10)
+    ax[2].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.G_mix_xv, c='k', zorder=10)
     ax[2].plot(xplot, quar_G, c='k', ls='solid')
     ax[2].plot(xplot, uniq_G, c='dodgerblue', ls='dashed')
     ax[2].plot(xplot, unif_G, c='limegreen', ls='dotted')
 
     ax[0].set_xlim(-0.05,1.05)
     for i in range(3):
-      ax[i].set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
+      ax[i].set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax[0].set_ylabel(f'$\Delta H_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax[1].set_ylabel(f'$-T\Delta S_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax[2].set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
 
     ax[1].legend(fontsize=11, loc='upper center')
-    plt.savefig(f'{self.model.kbi_method_dir}thermo_model_comparisons_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}thermo_model_comparisons_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
 
@@ -296,91 +296,91 @@ class KBIPlotter:
     xplot0 = self.xplot0("mol")
 
     fig, ax = plt.subplots()
-    ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    uniq_G = self.model.uniquac_Hmix + self.model.uniquac_Smix
-    ax.plot(self.model.z_plot[:,self.model.kbi_model.solute_loc], uniq_G, linewidth=2.5, color='tab:red', label='UNIQUAC')      
+    ax.scatter(xplot0, add_zeros(self.kbi_model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
+    uniq_G = self.kbi_model.uniquac_Hmix + self.kbi_model.uniquac_Smix
+    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], uniq_G, linewidth=2.5, color='tab:red', label='UNIQUAC')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
+    ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
-    plt.savefig(f'{self.model.kbi_method_dir}UNIQUAC_fit_molfrac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}UNIQUAC_fit_molfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
   def plot_NRTL_IP_fit(self):
     # if not a binary system skip the function
-    if len(self.model.unique_mols) != 2:
+    if len(self.kbi_model.unique_mols) != 2:
       return
 
     try:
-      self.model.nrtl_taus
+      self.kbi_model.nrtl_taus
     except:
-      self.model.fit_binary_NRTL_IP()
+      self.kbi_model.fit_binary_NRTL_IP()
 
-    tau12, tau21 = list(self.model.nrtl_taus.values())
+    tau12, tau21 = list(self.kbi_model.nrtl_taus.values())
 
     def NRTL_GE(z, tau12, tau21):
       alpha = 0.2 # randomness factor == constant
-      G12 = np.exp(-alpha*tau12/(self.model.Rc*self.model.T_sim))
-      G21 = np.exp(-alpha*tau21/(self.model.Rc*self.model.T_sim))
+      G12 = np.exp(-alpha*tau12/(self.kbi_model.Rc*self.kbi_model.T_sim))
+      G21 = np.exp(-alpha*tau21/(self.kbi_model.Rc*self.kbi_model.T_sim))
       x1 = z[:,0]
       x2 = z[:,1]
-      G_ex = -self.model.Rc * self.model.T_sim * (x1 * x2 * (tau21 * G21/(x1 + x2 * G21) + tau12 * G12 / (x2 + x1 * G12))) 
-      G_id = self.model.Rc * self.model.T_sim * (x1 * np.log(x1) + x2 * np.log(x2))
+      G_ex = -self.kbi_model.Rc * self.kbi_model.T_sim * (x1 * x2 * (tau21 * G21/(x1 + x2 * G21) + tau12 * G12 / (x2 + x1 * G12))) 
+      G_id = self.kbi_model.Rc * self.kbi_model.T_sim * (x1 * np.log(x1) + x2 * np.log(x2))
       return G_ex + G_id
     
-    Gmix_fit0 = NRTL_GE(self.model.z_plot, tau12, tau21)
+    Gmix_fit0 = NRTL_GE(self.kbi_model.z_plot, tau12, tau21)
     Gmix_fit0 = np.nan_to_num(Gmix_fit0, nan=0)
 
     xplot0 = self.xplot0("mol")
 
     fig, ax = plt.subplots()
-    ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.model.z_plot[:,self.model.kbi_model.solute_loc], Gmix_fit0, linewidth=2.5, color='tab:red', label='NRTL')      
+    ax.scatter(xplot0, add_zeros(self.kbi_model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
+    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], Gmix_fit0, linewidth=2.5, color='tab:red', label='NRTL')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
+    ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
-    plt.savefig(f'{self.model.kbi_method_dir}NRTL_fit_molfrac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}NRTL_fit_molfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
 
   def plot_FH_chi_fit(self):
     try:
-      self.model.fh_chi
+      self.kbi_model.fh_chi
     except:
-      self.model.fit_FH_chi()
+      self.kbi_model.fit_FH_chi()
 
-    pplot = np.zeros(len(self.model.fh_phi)+2)
-    pplot[1:-1] = self.model.fh_phi
+    pplot = np.zeros(len(self.kbi_model.fh_phi)+2)
+    pplot[1:-1] = self.kbi_model.fh_phi
     pplot[-1] = 1
 
-    Gmix0 = np.zeros(len(self.model.G_mix_xv)+2)
-    Gmix0[1:-1] = self.model.G_mix_xv
-    fh_gmix0 = np.zeros(len(self.model.fh_Gmix)+2)
-    fh_gmix0[1:-1] = self.model.fh_Gmix
+    Gmix0 = np.zeros(len(self.kbi_model.G_mix_xv)+2)
+    Gmix0[1:-1] = self.kbi_model.G_mix_xv
+    fh_gmix0 = np.zeros(len(self.kbi_model.fh_Gmix)+2)
+    fh_gmix0[1:-1] = self.kbi_model.fh_Gmix
 
     fig, ax = plt.subplots()
     ax.scatter(pplot, Gmix0, color='k', marker='o', linewidth=1.8, label="Simulated", zorder=10)
     ax.plot(pplot, fh_gmix0, color='tab:red', linewidth=2.5, label='FH')
     ax.legend(fontsize=11, loc='upper center')
-    ax.set_xlabel(f'$\phi_{{{self.model.kbi_model.solute_name}}}$')
+    ax.set_xlabel(f'$\phi_{{{self.kbi_model.solute_name}}}$')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.2))
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
-    plt.savefig(f'{self.model.kbi_method_dir}FH_fit_volfrac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}FH_fit_volfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
   def plot_quartic_fit(self):
     xplot0 = self.xplot0("mol")
 
     fig, ax = plt.subplots()
-    ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.model.z_plot[:,self.model.kbi_model.solute_loc], self.model.quartic_Smix + self.model.quartic_Hmix, linewidth=2.5, color='tab:red', label='Quartic')      
+    ax.scatter(xplot0, add_zeros(self.kbi_model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
+    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], self.kbi_model.quartic_Smix + self.kbi_model.quartic_Hmix, linewidth=2.5, color='tab:red', label='Quartic')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
+    ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
-    plt.savefig(f'{self.model.kbi_method_dir}QUARTIC_fit_molfrac_{self.model.kbi_method.lower()}.png')
+    plt.savefig(f'{self.kbi_model.kbi_method_dir}QUARTIC_fit_molfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
 
@@ -390,10 +390,10 @@ class KBIPlotter:
 class PhaseDiagramPlotter:
   def __init__(self, model: ThermoModel):
     """ for visualizing phase behavior """
-    self.model = model
+    self.thermo_model = model
 
   def make_figures(self, T=300, colormap='jet', num_contours=40):
-    if self.model.z.shape[1] == 2:
+    if self.thermo_model.z.shape[1] == 2:
       for basis in ["mol", "vol"]:
         self.binary_gmix(basis=basis)
         self.binary_gmix_selectpts(basis=basis)
@@ -403,50 +403,50 @@ class PhaseDiagramPlotter:
         self.binary_phase_diagram_I0_heatmap_widomline(basis=basis, num_contours=num_contours)
         self.binary_phase_diagram_widomline(basis=basis)
 
-    elif self.model.z.shape[1] == 3:
+    elif self.thermo_model.z.shape[1] == 3:
       self.ternary_GM(T, plot_spbi=False, colormap=colormap, num_contours=num_contours)
       self.ternary_GM(T, plot_spbi=True, colormap=colormap, num_contours=num_contours)
       self.ternary_Io(T, plot_spbi=False, colormap=colormap, num_contours=num_contours)
       self.ternary_Io(T, plot_spbi=True, colormap=colormap, num_contours=num_contours)
       self.ternary_binodals_fTemp(colormap=colormap)
     
-    elif self.model.z.shape[1] > 3:
+    elif self.thermo_model.z.shape[1] > 3:
       print("plotter functions only supported for binary and ternary systems")
   
 
   def x_basis(self, basis):
     if basis == "mol":
-      x_val = self.model.z[:,self.model.kbi_model.solute_loc].flatten()
+      x_val = self.thermo_model.z[:,self.thermo_model.kbi_model.solute_loc].flatten()
       x_lab = 'x'
-      sp = self.model.x_sp
-      bi = self.model.x_bi
+      sp = self.thermo_model.x_sp
+      bi = self.thermo_model.x_bi
     else:
-      x_val = self.model.v[:,self.model.kbi_model.solute_loc].flatten()
+      x_val = self.thermo_model.v[:,self.thermo_model.kbi_model.solute_loc].flatten()
       x_lab = '\phi'
-      sp = self.model.v_sp
-      bi = self.model.v_bi
+      sp = self.thermo_model.v_sp
+      bi = self.thermo_model.v_bi
     return x_val, x_lab, sp, bi
    
   def binary_gmix(self, basis: str, show_fig: bool = False):
     '''get mixing free energy with binodal & spinodal points'''
-    c, cmap = get_cmap(self.model.T_values)
+    c, cmap = get_cmap(self.thermo_model.T_values)
     x_val, x_lab, sp, bi = self.x_basis(basis)
     fig, ax = plt.subplots(1, 1, figsize=(5, 3.5))
-    for t, T in enumerate(self.model.T_values):
+    for t, T in enumerate(self.thermo_model.T_values):
       if T % 10 == 0:
         # add mixing free energy to plot
-        ax.plot(x_val, self.model.GM[t], lw=2, c=cmap.to_rgba(c[t]))
+        ax.plot(x_val, self.thermo_model.GM[t], lw=2, c=cmap.to_rgba(c[t]))
         # add spinodals to plot
-        ax.plot(sp[t], self.model.GM_sp[t], marker='o', color='k', linestyle='', fillstyle='none', linewidth=1.5, zorder=len(self.model.T_values)+1)
+        ax.plot(sp[t], self.thermo_model.GM_sp[t], marker='o', color='k', linestyle='', fillstyle='none', linewidth=1.5, zorder=len(self.thermo_model.T_values)+1)
         # add binodals to plot
-        ax.plot(bi[t], self.model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.model.T_values)+1)
+        ax.plot(bi[t], self.thermo_model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.thermo_model.T_values)+1)
     fig.colorbar(cmap, ax=ax, orientation='vertical', pad=0.02, label='Temperature [K]')
-    ax.set_xlabel(f"${x_lab}_{{{self.model.kbi_model.solute_name}}}$")
+    ax.set_xlabel(f"${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$")
     ax.set_xlim(-0.05,1.05)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
-    if self.model.save_dir is not None:
-      plt.savefig(f"{self.model.save_dir}/{self.model.model_name}_Gmix_bin_spin_{basis}frac.png")
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f"{self.thermo_model.save_dir}/{self.thermo_model.model_name}_Gmix_bin_spin_{basis}frac.png")
     if show_fig:
       plt.show()
     else:
@@ -454,34 +454,34 @@ class PhaseDiagramPlotter:
 
   def binary_gmix_selectpts(self, basis: str, show_fig: bool = False):
     ''' get select mixing free energy lines '''
-    c, cmap = get_cmap(self.model.T_values)
+    c, cmap = get_cmap(self.thermo_model.T_values)
     x_val, x_lab, sp, bi = self.x_basis(basis)
     # get temperature just above phase spliting, 5 degree intervals
-    Tcs = 5 * (self.model.Tc // 5)
+    Tcs = 5 * (self.thermo_model.Tc // 5)
     step = 20 # Temperature differences to plot
     # temperatures
     Ts = [Tcs + i*step for i in [1, 0, -1, -2, -3]]
-    Ts_inds = [t for t, T in enumerate(self.model.T_values) if T in Ts]
+    Ts_inds = [t for t, T in enumerate(self.thermo_model.T_values) if T in Ts]
     # colors
     cs = plt.cm.jet(np.linspace(0,1,len(Ts)+1))
 
     fig, ax = plt.subplots(1, 1, figsize=(5,4))
     c_ind = 0
     for t in Ts_inds:
-      T = self.model.T_values[t]
-      ax.plot(x_val, self.model.GM[t], lw=2, c=cs[c_ind], label=f'{T:.0f} K')
+      T = self.thermo_model.T_values[t]
+      ax.plot(x_val, self.thermo_model.GM[t], lw=2, c=cs[c_ind], label=f'{T:.0f} K')
       # add spinodals
-      ax.plot(sp[t], self.model.GM_sp[t], marker='o', color='k', linestyle='', fillstyle='none', linewidth=1.5, zorder=len(self.model.T_values)+1)
+      ax.plot(sp[t], self.thermo_model.GM_sp[t], marker='o', color='k', linestyle='', fillstyle='none', linewidth=1.5, zorder=len(self.thermo_model.T_values)+1)
       # add binodals
-      ax.plot(bi[t], self.model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.model.T_values)+1)
+      ax.plot(bi[t], self.thermo_model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.thermo_model.T_values)+1)
       c_ind += 1
     ax.legend(loc='lower left', fontsize=9)
-    ax.set_xlabel(f"${x_lab}_{{{self.model.kbi_model.solute_name}}}$")
+    ax.set_xlabel(f"${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$")
     ax.set_xlim(-0.05,1.05)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
-    if self.model.save_dir is not None:
-      plt.savefig(f"{self.model.save_dir}/{self.model.model_name}_Gmix_binodal_spinodal_selectpts_{basis}frac.png")
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f"{self.thermo_model.save_dir}/{self.thermo_model.model_name}_Gmix_binodal_spinodal_selectpts_{basis}frac.png")
     if show_fig == True:
       plt.show()
     else:
@@ -496,20 +496,20 @@ class PhaseDiagramPlotter:
     ax.grid(False)
     ax.tick_params(bottom=False, top=False, left=False, right=False)
 
-    cs = ax.contourf(x_val, self.model.T_values, self.model.GM, cmap=plt.cm.jet, levels=num_contours)
+    cs = ax.contourf(x_val, self.thermo_model.T_values, self.thermo_model.GM, cmap=plt.cm.jet, levels=num_contours)
     fig.colorbar(cs, ax=ax, orientation='vertical', pad=0.01, format=mpl.ticker.FormatStrFormatter('%.2f'), label='$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
 
-    ax.plot(sp[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(sp[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
+    ax.plot(sp[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(sp[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
-    if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_Gmix_heatmap_{basis}frac.png')
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_Gmix_heatmap_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -523,9 +523,9 @@ class PhaseDiagramPlotter:
     ax.grid(False)
     ax.tick_params(bottom=False, top=False, left=False, right=False)
 
-    I0_plot = np.zeros(self.model.I0_arr.shape)
-    for t, T in enumerate(self.model.T_values):
-      I0_arr_T = self.model.I0_arr[t]
+    I0_plot = np.zeros(self.thermo_model.I0_arr.shape)
+    for t, T in enumerate(self.thermo_model.T_values):
+      I0_arr_T = self.thermo_model.I0_arr[t]
       min_mask = (I0_arr_T >= ymin)
       max_mask = (I0_arr_T <= ymax)
       I0_plot[t] = I0_arr_T.copy()
@@ -542,24 +542,24 @@ class PhaseDiagramPlotter:
     ticks = np.logspace(ymin_exp, ymax_exp, int(ymax_exp-ymin_exp+1))
 
     # create heatmap
-    X, Y = np.meshgrid(x_val, self.model.T_values)
+    X, Y = np.meshgrid(x_val, self.thermo_model.T_values)
     cs = ax.contourf(X, Y, I0_plot, cmap=plt.cm.jet, norm=mpl.colors.LogNorm(vmin=ymin, vmax=ymax), levels=levels)
     cbar = fig.colorbar(cs, ax=ax, ticks=ticks, pad=0.01, orientation='vertical')
     cbar.ax.set_title('$I_o$ (cm$^{-1}$)', fontsize=12)
     cbar.ax.minorticks_on()
 
     # add spinodals and binodals
-    ax.plot(sp[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(sp[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
+    ax.plot(sp[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(sp[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
-    if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_I0_heatmap_{basis}frac.png')
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_I0_heatmap_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -577,12 +577,12 @@ class PhaseDiagramPlotter:
       return moving_averages
     
     if basis == "mol":
-      I0_max = copy.deepcopy(self.model.x_I0_max)
+      I0_max = copy.deepcopy(self.thermo_model.x_I0_max)
       for i in range(I0_max.shape[1]):
         I0_max[1:-1,i] = moving_avg(I0_max[:,i], 3)
       return I0_max
     else:
-      I0_max = copy.deepcopy(self.model.v_I0_max)
+      I0_max = copy.deepcopy(self.thermo_model.v_I0_max)
       for i in range(I0_max.shape[1]):
         I0_max[1:-1,i] = moving_avg(I0_max[:,i], 3)
       return I0_max
@@ -596,9 +596,9 @@ class PhaseDiagramPlotter:
     ax.grid(False)
     ax.tick_params(bottom=False, top=False, left=False, right=False)
 
-    I0_plot = np.zeros(self.model.I0_arr.shape)
-    for t, T in enumerate(self.model.T_values):
-      I0_arr_T = self.model.I0_arr[t]
+    I0_plot = np.zeros(self.thermo_model.I0_arr.shape)
+    for t, T in enumerate(self.thermo_model.T_values):
+      I0_arr_T = self.thermo_model.I0_arr[t]
       min_mask = (I0_arr_T >= ymin)
       max_mask = (I0_arr_T <= ymax)
       I0_plot[t] = I0_arr_T.copy()
@@ -615,27 +615,27 @@ class PhaseDiagramPlotter:
     ticks = np.logspace(ymin_exp, ymax_exp, int(ymax_exp-ymin_exp+1))
 
     # create heatmap
-    X, Y = np.meshgrid(x_val, self.model.T_values)
+    X, Y = np.meshgrid(x_val, self.thermo_model.T_values)
     cs = ax.contourf(X, Y, I0_plot, cmap=plt.cm.jet, norm=mpl.colors.LogNorm(vmin=ymin, vmax=ymax), levels=levels)
     cbar = fig.colorbar(cs, ax=ax, ticks=ticks, pad=0.01, orientation='vertical')
     cbar.ax.set_title('$I_o$ (cm$^{-1}$)', fontsize=12)
     cbar.ax.minorticks_on()
 
     # add spinodals and binodals
-    ax.plot(sp[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(sp[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
+    ax.plot(sp[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(sp[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.model.kbi_model.solute_loc], self.model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.thermo_model.kbi_model.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
-    if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_I0_heatmap_widomline_{basis}frac.png')
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_I0_heatmap_widomline_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -645,9 +645,9 @@ class PhaseDiagramPlotter:
   def xc(self, basis):
     ''' return critical point mol or vol frac '''
     if basis == "mol":
-      return self.model.xc
+      return self.thermo_model.xc
     else:
-      return self.model.phic
+      return self.thermo_model.phic
 
   def binary_phase_diagram(self, plot_Tmin=0, plot_Tmax=500, basis: str = 'vol', color='mediumblue', show_fig: bool = False):
 
@@ -655,13 +655,13 @@ class PhaseDiagramPlotter:
 
     fig, ax = plt.subplots(1, 1, figsize=(4.5,4))
     # add spinodals and binodals
-    ax.plot(sp[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(sp[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
+    ax.plot(sp[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(sp[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
-    legend_label = f"$T_c = {self.model.Tc:.0f}$ K\n${x_lab}_c = {self.xc(basis):.3f}$"
-    ax.plot(self.xc(basis), self.model.Tc, color='none', marker='o', linestyle='', fillstyle='none', label=legend_label)
+    legend_label = f"$T_c = {self.thermo_model.Tc:.0f}$ K\n${x_lab}_c = {self.xc(basis):.3f}$"
+    ax.plot(self.xc(basis), self.thermo_model.Tc, color='none', marker='o', linestyle='', fillstyle='none', label=legend_label)
     ax.legend()
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.2))
@@ -669,12 +669,12 @@ class PhaseDiagramPlotter:
     if plot_Tmin != 0 and plot_Tmax != 500:
       ax.set_ylim(plot_Tmin, plot_Tmax)
     else:
-      ax.set_ylim(min(self.model.T_values), max(self.model.T_values))
+      ax.set_ylim(min(self.thermo_model.T_values), max(self.thermo_model.T_values))
 
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
-    if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_{basis}frac.png')
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -686,16 +686,16 @@ class PhaseDiagramPlotter:
 
     fig, ax = plt.subplots(1, 1, figsize=(4.5,4))
     # add spinodals and binodals
-    ax.plot(sp[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(sp[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,0], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
-    ax.plot(bi[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
+    ax.plot(sp[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(sp[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,0], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.model.kbi_model.solute_loc], self.model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.thermo_model.kbi_model.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
 
-    legend_label = f"$T_c = {self.model.Tc:.0f}$ K\n${x_lab}_c = {self.xc(basis):.3f}$"
-    ax.plot(self.xc(basis), self.model.Tc, color='none', marker='o', linestyle='', fillstyle='none', label=legend_label)
+    legend_label = f"$T_c = {self.thermo_model.Tc:.0f}$ K\n${x_lab}_c = {self.xc(basis):.3f}$"
+    ax.plot(self.xc(basis), self.thermo_model.Tc, color='none', marker='o', linestyle='', fillstyle='none', label=legend_label)
     ax.legend()
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.2))
@@ -703,12 +703,12 @@ class PhaseDiagramPlotter:
     if plot_Tmin != 0 and plot_Tmax != 500:
       ax.set_ylim(plot_Tmin, plot_Tmax)
     else:
-      ax.set_ylim(min(self.model.T_values), max(self.model.T_values))
+      ax.set_ylim(min(self.thermo_model.T_values), max(self.thermo_model.T_values))
 
-    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
-    if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_widomline_{basis}frac.png')
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_widomline_{basis}frac.png')
     if show_fig == True:
       plt.show()
     else:
@@ -720,13 +720,13 @@ class PhaseDiagramPlotter:
   def ternary_GM(self, T, plot_spbi: bool = False, num_contours: int = 20, colormap: str = 'jet', show_fig: bool = False):
     ''' mixing free energy at T '''
 
-    xtext, ytext, ztext = self.model.kbi_model.mol_name
+    xtext, ytext, ztext = self.thermo_model.mol_name
 
-    T_ind = np.abs(self.model.T_values - T).argmin()
-    T_plot = self.model.T_values[T_ind]
+    T_ind = np.abs(self.thermo_model.T_values - T).argmin()
+    T_plot = self.thermo_model.T_values[T_ind]
 
-    GM_arr = self.model.GM[T_ind]
-    a, b, c = self.model.z[:,0], self.model.z[:,1], self.model.z[:,2]
+    GM_arr = self.thermo_model.GM[T_ind]
+    a, b, c = self.thermo_model.z[:,0], self.thermo_model.z[:,1], self.thermo_model.z[:,2]
 
     valid_mask = (a >= 0) & (b >= 0) & (c >= 0) & ~np.isnan(GM_arr) & ~np.isinf(GM_arr)
     a = a[valid_mask]
@@ -740,15 +740,15 @@ class PhaseDiagramPlotter:
     cbar = fig.colorbar(tp, ax=ax, aspect=25, label='$\Delta G_{mix}$ [kJ mol$^{-1}$]')
 
     if plot_spbi:
-      figname = f'{self.model.save_dir}/{self.model.model_name}_GM_spbi_at_{T_plot}K.png'
-      if self.model.model_name != 'unifac':
-        sp_arr = np.array(self.model.x_sp[T_ind])
+      figname = f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_GM_spbi_at_{T_plot}K.png'
+      if self.thermo_model.model_name != 'unifac':
+        sp_arr = np.array(self.thermo_model.x_sp[T_ind])
         ax.plot(sp_arr[:,0], sp_arr[:,1], sp_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='none')
 
-      bi_arr = self.model.x_bi[T_ind]
+      bi_arr = self.thermo_model.x_bi[T_ind]
       ax.plot(bi_arr[:,0], bi_arr[:,1], bi_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='full')
     else:
-      figname = f'{self.model.save_dir}/{self.model.model_name}_GM_at_{T_plot}K.png'
+      figname = f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_GM_at_{T_plot}K.png'
 
     ax.set_tlabel(xtext)
     ax.set_llabel(ytext)
@@ -763,7 +763,7 @@ class PhaseDiagramPlotter:
     ax.laxis.set_major_locator(MultipleLocator(0.10))
     ax.raxis.set_major_locator(MultipleLocator(0.10))
 
-    if self.model.save_dir is not None:
+    if self.thermo_model.save_dir is not None:
       plt.savefig(figname)
     if show_fig:
       plt.show()
@@ -774,18 +774,18 @@ class PhaseDiagramPlotter:
   def ternary_Io(self, T, plot_spbi: bool = False, num_contours: int = 20, colormap: str = 'jet', show_fig: bool = False):
     ''' mixing free energy at T '''
 
-    xtext, ytext, ztext = self.model.kbi_model.mol_name
+    xtext, ytext, ztext = self.thermo_model.mol_name
 
-    T_ind = np.abs(self.model.T_values - T).argmin()
-    T_plot = self.model.T_values[T_ind]
+    T_ind = np.abs(self.thermo_model.T_values - T).argmin()
+    T_plot = self.thermo_model.T_values[T_ind]
 
     try:
-      self.model.I0_arr
+      self.thermo_model.I0_arr
     except:
-      self.model.calculate_saxs_Io()
+      self.thermo_model.calculate_saxs_Io()
 
-    Io_arr = self.model.I0_arr[T_ind]
-    a, b, c = self.model.z[:,0], self.model.z[:,1], self.model.z[:,2]
+    Io_arr = self.thermo_model.I0_arr[T_ind]
+    a, b, c = self.thermo_model.z[:,0], self.thermo_model.z[:,1], self.thermo_model.z[:,2]
 
     Io_arr[Io_arr <= 0.001] = 0.001
     values = Io_arr
@@ -807,15 +807,15 @@ class PhaseDiagramPlotter:
     cbar.ax.minorticks_on()
 
     if plot_spbi:
-      figname = f'{self.model.save_dir}/{self.model.model_name}_Io_spbi_at_{T_plot}K.png'
-      if self.model.model_name != 'unifac':
-        sp_arr = np.array(self.model.x_sp[T_ind])
+      figname = f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_Io_spbi_at_{T_plot}K.png'
+      if self.thermo_model.model_name != 'unifac':
+        sp_arr = np.array(self.thermo_model.x_sp[T_ind])
         ax.plot(sp_arr[:,0], sp_arr[:,1], sp_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='none')
 
-      bi_arr = self.model.x_bi[T_ind]
+      bi_arr = self.thermo_model.x_bi[T_ind]
       ax.plot(bi_arr[:,0], bi_arr[:,1], bi_arr[:,2], color='k', linestyle='', marker='o', markersize=4, fillstyle='full')
     else:
-      figname = f'{self.model.save_dir}/{self.model.model_name}_Io_at_{T_plot}K.png'
+      figname = f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_Io_at_{T_plot}K.png'
 
 
     ax.set_tlabel(xtext)
@@ -831,7 +831,7 @@ class PhaseDiagramPlotter:
     ax.laxis.set_major_locator(MultipleLocator(0.10))
     ax.raxis.set_major_locator(MultipleLocator(0.10))
 
-    if self.model.save_dir is not None:
+    if self.thermo_model.save_dir is not None:
       plt.savefig(figname)
     if show_fig:
       plt.show()
@@ -844,12 +844,12 @@ class PhaseDiagramPlotter:
 
     fig, ax = plt.subplots(figsize=(8,6), subplot_kw={'projection': 'ternary'})
 
-    cs, cmap = get_cmap(self.model.T_values, colormap=colormap)
-    for a, arr in enumerate(self.model.x_bi):
-      ax.plot(arr[:,0], arr[:,1], arr[:,2], linestyle='', marker='o', markersize=4, fillstyle='full', color=cmap.to_rgba(cs[a]), zorder=len(self.model.T_values)-a)
+    cs, cmap = get_cmap(self.thermo_model.T_values, colormap=colormap)
+    for a, arr in enumerate(self.thermo_model.x_bi):
+      ax.plot(arr[:,0], arr[:,1], arr[:,2], linestyle='', marker='o', markersize=4, fillstyle='full', color=cmap.to_rgba(cs[a]), zorder=len(self.thermo_model.T_values)-a)
     fig.colorbar(cmap, ax=ax, aspect=25, label='Temperature [K]')
 
-    xtext, ytext, ztext = self.model.kbi_model.mol_name
+    xtext, ytext, ztext = self.thermo_model.mol_name
     ax.set_tlabel(xtext)
     ax.set_llabel(ytext)
     ax.set_rlabel(ztext)
@@ -863,8 +863,8 @@ class PhaseDiagramPlotter:
     ax.laxis.set_major_locator(MultipleLocator(0.10))
     ax.raxis.set_major_locator(MultipleLocator(0.10))
 
-    if self.model.save_dir is not None:
-      plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_binodals_temperature_dependence.png')
+    if self.thermo_model.save_dir is not None:
+      plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_binodals_temperature_dependence.png')
     if show_fig:
       plt.show()
     else:
@@ -875,12 +875,12 @@ class PhaseDiagramPlotter:
     ''' create 3D ternary plots of mixing free energy '''
 
     # Verify the shapes
-    num_layers = len(self.model.T_values)
+    num_layers = len(self.thermo_model.T_values)
 
     # Flatten the ternary coordinates
-    A = self.model.z[:,0]
-    B = self.model.z[:,1]
-    C = self.model.z[:,2]
+    A = self.thermo_model.z[:,0]
+    B = self.thermo_model.z[:,1]
+    C = self.thermo_model.z[:,2]
 
     # Convert ternary coordinates to 2D Cartesian coordinates
     def ternary_to_cartesian(a, b, c):
@@ -907,7 +907,7 @@ class PhaseDiagramPlotter:
     # Iterate over each GM layer to create frames
     for layer in range(num_layers):
         # Flatten the GM layer data
-        GM_layer_flat = self.model.GM[layer].flatten()
+        GM_layer_flat = self.thermo_model.GM[layer].flatten()
 
         # Create a combined mask for valid coordinates and GM values
         GM_valid_mask = ~np.isnan(GM_layer_flat)
@@ -938,7 +938,7 @@ class PhaseDiagramPlotter:
     # Now, create frames with consistent z-axis limits
     for layer in range(num_layers):
         # Flatten the GM layer data
-        GM_layer_flat = self.model.GM[layer].flatten()
+        GM_layer_flat = self.thermo_model.GM[layer].flatten()
 
         # Create a combined mask for valid coordinates and GM values
         GM_valid_mask = ~np.isnan(GM_layer_flat)
@@ -1035,7 +1035,7 @@ class PhaseDiagramPlotter:
                             [f'Frame {k+1}'],
                             {'mode': 'immediate', 'frame': {'duration': 0}, 'transition': {'duration': 0}}
                         ],
-                        'label': f'{self.model.T_values[k]} K'
+                        'label': f'{self.thermo_model.T_values[k]} K'
                     } for k in range(len(frames))
                 ],
                 'transition': {'duration': 0},
@@ -1055,12 +1055,12 @@ class PhaseDiagramPlotter:
   def ternary_plotly_GM_flat(self, colormap: str = 'rainbow', num_contours: int = 40, show_fig: bool = False):
     ''' create flat ternary diagrams of mixing free energy '''
 
-    num_layers = len(self.model.T_values)
+    num_layers = len(self.thermo_model.T_values)
 
     # Flatten the ternary coordinates
-    A = self.model.z[:,0]
-    B = self.model.z[:,1]
-    C = self.model.z[:,2]
+    A = self.thermo_model.z[:,0]
+    B = self.thermo_model.z[:,1]
+    C = self.thermo_model.z[:,2]
 
     # Prepare a mask for valid ternary coordinates
     tolerance = 1e-6
@@ -1086,7 +1086,7 @@ class PhaseDiagramPlotter:
 
     for layer in range(num_layers):
         # Flatten and mask GM data
-        GM_layer_flat = self.model.GM[layer].flatten()  # Shape: (121,)
+        GM_layer_flat = self.thermo_model.GM[layer].flatten()  # Shape: (121,)
 
         # Create per-layer valid mask
         per_layer_mask = valid_coords_mask & ~np.isnan(GM_layer_flat)  # Shape: (121,)
@@ -1135,7 +1135,7 @@ class PhaseDiagramPlotter:
 
     for layer in range(num_layers):
         # Flatten and mask GM data
-        GM_layer_flat = self.model.GM[layer].flatten()
+        GM_layer_flat = self.thermo_model.GM[layer].flatten()
 
         # Create per-layer valid mask
         per_layer_mask = valid_coords_mask & ~np.isnan(GM_layer_flat)
@@ -1228,7 +1228,7 @@ class PhaseDiagramPlotter:
                         {'mode': 'immediate', 'frame': {'duration': 0, 'redraw': True},
                         'transition': {'duration': 0}}
                     ],
-                    'label': f'{self.model.T_values[k]} K'
+                    'label': f'{self.thermo_model.T_values[k]} K'
                 } for k in range(num_layers)
             ],
             'transition': {'duration': 0},
