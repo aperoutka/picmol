@@ -6,6 +6,7 @@ from .thermo_model import Tc_search, ThermoModel
 from .plotter import KBIPlotter, PhaseDiagramPlotter
 from .models import UNIQUAC, UNIFAC, NRTL, FH, QuarticModel
 from .kbi import KBI
+from .functions import get_solute_molid
 
 __all__ = [
 	"mol2vol",
@@ -14,4 +15,5 @@ __all__ = [
 	"KBIPlotter", "PhaseDiagramPlotter",
 	"UNIFAC", "UNIQUAC", "NRTL", "FH", "QuarticModel",
 	"KBI",
+  "get_solute_molid"
 ]
