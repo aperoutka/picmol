@@ -74,7 +74,7 @@ class KBIPlotter:
             ax[ij_combo].set_xlim(0, 5)
             ax[ij_combo].set_xticks(ticks=np.arange(0,5.1,1.))
             ax[ij_combo].set_xlabel('$r$ [nm]')
-            ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name}}}$")
+            ax[ij_combo].set_title(f"{self.model.kbi_model.mol_name_dict[mol_1]}-{self.model.kbi_model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.kbi_model.solute}'][s]:.2f} $\phi_{{{self.model.kbi_model.solute_name}}}$")
             ij_combo += 1
       ax[0].set_ylabel('$G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
       plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi.png')
@@ -109,7 +109,7 @@ class KBIPlotter:
             # figure properties
             ax[ij_combo].set_xlim(L.min(), L.max())
             ax[ij_combo].set_xlabel('$\lambda$')
-            ax[ij_combo].set_title(f"{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.solute}'][s]:.2f} $\phi_{{{self.model.solute_name}}}$")
+            ax[ij_combo].set_title(f"{self.model.kbi_model.mol_name_dict[mol_1]}-{self.model.kbi_model.mol_name_dict[mol_2]}\n{self.model.df_comp[f'phi_{self.model.kbi_model.solute}'][s]:.2f} $\phi_{{{self.model.kbi_model.solute_name}}}$")
             ij_combo += 1
       ax[0].set_ylabel('$\lambda$ $G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
       plt.savefig(f'{self.model.kbi_indiv_fig_dir}{sys}_kbi_inf.png')
@@ -120,11 +120,11 @@ class KBIPlotter:
     # get xlabel for figure and column label in df for mol frac / vol frac basis
     if basis.lower() == "mol":
       zplot = self.model.z
-      xplot = self.model.z[:,self.model.solute_loc].flatten()
+      xplot = self.model.z[:,self.model.kbi_model.solute_loc].flatten()
       x_lab = 'x'
     else:
       zplot = self.model.v
-      xplot = self.model.v[:,self.model.solute_loc].flatten()
+      xplot = self.model.v[:,self.model.kbi_model.solute_loc].flatten()
       x_lab = '\phi'
     return zplot, xplot, x_lab
 
@@ -147,13 +147,13 @@ class KBIPlotter:
     for i, mol_1 in enumerate(self.model._top_unique_mols):
       for j, mol_2 in enumerate(self.model._top_unique_mols):
         if i <= j:
-          ax.scatter(xplot, self.model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.model.mol_name_dict[mol_1]}-{self.model.mol_name_dict[mol_2]}')
+          ax.scatter(xplot, self.model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.model.kbi_model.mol_name_dict[mol_1]}-{self.model.kbi_model.mol_name_dict[mol_2]}')
           ij += 1
 
     ax.legend(fontsize=10, loc='best', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$G_{{ij}}^{{\infty}}$ [cm$^3$ mol$^{{-1}}$]')
     plt.savefig(f'{self.model.kbi_method_dir}composition_KBI_{basis.lower()}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
@@ -166,11 +166,11 @@ class KBIPlotter:
     colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
     for i, mol in enumerate(self.model.unique_mols):
       if zplot.shape[1] > 2:
-        ax.scatter(zplot[:,i], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+        ax.scatter(zplot[:,i], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_i$')
       else:
-        ax.scatter(zplot[:,self.model.solute_loc], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
-        ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
+        ax.scatter(zplot[:,self.model.kbi_model.solute_loc], self.model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
     ax.legend(fontsize=11, loc='lower center', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
@@ -195,11 +195,11 @@ class KBIPlotter:
     colors = plt.cm.jet(np.linspace(0,1,len(self.model.unique_mols)+1))
     for i, mol in enumerate(self.model.unique_mols):
       if zplot.shape[1] > 2:
-        ax.scatter(zplot[:,i], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
+        ax.scatter(zplot[:,i], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_i$')
       else:
-        ax.scatter(zplot[:,self.model.solute_loc], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.mol_name_dict[mol])
-        ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
+        ax.scatter(zplot[:,self.model.kbi_model.solute_loc], np.log(self.model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.model.kbi_model.mol_name_dict[mol])
+        ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
     ax.legend(fontsize=11, loc='upper center', frameon=True, framealpha=0.7)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
@@ -235,7 +235,7 @@ class KBIPlotter:
     ax.scatter(xplot0, add_zeros(self.model.G_ex), c='m', linewidth=1.8, marker='s')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
     ax.set_ylabel('$G^E$ $[kJ$ $mol^{-1}]$')
     plt.savefig(f'{self.model.kbi_method_dir}gibbs_excess_energy_{basis}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
@@ -251,7 +251,7 @@ class KBIPlotter:
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')
     ax.set_ylabel('Excess Properties $[kJ$ $mol^{-1}]$')
     plt.savefig(f'{self.model.kbi_method_dir}gibbs_excess_properties_{basis}frac_{self.model.kbi_method.lower()}.png')
     plt.close()
@@ -259,14 +259,14 @@ class KBIPlotter:
   def plot_binary_thermo_model_comparisons(self):
     """compare UNIQUAC, UNIFAC, QuarticModel"""
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
-    xplot = self.model.z_plot[:,self.model.solute_loc]
+    xplot = self.model.z_plot[:,self.model.kbi_model.solute_loc]
     
-    ax[0].scatter(self.model.z[:,self.model.solute_loc], self.model.Hmix, c='k', zorder=10)
+    ax[0].scatter(self.model.z[:,self.model.kbi_model.solute_loc], self.model.Hmix, c='k', zorder=10)
     ax[0].plot(xplot, self.model.quartic_Hmix, c='k', ls='solid')
     ax[0].plot(xplot, self.model.uniquac_Hmix, c='dodgerblue', ls='dashed')
     ax[0].plot(xplot, self.model.unifac_Hmix, c='limegreen', ls='dotted')
 
-    ax[1].scatter(self.model.z[:,self.model.solute_loc], self.model.nTdSmix, c='k', label='KB + MD', zorder=10)
+    ax[1].scatter(self.model.z[:,self.model.kbi_model.solute_loc], self.model.nTdSmix, c='k', label='KB + MD', zorder=10)
     ax[1].plot(xplot, self.model.quartic_Smix, c='k', ls='solid', label='Fit')
     ax[1].plot(xplot, self.model.uniquac_Smix, c='dodgerblue', ls='dashed', label='uniquac')
     ax[1].plot(xplot, self.model.unifac_Smix, c='limegreen', ls='dotted', label='unifac')
@@ -275,14 +275,14 @@ class KBIPlotter:
     unif_G = self.model.unifac_Hmix + self.model.unifac_Smix
     quar_G = self.model.quartic_Hmix + self.model.quartic_Smix
 
-    ax[2].scatter(self.model.z[:,self.model.solute_loc], self.model.G_mix_xv, c='k', zorder=10)
+    ax[2].scatter(self.model.z[:,self.model.kbi_model.solute_loc], self.model.G_mix_xv, c='k', zorder=10)
     ax[2].plot(xplot, quar_G, c='k', ls='solid')
     ax[2].plot(xplot, uniq_G, c='dodgerblue', ls='dashed')
     ax[2].plot(xplot, unif_G, c='limegreen', ls='dotted')
 
     ax[0].set_xlim(-0.05,1.05)
     for i in range(3):
-      ax[i].set_xlabel(f'$x_{{{self.model.solute_name}}}$')
+      ax[i].set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
     ax[0].set_ylabel(f'$\Delta H_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax[1].set_ylabel(f'$-T\Delta S_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax[2].set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
@@ -298,9 +298,9 @@ class KBIPlotter:
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
     uniq_G = self.model.uniquac_Hmix + self.model.uniquac_Smix
-    ax.plot(self.model.z_plot[:,self.model.solute_loc], uniq_G, linewidth=2.5, color='tab:red', label='UNIQUAC')      
+    ax.plot(self.model.z_plot[:,self.model.kbi_model.solute_loc], uniq_G, linewidth=2.5, color='tab:red', label='UNIQUAC')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
+    ax.set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
     plt.savefig(f'{self.model.kbi_method_dir}UNIQUAC_fit_molfrac_{self.model.kbi_method.lower()}.png')
@@ -335,9 +335,9 @@ class KBIPlotter:
 
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.model.z_plot[:,self.model.solute_loc], Gmix_fit0, linewidth=2.5, color='tab:red', label='NRTL')      
+    ax.plot(self.model.z_plot[:,self.model.kbi_model.solute_loc], Gmix_fit0, linewidth=2.5, color='tab:red', label='NRTL')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
+    ax.set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
     plt.savefig(f'{self.model.kbi_method_dir}NRTL_fit_molfrac_{self.model.kbi_method.lower()}.png')
@@ -363,7 +363,7 @@ class KBIPlotter:
     ax.scatter(pplot, Gmix0, color='k', marker='o', linewidth=1.8, label="Simulated", zorder=10)
     ax.plot(pplot, fh_gmix0, color='tab:red', linewidth=2.5, label='FH')
     ax.legend(fontsize=11, loc='upper center')
-    ax.set_xlabel(f'$\phi_{{{self.model.solute_name}}}$')
+    ax.set_xlabel(f'$\phi_{{{self.model.kbi_model.solute_name}}}$')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.2))
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
@@ -375,9 +375,9 @@ class KBIPlotter:
 
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.model.z_plot[:,self.model.solute_loc], self.model.quartic_Smix + self.model.quartic_Hmix, linewidth=2.5, color='tab:red', label='Quartic')      
+    ax.plot(self.model.z_plot[:,self.model.kbi_model.solute_loc], self.model.quartic_Smix + self.model.quartic_Hmix, linewidth=2.5, color='tab:red', label='Quartic')      
     ax.set_xlim(-0.05,1.05)
-    ax.set_xlabel(f'$x_{{{self.model.solute_name}}}$')
+    ax.set_xlabel(f'$x_{{{self.model.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, loc='upper center')
     plt.savefig(f'{self.model.kbi_method_dir}QUARTIC_fit_molfrac_{self.model.kbi_method.lower()}.png')
@@ -416,12 +416,12 @@ class PhaseDiagramPlotter:
 
   def x_basis(self, basis):
     if basis == "mol":
-      x_val = self.model.z[:,self.model.solute_loc].flatten()
+      x_val = self.model.z[:,self.model.kbi_model.solute_loc].flatten()
       x_lab = 'x'
       sp = self.model.x_sp
       bi = self.model.x_bi
     else:
-      x_val = self.model.v[:,self.model.solute_loc].flatten()
+      x_val = self.model.v[:,self.model.kbi_model.solute_loc].flatten()
       x_lab = '\phi'
       sp = self.model.v_sp
       bi = self.model.v_bi
@@ -441,7 +441,7 @@ class PhaseDiagramPlotter:
         # add binodals to plot
         ax.plot(bi[t], self.model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.model.T_values)+1)
     fig.colorbar(cmap, ax=ax, orientation='vertical', pad=0.02, label='Temperature [K]')
-    ax.set_xlabel(f"${x_lab}_{{{self.model.solute_name}}}$")
+    ax.set_xlabel(f"${x_lab}_{{{self.model.kbi_model.solute_name}}}$")
     ax.set_xlim(-0.05,1.05)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
@@ -476,7 +476,7 @@ class PhaseDiagramPlotter:
       ax.plot(bi[t], self.model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.model.T_values)+1)
       c_ind += 1
     ax.legend(loc='lower left', fontsize=9)
-    ax.set_xlabel(f"${x_lab}_{{{self.model.solute_name}}}$")
+    ax.set_xlabel(f"${x_lab}_{{{self.model.kbi_model.solute_name}}}$")
     ax.set_xlim(-0.05,1.05)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
@@ -506,7 +506,7 @@ class PhaseDiagramPlotter:
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
       plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_Gmix_heatmap_{basis}frac.png')
@@ -556,7 +556,7 @@ class PhaseDiagramPlotter:
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
       plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_I0_heatmap_{basis}frac.png')
@@ -628,11 +628,11 @@ class PhaseDiagramPlotter:
     ax.plot(bi[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.model.solute_loc], self.model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.model.kbi_model.solute_loc], self.model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.model.T_values)+1)
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
       plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_I0_heatmap_widomline_{basis}frac.png')
@@ -671,7 +671,7 @@ class PhaseDiagramPlotter:
     else:
       ax.set_ylim(min(self.model.T_values), max(self.model.T_values))
 
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
       plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_{basis}frac.png')
@@ -692,7 +692,7 @@ class PhaseDiagramPlotter:
     ax.plot(bi[:,1], self.model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.model.solute_loc], self.model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.model.kbi_model.solute_loc], self.model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.model.T_values)+1)
 
     legend_label = f"$T_c = {self.model.Tc:.0f}$ K\n${x_lab}_c = {self.xc(basis):.3f}$"
     ax.plot(self.xc(basis), self.model.Tc, color='none', marker='o', linestyle='', fillstyle='none', label=legend_label)
@@ -705,7 +705,7 @@ class PhaseDiagramPlotter:
     else:
       ax.set_ylim(min(self.model.T_values), max(self.model.T_values))
 
-    ax.set_xlabel(f'${x_lab}_{{{self.model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.model.kbi_model.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.model.save_dir is not None:
       plt.savefig(f'{self.model.save_dir}/{self.model.model_name}_phase_diagram_widomline_{basis}frac.png')
@@ -720,7 +720,7 @@ class PhaseDiagramPlotter:
   def ternary_GM(self, T, plot_spbi: bool = False, num_contours: int = 20, colormap: str = 'jet', show_fig: bool = False):
     ''' mixing free energy at T '''
 
-    xtext, ytext, ztext = self.model.mol_name
+    xtext, ytext, ztext = self.model.kbi_model.mol_name
 
     T_ind = np.abs(self.model.T_values - T).argmin()
     T_plot = self.model.T_values[T_ind]
@@ -774,7 +774,7 @@ class PhaseDiagramPlotter:
   def ternary_Io(self, T, plot_spbi: bool = False, num_contours: int = 20, colormap: str = 'jet', show_fig: bool = False):
     ''' mixing free energy at T '''
 
-    xtext, ytext, ztext = self.model.mol_name
+    xtext, ytext, ztext = self.model.kbi_model.mol_name
 
     T_ind = np.abs(self.model.T_values - T).argmin()
     T_plot = self.model.T_values[T_ind]
@@ -849,7 +849,7 @@ class PhaseDiagramPlotter:
       ax.plot(arr[:,0], arr[:,1], arr[:,2], linestyle='', marker='o', markersize=4, fillstyle='full', color=cmap.to_rgba(cs[a]), zorder=len(self.model.T_values)-a)
     fig.colorbar(cmap, ax=ax, aspect=25, label='Temperature [K]')
 
-    xtext, ytext, ztext = self.model.mol_name
+    xtext, ytext, ztext = self.model.kbi_model.mol_name
     ax.set_tlabel(xtext)
     ax.set_llabel(ytext)
     ax.set_rlabel(ztext)
