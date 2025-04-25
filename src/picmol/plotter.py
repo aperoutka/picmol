@@ -101,6 +101,7 @@ class KBIPlotter:
             L = self.model.lamdba_values[sys]
             L_fit = self.model.lamdba_values_fit[sys]
             inf_coeffs = self.model.kbi_inf_fits[sys]
+            Gij = inf_coeffs[0]
 
             ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
             ax[ij_combo].plot(L_fit, inf_coeffs(L_fit),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
