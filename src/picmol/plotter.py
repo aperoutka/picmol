@@ -98,9 +98,9 @@ class KBIPlotter:
             Gij_R = df_kbi_sys[f'G_{mol_1}_{mol_2}_cm3_mol']
             r = df_kbi_sys["r"]
 
-            L = self.model.lamdba_values[sys]
-            L_fit = self.model.lamdba_values_fit[sys]
-            inf_coeffs = self.model.kbi_inf_fits[sys]
+            L = self.model.lamdba_values[sys][f'{mol_1}-{mol_2}']
+            L_fit = self.model.lamdba_values_fit[sys][f'{mol_1}-{mol_2}']
+            inf_coeffs = self.model.kbi_inf_fits[sys][f'{mol_1}-{mol_2}']
             Gij = inf_coeffs[0]
 
             ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
@@ -393,7 +393,7 @@ class PhaseDiagramPlotter:
     self.model = model
 
   def make_figures(self, T=300, colormap='jet', num_contours=40):
-    if self.model.num_comp == 2:
+    if self.model.z.shape[1] == 2:
       for basis in ["mol", "vol"]:
         self.binary_gmix(basis=basis)
         self.binary_gmix_selectpts(basis=basis)
@@ -403,14 +403,14 @@ class PhaseDiagramPlotter:
         self.binary_phase_diagram_I0_heatmap_widomline(basis=basis, num_contours=num_contours)
         self.binary_phase_diagram_widomline(basis=basis)
 
-    elif self.model.num_comp == 3:
+    elif self.model.z.shape[1] == 3:
       self.ternary_GM(T, plot_spbi=False, colormap=colormap, num_contours=num_contours)
       self.ternary_GM(T, plot_spbi=True, colormap=colormap, num_contours=num_contours)
       self.ternary_Io(T, plot_spbi=False, colormap=colormap, num_contours=num_contours)
       self.ternary_Io(T, plot_spbi=True, colormap=colormap, num_contours=num_contours)
       self.ternary_binodals_fTemp(colormap=colormap)
     
-    elif self.model.num_comp > 3:
+    elif self.model.z.shape[1] > 3:
       print("plotter functions only supported for binary and ternary systems")
   
 

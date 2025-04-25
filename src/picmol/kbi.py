@@ -498,10 +498,10 @@ class KBI:
 					df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'] = np.zeros(self.n_sys)
 		
 		# create dict fo storing inf fits
-		self.kbi_inf_fits = {}
+		self.kbi_inf_fits = {sys: {} for sys in self.systems}
 		# storing system lambda values
-		self.lamdba_values = {}
-		self.lamdba_values_fit = {}
+		self.lamdba_values = {sys: {} for sys in self.systems}
+		self.lamdba_values_fit = {sys: {} for sys in self.systems}
 
 		for s, sys in enumerate(self.systems):
 			# create kbi dataframe for each system for storing kbi's as a function of r
@@ -555,9 +555,9 @@ class KBI:
 						params_cm3_mol = self._extrapolate_kbi(L=L, rkbi=kbi_cm3_mol_r, min_L_idx=min_L_idx)
 						Gij_inf_cm3_mol, _ = params_cm3_mol
 
-						self.kbi_inf_fits[sys] = np.poly1d(params_cm3_mol)
-						self.lamdba_values[sys] = L
-						self.lamdba_values_fit[sys] = L[min_L_idx:]
+						self.kbi_inf_fits[sys][f'{mol_1}-{mol_2}'] = np.poly1d(params_cm3_mol)
+						self.lamdba_values[sys][f'{mol_1}-{mol_2}'] = L
+						self.lamdba_values_fit[sys][f'{mol_1}-{mol_2}'] = L[min_L_idx:]
 
 						# add kbi values to nested dictionaries
 						df_kbi.loc[s, f'G_{mol_1}_{mol_2}_nm3'] = Gij_inf_nm3
