@@ -41,7 +41,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
 
 <div class="viewcode-block" id="add_molecule">
-<a class="viewcode-back" href="../../index.html#picmol.add_molecule">[docs]</a>
+<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.add_molecule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">add_molecule</span><span class="p">(</span><span class="n">mol_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 	<span class="n">mol_obj</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
 	<span class="n">mol_obj</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
@@ -86,7 +86,7 @@
 
 	
 <div class="viewcode-block" id="search_molecule">
-<a class="viewcode-back" href="../../index.html#picmol.search_molecule">[docs]</a>
+<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.search_molecule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">search_molecule</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&#39;&#39;&#39;takes in molecule name search csv to find molecule&#39;&#39;&#39;</span>
 	<span class="n">df</span> <span class="o">=</span> <span class="n">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
@@ -98,7 +98,7 @@
 
 
 <div class="viewcode-block" id="load_molecular_properties">
-<a class="viewcode-back" href="../../index.html#picmol.load_molecular_properties">[docs]</a>
+<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.load_molecular_properties">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
 	<span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>	</div>
 
