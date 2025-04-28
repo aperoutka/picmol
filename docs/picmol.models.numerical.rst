@@ -1,4 +1,4 @@
-Numerical (Taylor Series Expansion)
+Quartic
 =============================================
 
 .. automodule:: picmol.models.numerical

@@ -2,8 +2,9 @@
 
 `picmol` is a `Python` library designed to streamline the analysis of molecular dynamics simulations, focusing on the application of Kirkwood-Buff (KB) theory for the calculation of activity coefficients, excess thermodynamic properties, and liquid-liquid equilibria (LLE).
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://tldrlegal.com/license/mit-license)
-![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue)
+[![docs](https://picmol.readthedocs.io/)](http://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)
+[![license](https://img.shields.io/badge/License-MIT-blue.svg)](https://tldrlegal.com/license/mit-license)
+![python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue)
 
 
 ## Key Features
