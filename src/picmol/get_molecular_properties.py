@@ -84,7 +84,10 @@ def load_molecular_properties(index):
 	Loads `molecular_properties.csv` with pandas setting index to specified column
 
 	:param index: column to set as `index` in pandas DataFrame
-		* options: 'mol_name', 'mol_id', 'smiles'
+	:param index options:
+		* 'mol_name'
+		* 'mol_id'
+		* 'smiles'
 	:type index: str
 	:return: pandas DataFrame of `molecular_properties.csv` with specified index
 	:rtype: pd.DataFrame

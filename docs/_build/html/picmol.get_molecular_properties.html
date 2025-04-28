@@ -50,11 +50,12 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mol_name</strong> – molecule name used in figure labels</p></li>
-<li><p><strong>mol_id</strong> – molecule name used in .top files</p></li>
-<li><p><strong>mol_class</strong> – str to describe molecule type (i.e., ‘solute’, ‘extractant’, ‘solvent’)</p></li>
-<li><p><strong>smiles</strong> – SMILES str to identify molecule using RDkit</p></li>
-<li><p><strong>density</strong> – mass density (g/mL) of molecule (optional), if not provided density and molar volume are estimated with RDkit</p></li>
+<li><p><strong>mol_name</strong> (<em>str</em>) – molecule name used in figure labels</p></li>
+<li><p><strong>mol_id</strong> (<em>str</em>) – molecule name used in .top files</p></li>
+<li><p><strong>mol_class</strong> (<em>str</em>) – molecule type 
+* options: ‘solute’, ‘solvent’, ‘extractant’</p></li>
+<li><p><strong>smiles</strong> (<em>str</em>) – molecule SMILES to identify molecule using RDkit</p></li>
+<li><p><strong>density</strong> (<em>float</em><em>, </em><em>optional</em>) – mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit</p></li>
 </ul>
 </dd>
 </dl>
@@ -66,10 +67,14 @@
 <dd><p>Loads <cite>molecular_properties.csv</cite> with pandas setting index to specified column</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>index</strong> – column to set as index in pandas DataFrame (options: ‘mol_name’, ‘mol_id’, ‘smiles’)</p>
+<dd class="field-odd"><p><strong>index</strong> (<em>str</em>) – column to set as <cite>index</cite> in pandas DataFrame
+* options: ‘mol_name’, ‘mol_id’, ‘smiles’</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>pandas DataFrame of <cite>molecular_properties.csv</cite> with specified index</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -81,12 +86,13 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mol</strong> – molecule to look up of type index</p></li>
-<li><p><strong>index</strong> – type of molecule id (i.e., ‘mol_name’, ‘mol_id’, ‘smiles’)</p></li>
+<li><p><strong>mol</strong> (<em>str</em>) – molecule to look up using identifer <cite>index</cite></p></li>
+<li><p><strong>index</strong> (<em>str</em>) – molecule identifier type
+* options: ‘mol_name’, ‘mol_id’, ‘smiles’</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>SystemExit</strong> – If the molecule is not found.</p>
+<dd class="field-even"><p><strong>SystemExit</strong> – if <cite>mol</cite> is not found</p>
 </dd>
 </dl>
 </dd></dl>
