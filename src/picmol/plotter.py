@@ -11,7 +11,7 @@ from scipy.interpolate import griddata
 import mpltern
 
 from .thermo_model import ThermoModel, UNIFACThermoModel
-from .conversions import mol2vol
+from .functions import mol2vol
 from .kbi import add_zeros
 
 
