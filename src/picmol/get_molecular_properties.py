@@ -9,10 +9,16 @@ def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, densit
 	Adds a molecule to `molecular_properties.csv` file, using user specified information and rdkit properties
 	
 	:param mol_name: molecule name used in figure labels
+	:type mol_name: str
 	:param mol_id: molecule name used in .top files 
-	:param mol_class: str to describe molecule type (i.e., 'solute', 'extractant', 'solvent')
-	:param smiles: SMILES str to identify molecule using RDkit
-	:param density: mass density (g/mL) of molecule (optional), if not provided density and molar volume are estimated with RDkit
+	:type mol_id: str
+	:param mol_class: molecule type 
+		* options: 'solute', 'solvent', 'extractant'
+	:type mol_class: str 
+	:param smiles: molecule SMILES to identify molecule using RDkit
+	:type smiles: str
+	:param density: mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit
+	:type density: float, optional
 	"""
 	mol_obj = Chem.MolFromSmiles(smiles)
 	mol_obj = AllChem.AddHs(mol_obj)
@@ -59,9 +65,12 @@ def search_molecule(mol, index):
 	"""
 	Uses molecule name to search `molecular_properties.csv` to determine if molecule is present
 
-	:param mol: molecule to look up of type index
-	:param index: type of molecule id (i.e., 'mol_name', 'mol_id', 'smiles')
-	:raises SystemExit: If the molecule is not found.
+	:param mol: molecule to look up using identifer `index`
+	:type mol: str
+	:param index: molecule identifier type
+		* options: 'mol_name', 'mol_id', 'smiles'
+	:type index: str
+	:raises SystemExit: if `mol` is not found
 	"""
 	df = load_molecular_properties(index)
 	if mol not in df.index:
@@ -74,8 +83,11 @@ def load_molecular_properties(index):
 	"""
 	Loads `molecular_properties.csv` with pandas setting index to specified column
 
-	:param index: column to set as index in pandas DataFrame (options: 'mol_name', 'mol_id', 'smiles')
+	:param index: column to set as `index` in pandas DataFrame
+		* options: 'mol_name', 'mol_id', 'smiles'
+	:type index: str
 	:return: pandas DataFrame of `molecular_properties.csv` with specified index
+	:rtype: pd.DataFrame
 	"""
 	return pd.read_csv(Path(__file__).parent / "data" / "molecular_properties.csv").set_index(index)	
 	
