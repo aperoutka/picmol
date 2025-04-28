@@ -19,4 +19,3 @@ Homepage = "https://github.com/aperoutka/picmol"
 [project.scripts]
 picmol-kbi = "picmol.kbi_analysis:main"
 picmol-rdf = "picmol.traj_process.make_rdf_runscript:main"
-picmol-docs = "picmol.docs:main"

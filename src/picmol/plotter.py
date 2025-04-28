@@ -30,30 +30,30 @@ class KBIPlotter:
     self.kbi_model = model
     self.num_comp = len(self.kbi_model.unique_mols)
     
-  def make_figures(self):
+  def make_figures(self, show_fig: bool = False):
     '''creates figures based on number of components in system'''
     # kbi integral as a function of r
-    self.make_indiv_kbi_plots() # running kbi
-    self.plot_kbi_inf() # kbi extrapolation to infinity (thermodynamic limit)
+    self.make_indiv_kbi_plots(show_fig=show_fig) # running kbi
+    self.plot_kbi_inf(show_fig=show_fig) # kbi extrapolation to infinity (thermodynamic limit)
 
     for basis in ["mol", "vol"]:
       # kbi values & activities
-      self.plot_composition_kbis(basis=basis)
-      self.plot_dln_gammas(basis=basis)
-      self.plot_ln_gammas(basis=basis)
+      self.plot_composition_kbis(basis=basis, show_fig=show_fig)
+      self.plot_dln_gammas(basis=basis, show_fig=show_fig)
+      self.plot_ln_gammas(basis=basis, show_fig=show_fig)
 
       if self.num_comp == 2:
         # calculated excess parameters
-        self.plot_binary_Gex(basis=basis)
-        self.plot_binary_excess_contributions(basis=basis)
+        self.plot_binary_Gex(basis=basis, show_fig=show_fig)
+        self.plot_binary_excess_contributions(basis=basis, show_fig=show_fig)
         # plot fits for thermodynamic interaction parameters
         self.plot_NRTL_IP_fit()
         self.plot_FH_chi_fit()
         self.plot_UNIQUAC_IP_fit()
         self.plot_quartic_fit()
-        self.plot_binary_thermo_model_comparisons()
+        self.plot_binary_thermo_model_comparisons(show_fig=show_fig)
 
-  def make_indiv_kbi_plots(self):
+  def make_indiv_kbi_plots(self, show_fig: bool = False):
     ''' create plots for each system as a function of r '''
     # if kbi's not found, run kbi_analysis
     try:
@@ -78,9 +78,12 @@ class KBIPlotter:
             ij_combo += 1
       ax[0].set_ylabel('$G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
       plt.savefig(f'{self.kbi_model.kbi_indiv_fig_dir}{sys}_kbi.png')
-      plt.close()
+      if show_fig:
+        plt.show()
+      else:
+        plt.close()
 
-  def plot_kbi_inf(self):
+  def plot_kbi_inf(self, show_fig: bool = False):
     ''' create kbi plots for extrapolating to the thermodynamic limit'''
     try:
       self.kbi_model.df_kbi
@@ -105,7 +108,7 @@ class KBIPlotter:
 
             ax[ij_combo].plot(L, L*Gij_R, c="dodgerblue", linestyle='solid', linewidth=2, alpha=0.5)
             ax[ij_combo].plot(L_fit, inf_coeffs(L_fit),c='k', alpha=0.9, ls='--', lw=3, label=f"$G_{{ij}}^{{\infty}}$: {Gij:.0f}")
-            ax[ij_combo].legend(fontsize=11)
+            ax[ij_combo].legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
             # figure properties
             ax[ij_combo].set_xlim(L.min(), L.max())
             ax[ij_combo].set_xlabel('$\lambda$')
@@ -113,7 +116,10 @@ class KBIPlotter:
             ij_combo += 1
       ax[0].set_ylabel('$\lambda$ $G_{ij}^R$ [cm$^3$ mol$^{-1}$]')
       plt.savefig(f'{self.kbi_model.kbi_indiv_fig_dir}{sys}_kbi_inf.png')
-      plt.close()
+      if show_fig:
+        plt.show()
+      else:
+        plt.close()
 
 
   def x_basis(self, basis):
@@ -128,7 +134,7 @@ class KBIPlotter:
       x_lab = '\phi'
     return zplot, xplot, x_lab
 
-  def plot_composition_kbis(self, basis):
+  def plot_composition_kbis(self, basis, show_fig: bool = False):
     '''kbi integral values as a function of composition'''
     try:
       self.kbi_model.df_kbi
@@ -150,15 +156,18 @@ class KBIPlotter:
           ax.scatter(xplot, self.kbi_model.df_kbi[f'G_{mol_1}_{mol_2}_cm3_mol'], c=colors[ij], marker='s', linewidth=1.8, label=f'{self.kbi_model.mol_name_dict[mol_1]}-{self.kbi_model.mol_name_dict[mol_2]}')
           ij += 1
 
-    ax.legend(fontsize=10, loc='best', frameon=True, framealpha=0.7)
+    ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$G_{{ij}}^{{\infty}}$ [cm$^3$ mol$^{{-1}}$]')
     plt.savefig(f'{self.kbi_model.kbi_method_dir}composition_KBI_{basis.lower()}frac_{self.kbi_model.kbi_method.lower()}.png')
-    plt.close()
+    if show_fig:
+      plt.show()
+    else:
+      plt.close()
 
-  def plot_dln_gammas(self, basis, ylimits=[]):
+  def plot_dln_gammas(self, basis, ylimits=[], show_fig: bool = False):
     '''derivative of log activity coefficients'''
     zplot, xplot, x_lab = self.x_basis(basis)
 
@@ -171,7 +180,7 @@ class KBIPlotter:
       else:
         ax.scatter(zplot[:,self.kbi_model.solute_loc], self.kbi_model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
-    ax.legend(fontsize=11, loc='lower center', frameon=True, framealpha=0.7)
+    ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
@@ -185,9 +194,12 @@ class KBIPlotter:
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\partial \ln(\gamma_{i})/\partial x_{i}$')
     plt.savefig(f'{self.kbi_model.kbi_method_dir}deriv_activity_coefs_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
-    plt.close()
+    if show_fig:
+      plt.show()
+    else:
+      plt.close()
 
-  def plot_ln_gammas(self, basis, ylimits=[]):
+  def plot_ln_gammas(self, basis, ylimits=[], show_fig: bool = False):
     '''log activity coefficients'''
     zplot, xplot, x_lab = self.x_basis(basis)
 
@@ -200,7 +212,7 @@ class KBIPlotter:
       else:
         ax.scatter(zplot[:,self.kbi_model.solute_loc], np.log(self.kbi_model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
-    ax.legend(fontsize=11, loc='upper center', frameon=True, framealpha=0.7)
+    ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
@@ -214,7 +226,10 @@ class KBIPlotter:
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_ylabel('$\ln \gamma_{i}$')
     plt.savefig(f'{self.kbi_model.kbi_method_dir}activity_coefs_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
-    plt.close()
+    if show_fig:
+      plt.show()
+    else:
+      plt.close()
 
   def xplot0(self, basis):
     zplot, xplot, _ = self.x_basis(basis)
@@ -226,7 +241,7 @@ class KBIPlotter:
       xplot0[0] = 1
     return xplot0
   
-  def plot_binary_Gex(self, basis):
+  def plot_binary_Gex(self, basis, show_fig: bool = False):
 
     zplot, xplot, x_lab = self.x_basis(basis)
     xplot0 = self.xplot0(basis)
@@ -238,9 +253,12 @@ class KBIPlotter:
     ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel('$G^E$ $[kJ$ $mol^{-1}]$')
     plt.savefig(f'{self.kbi_model.kbi_method_dir}gibbs_excess_energy_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
-    plt.close()
+    if show_fig:
+      plt.show()
+    else:
+      plt.close()
 
-  def plot_binary_excess_contributions(self, basis):
+  def plot_binary_excess_contributions(self, basis, show_fig: bool = False):
     zplot, xplot, x_lab = self.x_basis(basis)
     xplot0 = self.xplot0(basis)
 
@@ -254,9 +272,12 @@ class KBIPlotter:
     ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel('Excess Properties $[kJ$ $mol^{-1}]$')
     plt.savefig(f'{self.kbi_model.kbi_method_dir}gibbs_excess_properties_{basis}frac_{self.kbi_model.kbi_method.lower()}.png')
-    plt.close()
+    if show_fig:
+      plt.show()
+    else:
+      plt.close()
 
-  def plot_binary_thermo_model_comparisons(self):
+  def plot_binary_thermo_model_comparisons(self, show_fig: bool = False):
     """compare UNIQUAC, UNIFAC, QuarticModel"""
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
     xplot = self.kbi_model.z_plot[:,self.kbi_model.solute_loc]
@@ -287,9 +308,12 @@ class KBIPlotter:
     ax[1].set_ylabel(f'$-T\Delta S_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax[2].set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
 
-    ax[1].legend(fontsize=11, loc='upper center')
+    ax[1].legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     plt.savefig(f'{self.kbi_model.kbi_method_dir}thermo_model_comparisons_{self.kbi_model.kbi_method.lower()}.png')
-    plt.close()
+    if show_fig:
+      plt.show()
+    else:
+      plt.close()
 
 
   def plot_UNIQUAC_IP_fit(self):
@@ -302,7 +326,7 @@ class KBIPlotter:
     ax.set_xlim(-0.05,1.05)
     ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
-    ax.legend(fontsize=11, loc='upper center')
+    ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     plt.savefig(f'{self.kbi_model.kbi_method_dir}UNIQUAC_fit_molfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
@@ -339,7 +363,7 @@ class KBIPlotter:
     ax.set_xlim(-0.05,1.05)
     ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
-    ax.legend(fontsize=11, loc='upper center')
+    ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     plt.savefig(f'{self.kbi_model.kbi_method_dir}NRTL_fit_molfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 
@@ -362,7 +386,7 @@ class KBIPlotter:
     fig, ax = plt.subplots()
     ax.scatter(pplot, Gmix0, color='k', marker='o', linewidth=1.8, label="Simulated", zorder=10)
     ax.plot(pplot, fh_gmix0, color='tab:red', linewidth=2.5, label='FH')
-    ax.legend(fontsize=11, loc='upper center')
+    ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlabel(f'$\phi_{{{self.kbi_model.solute_name}}}$')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.2))
@@ -379,7 +403,7 @@ class KBIPlotter:
     ax.set_xlim(-0.05,1.05)
     ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
-    ax.legend(fontsize=11, loc='upper center')
+    ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     plt.savefig(f'{self.kbi_model.kbi_method_dir}QUARTIC_fit_molfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
 

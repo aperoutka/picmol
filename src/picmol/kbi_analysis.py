@@ -52,7 +52,7 @@ def main():
 
   # run kbi analysis
   print('computing kbis')
-  kbi_obj.kbi_analysis()
+  kbi_obj.run()
 
   # create figures
   print('creating figures')
@@ -73,7 +73,7 @@ def main():
       )
 
     print('performing temperature scaling')
-    tmodel.temperature_scaling()
+    tmodel.run()
 
     # create phase diagram figures
     print('creating figures')

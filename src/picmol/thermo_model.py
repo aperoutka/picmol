@@ -235,12 +235,12 @@ class ThermoModel:
 			self.model.load_thermo_data(phi=KBIModel.v[:,self.kbi_model.solute_loc], Smix=KBIModel.Smix, Hmix=KBIModel.Hmix)
 
 
-	def temperature_scaling(self):
+	def run(self):
 		# first perform temperature scaling to get: Gmix, spinodals, binodals
 		if self.kbi_model.num_comp == 2:
-			self._do_binary_temperature_scaling()
+			self._binary_temperature_scaling()
 		else:
-			self._do_multicomp_temperature_scaling()
+			self._multicomp_temperature_scaling()
 		# then calculate saxs Io
 		self._calculate_saxs_Io()
 
@@ -265,7 +265,7 @@ class ThermoModel:
 			self.phic = mol2vol(([self.xc, 1-self.xc]), self.kbi_model.molar_vol)
 		self.Tc = T
 	
-	def _do_binary_temperature_scaling(self):
+	def _binary_temperature_scaling(self):
 
 		self.GM = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
 		self.d2GM = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
@@ -360,7 +360,7 @@ class ThermoModel:
 			df.to_csv(f"{self.save_dir}{self.model_name}_phase_instability_values.csv", index=False)
 
 
-	def _do_multicomp_temperature_scaling(self):
+	def _multicomp_temperature_scaling(self):
 
 		all_GMs = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
 		all_d2GMs = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
@@ -487,14 +487,14 @@ class UNIFACThermoModel:
 		self.v = mol2vol(self.z, self.molar_vol)
 
 
-	def temperature_scaling(self):
+	def run(self):
 		# first perform temperature scaling to get: Gmix, spinodals, binodals
 		if self.num_comp == 2:
-			self._do_binary_temperature_scaling()
+			self._binary_temperature_scaling()
+			# then calculate saxs Io
+			self._calculate_saxs_Io()
 		else:
-			self._do_multicomp_temperature_scaling()
-		# then calculate saxs Io
-		self._calculate_saxs_Io()
+			self._multicomp_temperature_scaling()
 
 	@property
 	def Rc(self):
@@ -547,12 +547,8 @@ class UNIFACThermoModel:
 		return self.mol_by_identifier["mol_class"].to_numpy()
 	
 	def critical_point(self, sp_bi_vals, T):
-		if self.model_type == FH:
-			self.xc = self.model.xc
-			self.phic = self.model.phic
-		else:
-			self.xc = np.mean(sp_bi_vals)
-			self.phic = mol2vol(([self.xc, 1-self.xc]), self.molar_vol)
+		self.xc = np.mean(sp_bi_vals)
+		self.phic = mol2vol(([self.xc, 1-self.xc]), self.molar_vol)
 		self.Tc = T
 	
 	@property
@@ -561,13 +557,13 @@ class UNIFACThermoModel:
 
 	@property
 	def solute_loc(self):
-		return np.where(self.mol_id==self.solute)[0][0]
+		return list(self.mol_id).index(self.solute)
 	
 	@property
 	def solute_name(self):
 		return self.mol_name[self.solute_loc]
 	
-	def _do_binary_temperature_scaling(self):
+	def _binary_temperature_scaling(self):
 
 		self.GM = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
 		self.d2GM = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
@@ -585,7 +581,6 @@ class UNIFACThermoModel:
 			# unifac, requires a new model object at each temperature
 			self.model = UNIFAC(T=T, smiles=self.smiles, version=self.unif_version)
 			gm = self.model.GM()
-			dgm = self.model.dGM_dxs().flatten()
 			self.GM[t,:] = gm
 			self.d2GM[t,:] = self.model.det_Hij()
 			gammas = self.model.gammas()
@@ -625,18 +620,14 @@ class UNIFACThermoModel:
 		elif T_values_filter[crit_ind] == T_values_filter.min():
 			self.lle_type = "lcst"
 
-
-	def _do_multicomp_temperature_scaling(self):
+	def _multicomp_temperature_scaling(self):
 
 		all_GMs = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
-		all_d2GMs = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
-		all_sp_ls = []
 		all_bi_ls = []
 
 		for t, T in enumerate(self.T_values):
 			self.model = UNIFAC(T=T, smiles=self.smiles, version=self.unif_version)
 			GM = self.model.GM()
-			det_Hij = self.model.det_Hij()
 			gammas = self.model.gammas()
 			all_GMs[t] = GM
 
@@ -645,3 +636,55 @@ class UNIFACThermoModel:
 	
 		self.GM = all_GMs
 		self.x_bi = all_bi_ls
+
+	def _calculate_saxs_Io(self):
+		re2 = 7.9524E-26 # cm^2
+		kb = self.Rc / self.N_A
+
+		V_bar_i0 = self.z @ self.molar_vol
+		N_bar = self.z @ self.n_electrons
+		rho_e = 1/V_bar_i0
+
+		drho_dx = np.zeros(self.z.shape[0])
+		for j in range(self.num_comp-1):
+			drho_dx += self.N_A*(rho_e*(self.n_electrons[j]-self.n_electrons[-1]) - N_bar*rho_e*(self.molar_vol[j]-self.molar_vol[-1])/V_bar_i0)
+
+		I0_arr = np.empty((len(self.T_values), self.z.shape[0]))
+		x_I0_max = np.full((len(self.T_values), self.num_comp), fill_value=np.nan)
+		v_I0_max = np.full((len(self.T_values), self.num_comp), fill_value=np.nan)
+		df_I0_max = pd.DataFrame(columns=['T', 'I0'])
+		df_I0 = pd.DataFrame()
+		df_I0['x'] = self.z[:,self.solute_loc]
+		df_I0['v'] = self.v[:,self.solute_loc]
+
+		for t, T in enumerate(self.T_values):
+			S0 = kb * T * V_bar_i0 / self.d2GM[t]
+			I0 = re2 * (drho_dx**2) * S0
+			I0_arr[t] = I0
+			I0 = np.array([np.round(i, 4) for i in I0])
+			I0_filter = ~np.isnan(I0)
+			if len(I0_filter) > 0:
+				I0_max = max(I0[I0_filter])
+				try:
+					if self.lle_type == "ucst" and T > self.Tc:
+						df_I0[T] = I0
+						new_row = {"T": T, "I0": I0_max}
+						df_I0_max = df_I0_max._append(new_row, ignore_index=True)
+						v_I0_max[t] = self.v[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
+						x_I0_max[t] = self.z[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
+					elif self.lle_type == "lcst" and T < self.Tc:
+						df_I0[T] = I0
+						new_row = {"T": T, "I0": I0_max}
+						df_I0_max = df_I0_max._append(new_row, ignore_index=True)
+						v_I0_max[t] = self.v[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
+						x_I0_max[t] = self.z[I0_filter][np.where(I0[I0_filter]==I0_max)[0][0]]
+				except:
+					pass
+			
+		self.I0_max = df_I0_max
+		self.I0_arr = I0_arr
+
+		# remove nan values, ie, for T <= Tc
+		nan_filter = ~np.any(np.isnan(x_I0_max), axis=1)
+		self.x_I0_max = x_I0_max[nan_filter]
+		self.v_I0_max = v_I0_max[nan_filter]

@@ -108,7 +108,7 @@ class KBI:
 		self._z = self._top_z # get mol fraction matrix of each system
 		self._v = self._top_v # convert mol fraction matrix to vol fraction
 	
-	def kbi_analysis(self):
+	def run(self):
 		# run the KBI analysis
 		self._calculate_kbi()
 		# calculate thermodynamic properties
