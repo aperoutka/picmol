@@ -61,6 +61,7 @@ def search_molecule(mol, index):
 
 	:param mol: molecule to look up of type index
 	:param index: type of molecule id (i.e., 'mol_name', 'mol_id', 'smiles')
+	:raises SystemExit: If the molecule is not found.
 	"""
 	df = load_molecular_properties(index)
 	if mol not in df.index:
