@@ -21,9 +21,7 @@ extensions = [
   'sphinx.ext.viewcode',
   'sphinx.ext.autosummary',
   'sphinx.ext.intersphinx',
-  'nbsphinx',
   'matplotlib.sphinxext.plot_directive',
-  'sphinxcontrib.katex',
   'sphinx_sitemap',
   'sphinxcontrib.googleanalytics',
 ]
