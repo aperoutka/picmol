@@ -94,13 +94,13 @@ def numerical_binodal_fn(x, GM, dGM, sp1=None, sp2=None):
 
 
 
-def Tc_search(smiles: list, lle_type=None, Tmin=100, Tmax=500, dT=5, unif_version="unifac-kbi"):
+def Tc_search(smiles: list, lle_type=None, Tmin=100, Tmax=500, dT=5, unif_version="unifac"):
 	''' 
 	find Tc for binary systems 
 
 	if lle_type is specificied, calculation is more efficient
 	'''
-	if "md" in unif_version:
+	if "md" in unif_version or 'kbi' in unif_version:
 		version = "unifac-kbi"
 	elif "il" in unif_version:
 		version = "unifac-il"
@@ -112,7 +112,7 @@ def Tc_search(smiles: list, lle_type=None, Tmin=100, Tmax=500, dT=5, unif_versio
 		T_initial = {"ucst": Tmax, "lcst": Tmin}
 		T = T_initial[lle_type]
 		dT = 50
-		while T > 0 and T < 1200:
+		while T >= 0 and T <= 1200:
 			model = UNIFAC(T=T, smiles=smiles, version=version)
 			d2GM = model.det_Hij()
 			sign_changes = np.diff(np.sign(d2GM))  # diff of signs between consecutive elements
@@ -140,7 +140,7 @@ def Tc_search(smiles: list, lle_type=None, Tmin=100, Tmax=500, dT=5, unif_versio
 					T -= dT
 				else:
 					T += dT
-		return 0
+		return np.nan
 	# if lle type is not known, calculate spinodals for all T
 	# Tc is where there is the smallest difference between spinodal values
 	else:
