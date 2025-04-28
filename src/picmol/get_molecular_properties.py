@@ -5,6 +5,15 @@ from pathlib import Path
 import sys, os
 
 def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, density: float = None):
+	"""
+	Adds a molecule to `molecular_properties.csv` file, using user specified information and rdkit properties
+	
+	:param mol_name: molecule name used in figure labels
+	:param mol_id: molecule name used in .top files 
+	:param mol_class: str to describe molecule type (i.e., 'solute', 'extractant', 'solvent')
+	:param smiles: SMILES str to identify molecule using RDkit
+	:param density: mass density (g/mL) of molecule (optional), if not provided density and molar volume are estimated with RDkit
+	"""
 	mol_obj = Chem.MolFromSmiles(smiles)
 	mol_obj = AllChem.AddHs(mol_obj)
 
@@ -47,7 +56,12 @@ def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, densit
 
 	
 def search_molecule(mol, index):
-	'''takes in molecule name search csv to find molecule'''
+	"""
+	Uses molecule name to search `molecular_properties.csv` to determine if molecule is present
+
+	:param mol: molecule to look up of type index
+	:param index: type of molecule id (i.e., 'mol_name', 'mol_id', 'smiles')
+	"""
 	df = load_molecular_properties(index)
 	if mol not in df.index:
 		print('molecule not found!!!')
@@ -56,5 +70,12 @@ def search_molecule(mol, index):
 
 
 def load_molecular_properties(index):
+	"""
+	Loads `molecular_properties.csv` with pandas setting index to specified column
+
+	:param index: column to set as index in pandas DataFrame
+
+	:return: pandas DataFrame of `molecular_properties.csv` with specified index
+	"""
 	return pd.read_csv(Path(__file__).parent / "data" / "molecular_properties.csv").set_index(index)	
 	
