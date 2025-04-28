@@ -21,14 +21,7 @@ extensions = [
   'sphinx.ext.viewcode',
   'sphinx.ext.autosummary',
   'sphinx.ext.intersphinx',
-  'sphinx_sitemap',
-  'sphinxcontrib.googleanalytics',
 ]
-googleanalytics_id = 'G-H82NH09HYY'
-
-html_baseurl = 'https://picmol.readthedocs.io/'
-sitemap_url_scheme = "{link}"
-sitemap_filename = 'sitemap2.xml' # readthedocs generates its own
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
