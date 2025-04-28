@@ -40,7 +40,18 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
 
+<div class="viewcode-block" id="add_molecule">
+<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.get_molecular_properties.add_molecule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">add_molecule</span><span class="p">(</span><span class="n">mol_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Adds a molecule to `molecular_properties.csv` file, using user specified information and rdkit properties</span>
+<span class="sd">	</span>
+<span class="sd">	:param mol_name: molecule name used in figure labels</span>
+<span class="sd">	:param mol_id: molecule name used in .top files </span>
+<span class="sd">	:param mol_class: str to describe molecule type (i.e., &#39;solute&#39;, &#39;extractant&#39;, &#39;solvent&#39;)</span>
+<span class="sd">	:param smiles: SMILES str to identify molecule using RDkit</span>
+<span class="sd">	:param density: mass density (g/mL) of molecule (optional), if not provided density and molar volume are estimated with RDkit</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">mol_obj</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
 	<span class="n">mol_obj</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
 
@@ -79,13 +90,20 @@
 	<span class="c1"># read in dataframe and add molecule and write back out</span>
 	<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span>
 	<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_append</span><span class="p">(</span><span class="n">new_molecule</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-	<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+	<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
 
 	
 <div class="viewcode-block" id="search_molecule">
 <a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.get_molecular_properties.search_molecule">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">search_molecule</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-<span class="w">	</span><span class="sd">&#39;&#39;&#39;takes in molecule name search csv to find molecule&#39;&#39;&#39;</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Uses molecule name to search `molecular_properties.csv` to determine if molecule is present</span>
+
+<span class="sd">	:param mol: molecule to look up of type index</span>
+<span class="sd">	:param index: type of molecule id (i.e., &#39;mol_name&#39;, &#39;mol_id&#39;, &#39;smiles&#39;)</span>
+<span class="sd">	:raises SystemExit: If the molecule is not found.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">df</span> <span class="o">=</span> <span class="n">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 	<span class="k">if</span> <span class="n">mol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;molecule not found!!!&#39;</span><span class="p">)</span>
@@ -94,8 +112,18 @@
 
 
 
+<div class="viewcode-block" id="load_molecular_properties">
+<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.get_molecular_properties.load_molecular_properties">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
-	<span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>	
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Loads `molecular_properties.csv` with pandas setting index to specified column</span>
+
+<span class="sd">	:param index: column to set as index in pandas DataFrame</span>
+
+<span class="sd">	:return: pandas DataFrame of `molecular_properties.csv` with specified index</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>	</div>
+
 	
 </pre></div>
 
