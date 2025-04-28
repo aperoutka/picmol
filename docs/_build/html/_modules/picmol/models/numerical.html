@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>picmol.models.numerical &#8212; picmol 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/nature.css?v=279e0f84" />
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">picmol 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">picmol.models.numerical</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for picmol.models.numerical</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">sympify</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">preorder_traversal</span><span class="p">,</span> <span class="n">lambdify</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.cem</span><span class="w"> </span><span class="kn">import</span> <span class="n">PointDisc</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add_zeros</span><span class="p">(</span><span class="n">arr1d</span><span class="p">,</span> <span class="n">num_comp</span><span class="p">):</span>
+  <span class="n">new_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">arr1d</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="n">num_comp</span><span class="p">)</span>
+  <span class="n">new_arr</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">arr1d</span><span class="p">)]</span> <span class="o">=</span> <span class="n">arr1d</span>
+  <span class="k">return</span> <span class="n">new_arr</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add_pc</span><span class="p">(</span><span class="n">z_arr</span><span class="p">,</span> <span class="n">num_comp</span><span class="p">):</span>
+  <span class="n">new_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">z_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">num_comp</span><span class="p">,</span> <span class="n">z_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+  <span class="n">new_arr</span><span class="p">[:</span><span class="n">z_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],:]</span> <span class="o">=</span> <span class="n">z_arr</span>
+  <span class="n">pure_comp_arr</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_comp</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_comp</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">pure_comp_arr</span> <span class="o">+=</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+  <span class="n">new_arr</span><span class="p">[</span><span class="n">z_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pure_comp_arr</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">new_arr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_symbols_sympy_func</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">xvar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
+  <span class="n">symbols_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+  <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">preorder_traversal</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
+      <span class="n">symbols_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+  <span class="n">symbols_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">symbols_set</span><span class="p">)</span>
+  <span class="n">x_symbols</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols_list</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">xvar</span><span class="p">)])</span>
+  <span class="n">other_symbols</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols_list</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">xvar</span><span class="p">)])</span>
+  <span class="k">return</span> <span class="n">x_symbols</span> <span class="o">+</span> <span class="n">other_symbols</span>
+
+
+<div class="viewcode-block" id="QuarticModel">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QuarticModel</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_data</span><span class="p">,</span> <span class="n">Hmix</span><span class="p">,</span> <span class="n">Sex</span><span class="p">,</span> <span class="n">molar_vol</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gid_type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">V0</span> <span class="o">=</span> <span class="n">molar_vol</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rec_steps</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">R</span> <span class="o">/</span> <span class="mi">1000</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">molar_vol</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">gid_type</span> <span class="o">=</span> <span class="n">gid_type</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">Hmix_vals</span> <span class="o">=</span> <span class="n">add_zeros</span><span class="p">(</span><span class="n">Hmix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Sex_vals</span> <span class="o">=</span> <span class="n">add_zeros</span><span class="p">(</span><span class="n">Sex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">z_data</span> <span class="o">=</span> <span class="n">add_pc</span><span class="p">(</span><span class="n">z_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)</span>
+
+    <span class="c1"># get mol and vol arrays</span>
+    <span class="n">num_pts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">4</span><span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rec_steps</span> <span class="o">=</span> <span class="n">num_pts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">z</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">point_disc</span> <span class="o">=</span> <span class="n">PointDisc</span><span class="p">(</span><span class="n">num_comp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">,</span> <span class="n">recursion_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_steps</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">point_disc</span><span class="o">.</span><span class="n">points_mfr</span> 
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">mol2vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">V0</span><span class="p">)</span>
+
+    <span class="c1"># fit quartic to Hmix and Sex</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fit_Hmix</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fit_Sex</span><span class="p">()</span>
+
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_polynomial_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_polynomial_for_fitting</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_df_dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dx_func</span><span class="p">(</span><span class="n">xvar</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_d2f_dx2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">d2f_dx2_func</span><span class="p">(</span><span class="n">xvar</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_dMf_dmi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dx_func</span><span class="p">(</span><span class="n">xvar</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QuarticModel.df_dx_func">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.df_dx_func">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">df_dx_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xvar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
+    <span class="c1"># create function from num_components</span>
+    <span class="n">py_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_polynomial_for_sympy</span><span class="p">(</span><span class="n">num_comp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">,</span> <span class="n">xvar</span><span class="o">=</span><span class="n">xvar</span><span class="p">)</span>
+    <span class="c1"># convert to sympy function</span>
+    <span class="n">sympy_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">python_function_to_sympy</span><span class="p">(</span><span class="n">python_function</span><span class="o">=</span><span class="n">py_func</span><span class="p">,</span> <span class="n">xvar</span><span class="o">=</span><span class="n">xvar</span><span class="p">)</span>
+    <span class="c1"># setup variables</span>
+    <span class="n">x_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">symbols</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xvar</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">xvar</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+      <span class="n">df_dxs</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">df_dxs</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)}</span>
+    <span class="c1"># get list of arguments</span>
+    <span class="n">arg_list</span> <span class="o">=</span> <span class="n">get_symbols_sympy_func</span><span class="p">(</span><span class="n">sympy_func</span><span class="p">,</span> <span class="n">xvar</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">df_dxs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+      <span class="n">df_dx_sympy</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">sympy_func</span><span class="p">,</span> <span class="n">x_symbols</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+      <span class="n">df_dxs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">arg_list</span><span class="p">,</span> <span class="n">df_dx_sympy</span><span class="p">,</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_dxs</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.d2f_dx2_func">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.d2f_dx2_func">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">d2f_dx2_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xvar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
+    <span class="c1"># create function from num_components</span>
+    <span class="n">py_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_polynomial_for_sympy</span><span class="p">(</span><span class="n">num_comp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">,</span> <span class="n">xvar</span><span class="o">=</span><span class="n">xvar</span><span class="p">)</span>
+    <span class="c1"># convert to sympy function</span>
+    <span class="n">sympy_func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">python_function_to_sympy</span><span class="p">(</span><span class="n">python_function</span><span class="o">=</span><span class="n">py_func</span><span class="p">,</span> <span class="n">xvar</span><span class="o">=</span><span class="n">xvar</span><span class="p">)</span>
+    <span class="c1"># setup variables</span>
+    <span class="n">x_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">symbols</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xvar</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">xvar</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+      <span class="n">d2f_dx2s</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">d2f_dx2s</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)}</span>
+    <span class="c1"># get list of arguments</span>
+    <span class="n">arg_list</span> <span class="o">=</span> <span class="n">get_symbols_sympy_func</span><span class="p">(</span><span class="n">sympy_func</span><span class="p">,</span> <span class="n">xvar</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">d2f_dx2s</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+      <span class="n">df_dx_sympy</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">sympy_func</span><span class="p">,</span> <span class="n">x_symbols</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">d2f_dx2s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">d2f_dx2_sympy</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">df_dx_sympy</span><span class="p">,</span> <span class="n">x_symbols</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+        <span class="n">d2f_dx2s</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">arg_list</span><span class="p">,</span> <span class="n">d2f_dx2_sympy</span><span class="p">,</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d2f_dx2s</span></div>
+
+  
+<div class="viewcode-block" id="QuarticModel.python_function_to_sympy">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.python_function_to_sympy">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">python_function_to_sympy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_function</span><span class="p">,</span> <span class="n">xvar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
+    <span class="n">arg_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">):</span>
+      <span class="n">arg_names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">xvar</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+      <span class="n">x_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">symbols</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xvar</span><span class="si">}{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">x_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">symbols</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xvar</span><span class="si">}{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)]</span>
+    <span class="n">arg_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">symbols</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">arg_names</span><span class="p">]</span>
+    <span class="c1"># Call the python function with symbolic arguments</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">python_function</span><span class="p">(</span><span class="o">*</span><span class="n">x_symbols</span><span class="p">,</span> <span class="o">*</span><span class="n">arg_symbols</span><span class="p">)</span>
+    <span class="c1"># Convert the NumPy array of SymPy symbols to a SymPy expression</span>
+    <span class="n">sympy_expression</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sympy_expression</span></div>
+
+
+
+<div class="viewcode-block" id="QuarticModel.fit_Hmix">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.fit_Hmix">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fit_Hmix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">fit</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polynomial_func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hmix_vals</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_Hmix_params</span> <span class="o">=</span> <span class="n">fit</span></div>
+
+  
+<div class="viewcode-block" id="QuarticModel.fit_Sex">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.fit_Sex">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fit_Sex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">fit</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_polynomial_func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sex_vals</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_Sex_params</span> <span class="o">=</span> <span class="n">fit</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">x_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">m_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">)]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">Hmix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polynomial_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Hmix_params</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">Sex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polynomial_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Sex_params</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">Gid_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">get_symbols_sympy_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Gid_sympy</span><span class="p">,</span> <span class="n">xvar</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">Gid_sympy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">xsum</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(1&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">):</span>
+      <span class="n">xsum</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;-x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">xsum</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
+
+    <span class="n">vbar</span> <span class="o">=</span> <span class="s2">&quot;(&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">):</span>
+      <span class="n">vbar</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">*v</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> + &quot;</span>
+    <span class="n">vbar</span> <span class="o">+=</span> <span class="n">xsum</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;*v</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="si">}</span><span class="s2">)&quot;</span>
+  
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gid_type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+      <span class="n">G</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">):</span>
+        <span class="n">G</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> * ln(x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">*v</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">vbar</span><span class="si">}</span><span class="s2">) + &quot;</span>
+      <span class="n">G</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xsum</span><span class="si">}</span><span class="s2"> * ln(</span><span class="si">{</span><span class="n">xsum</span><span class="si">}</span><span class="s2">*v</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">vbar</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">G</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">):</span>
+        <span class="n">G</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> * ln(x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">) + &quot;</span>
+      <span class="n">G</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xsum</span><span class="si">}</span><span class="s2"> * ln(</span><span class="si">{</span><span class="n">xsum</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">return</span> <span class="n">sympify</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QuarticModel.Gid">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.Gid">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">Gid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">Gid_py</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Gid_symbols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gid_sympy</span><span class="p">,</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gid_type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+      <span class="n">Gid_calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">Gid_py</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">V0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">Gid_calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">Gid_py</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Gid_calc</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">dGid_sympy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">df_dx</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">df_dx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Gid_sympy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gid_symbols</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df_dx</span>
+
+<div class="viewcode-block" id="QuarticModel.dGid">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.dGid">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">dGid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">df_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">df_dx_py</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Gid_symbols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dGid_sympy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gid_type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+        <span class="n">df_dx</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">df_dx_py</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">V0</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">df_dx</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">df_dx_py</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df_dx</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">d2Gid_sympy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">d2f_dx2</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">df_dx_sympy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dGid_sympy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">d2f_dx2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">df_dx_sympy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gid_symbols</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">d2f_dx2</span>
+
+<div class="viewcode-block" id="QuarticModel.d2Gid">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.d2Gid">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">d2Gid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">d2f_dx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">d2f_dx2_py</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Gid_symbols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d2Gid_sympy</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gid_type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
+          <span class="n">d2f_dx2</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">d2f_dx2_py</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">V0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">d2f_dx2</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">d2f_dx2_py</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d2f_dx2</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.Hmix_func">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.Hmix_func">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">Hmix_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Hmix</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.nTSex_func">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.nTSex_func">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">nTSex_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="o">-</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sex</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.Smix_func">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.Smix_func">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">Smix_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Gid</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sex</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.ln_gammas">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.ln_gammas">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">ln_gammas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">lng_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">):</span>
+      <span class="n">lng_arr</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dMf_dmi</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">m_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Hmix_params</span><span class="p">)</span> <span class="o">-</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dMf_dmi</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">m_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Sex_params</span><span class="p">)</span>
+    <span class="n">lng_arr</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span>
+    <span class="k">return</span> <span class="n">lng_arr</span></div>
+
+  
+<div class="viewcode-block" id="QuarticModel.gammas">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.gammas">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">gammas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ln_gammas</span><span class="p">(</span><span class="n">T</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.GE">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.GE">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">GE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">ge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hmix_func</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nTSex_func</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">ge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">ge</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ge</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.GM">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.GM">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">GM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>  
+    <span class="n">gm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Hmix_func</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Smix_func</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">gm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">gm</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">gm</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.dGM_dxs">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.dGM_dxs">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">dGM_dxs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">dgm_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">dgm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df_dx</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Hmix_params</span><span class="p">)</span> <span class="o">-</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df_dx</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Sex_params</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dGid</span><span class="p">(</span><span class="n">T</span><span class="p">)[:,</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">dgm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">dgm</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+      <span class="n">dgm_arr</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dgm</span>
+    <span class="k">return</span> <span class="n">dgm_arr</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.d2GM_dx2s">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.d2GM_dx2s">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">d2GM_dx2s</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="n">d2gm_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">d2gm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d2f_dx2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Hmix_params</span><span class="p">)</span> <span class="o">-</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d2f_dx2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">](</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_Sex_params</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d2Gid</span><span class="p">(</span><span class="n">T</span><span class="p">)[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">d2gm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">d2gm</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">d2gm_arr</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">d2gm</span>
+    <span class="k">return</span> <span class="n">d2gm_arr</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.det_Hij">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.det_Hij">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">det_Hij</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d2GM_dx2s</span><span class="p">(</span><span class="n">T</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="QuarticModel.create_polynomial_for_fitting">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.create_polynomial_for_fitting">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">create_polynomial_for_fitting</span><span class="p">(</span><span class="n">num_comp</span><span class="p">):</span>
+    <span class="c1"># generate argument names</span>
+    <span class="n">arg_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_comp</span><span class="p">):</span>
+      <span class="n">arg_names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+    <span class="c1"># include &#39;z&#39; at beginning of arg_list</span>
+    <span class="n">arg_list</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">arg_names</span><span class="p">)</span>
+
+    <span class="c1"># build the function code as string</span>
+    <span class="n">func_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">def quartic_taylor_expansion(</span><span class="si">{</span><span class="n">arg_list</span><span class="si">}</span><span class="s2">):</span>
+<span class="s2">  N = z.shape[1]</span>
+<span class="s2">  args = [</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_names</span><span class="p">)</span><span class="si">}</span><span class="s2">]</span>
+
+<span class="s2">  f = np.zeros(z.shape[0])</span>
+
+<span class="s2">  for i in range(1, N):</span>
+<span class="s2">    ai = args[i - 1] + args[i] + args[i + 1]</span>
+<span class="s2">    for j in range(1, N+1):</span>
+<span class="s2">      f -= (ai) * z[:,i-1] * z[:,j-1]</span>
+
+<span class="s2">  for i in range(1, N):</span>
+<span class="s2">    for j in range(1, N):</span>
+<span class="s2">      if i &lt;= j:</span>
+<span class="s2">        f += args[i - 1] * z[:,i-1] * z[:,j-1]</span>
+<span class="s2">        for k in range(1, N):</span>
+<span class="s2">          if j &lt;= k:</span>
+<span class="s2">            f += args[i] * z[:,i-1] * z[:,j-1] * z[:,k-1]</span>
+<span class="s2">            for l in range(1, N):</span>
+<span class="s2">              if k &lt;= l:</span>
+<span class="s2">                f += args[i + 1] * z[:,i-1] * z[:,j-1] * z[:,k-1] * z[:,l-1]</span>
+
+<span class="s2">  return f</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create a local namespace for the function definition</span>
+    <span class="n">func_namespace</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Include &#39;__name__&#39; in the globals dictionary</span>
+    <span class="n">exec</span><span class="p">(</span><span class="n">func_code</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">func_namespace</span><span class="p">)</span>
+    <span class="c1"># Retrieve the dynamically created function</span>
+    <span class="n">quartic_function</span> <span class="o">=</span> <span class="n">func_namespace</span><span class="p">[</span><span class="s1">&#39;quartic_taylor_expansion&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">quartic_function</span></div>
+
+
+<div class="viewcode-block" id="QuarticModel.create_polynomial_for_sympy">
+<a class="viewcode-back" href="../../../index.html#picmol.QuarticModel.create_polynomial_for_sympy">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">create_polynomial_for_sympy</span><span class="p">(</span><span class="n">num_comp</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">xvar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">):</span>
+    <span class="c1"># generate argument names</span>
+    <span class="n">arg_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_comp</span><span class="p">):</span>
+        <span class="n">arg_names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;a</span><span class="si">{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">])</span>
+    <span class="c1"># create x variables string</span>
+    <span class="k">if</span> <span class="n">xvar</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+      <span class="n">num_vars</span> <span class="o">=</span> <span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span>
+      <span class="n">x_vars_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">xvar</span><span class="si">}{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">num_vars</span> <span class="o">=</span> <span class="n">num_comp</span>
+      <span class="n">x_vars_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">xvar</span><span class="si">}{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_comp</span><span class="p">)])</span>
+
+    <span class="c1"># build the function code as string</span>
+    <span class="n">func_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">def quartic_taylor_expansion(</span><span class="si">{</span><span class="n">x_vars_str</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_names</span><span class="p">)</span><span class="si">}</span><span class="s2">):</span>
+<span class="s2">  args = [</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_names</span><span class="p">)</span><span class="si">}</span><span class="s2">]</span>
+
+<span class="s2">  if </span><span class="si">{</span><span class="n">num_vars</span><span class="si">}</span><span class="s2"> &lt; int(</span><span class="si">{</span><span class="n">num_comp</span><span class="si">}</span><span class="s2">):</span>
+<span class="s2">    M = 1</span>
+<span class="s2">    x = np.array([</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;x</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">range</span><span class="p">(</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)])</span><span class="si">}</span><span class="s2">, 1 - sum([</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;x</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">range</span><span class="p">(</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)])</span><span class="si">}</span><span class="s2">])])</span>
+<span class="s2">  else:</span>
+<span class="s2">    M = sum([</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;m</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">range</span><span class="p">(</span><span class="n">num_comp</span><span class="p">)])</span><span class="si">}</span><span class="s2">])</span>
+<span class="s2">    x = np.array([</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;m</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">range</span><span class="p">(</span><span class="n">num_comp</span><span class="p">)])</span><span class="si">}</span><span class="s2">])</span>
+<span class="s2">  </span>
+<span class="s2">  N = len(x)</span>
+<span class="s2">  f = 0</span>
+
+<span class="s2">  for i in range(1, N):</span>
+<span class="s2">    ai = args[i - 1] + args[i] + args[i + 1]</span>
+<span class="s2">    for j in range(1, N+1):</span>
+<span class="s2">      f -= (ai) * x[i-1] * x[j-1] / M</span>
+<span class="s2">  </span>
+<span class="s2">  for i in range(1, N):</span>
+<span class="s2">    for j in range(1, N):</span>
+<span class="s2">      if i &lt;= j:</span>
+<span class="s2">        f += args[i - 1] * x[i-1] * x[j-1] / M</span>
+<span class="s2">        for k in range(1, N):</span>
+<span class="s2">          if j &lt;= k:</span>
+<span class="s2">            f += args[i] * x[i-1] * x[j-1] * x[k-1] / (M**2)</span>
+<span class="s2">            for l in range(1, N):</span>
+<span class="s2">              if k &lt;= l:</span>
+<span class="s2">                f += args[i + 1] * x[i-1] * x[j-1] * x[k-1] * x[l-1] / (M**3)</span>
+<span class="s2">  </span>
+<span class="s2">  return f</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create a local namespace for the function definition</span>
+    <span class="n">func_namespace</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Include &#39;__name__&#39; in the globals dictionary</span>
+    <span class="n">exec</span><span class="p">(</span><span class="n">func_code</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">func_namespace</span><span class="p">)</span>
+    <span class="c1"># Retrieve the dynamically created function</span>
+    <span class="n">quartic_function</span> <span class="o">=</span> <span class="n">func_namespace</span><span class="p">[</span><span class="s1">&#39;quartic_taylor_expansion&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">quartic_function</span></div>
+</div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">picmol 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">picmol.models.numerical</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Allison A. Peroutka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

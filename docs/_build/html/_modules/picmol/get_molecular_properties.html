@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>picmol.get_molecular_properties &#8212; picmol 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nature.css?v=279e0f84" />
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">picmol 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">picmol.get_molecular_properties</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for picmol.get_molecular_properties</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">AllChem</span><span class="p">,</span> <span class="n">rdFreeSASA</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+
+<div class="viewcode-block" id="add_molecule">
+<a class="viewcode-back" href="../../index.html#picmol.add_molecule">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_molecule</span><span class="p">(</span><span class="n">mol_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+	<span class="n">mol_obj</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+	<span class="n">mol_obj</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
+
+	<span class="k">def</span><span class="w"> </span><span class="nf">get_electron_number</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+		<span class="n">atomic_numbers</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
+			<span class="n">atomic_numbers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">()]</span>
+		<span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">)</span>
+
+	<span class="n">n_electrons</span> <span class="o">=</span> <span class="n">get_electron_number</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
+	<span class="n">mol_wt</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Descriptors</span><span class="o">.</span><span class="n">MolWt</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
+	<span class="n">mol_charge</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
+	
+	<span class="k">if</span> <span class="n">density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="n">molar_vol</span> <span class="o">=</span> <span class="n">mol_wt</span><span class="o">/</span><span class="n">density</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">,</span> <span class="n">useRandomCoords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">molar_vol</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">ComputeMolVolume</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
+		<span class="n">density</span> <span class="o">=</span> <span class="n">mol_wt</span><span class="o">/</span><span class="n">molar_vol</span> 
+
+	<span class="n">molarity</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">density</span><span class="o">/</span><span class="n">mol_wt</span>
+
+	<span class="n">new_molecule</span> <span class="o">=</span> <span class="p">{</span>
+		<span class="s1">&#39;mol_name&#39;</span><span class="p">:</span> <span class="n">mol_name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+		<span class="s1">&#39;mol_id&#39;</span><span class="p">:</span> <span class="n">mol_id</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+		<span class="s1">&#39;mol_wt&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mol_wt</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+		<span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">density</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+		<span class="s1">&#39;molarity&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molarity</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+		<span class="s1">&#39;molar_vol&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molar_vol</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+		<span class="s1">&#39;n_electrons&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_electrons</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+		<span class="s1">&#39;mol_charge&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mol_charge</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+		<span class="s1">&#39;mol_class&#39;</span><span class="p">:</span> <span class="n">mol_class</span><span class="p">,</span>
+		<span class="s1">&#39;smiles&#39;</span><span class="p">:</span> <span class="n">smiles</span><span class="p">,</span>
+	<span class="p">}</span>
+
+	<span class="c1"># read in dataframe and add molecule and write back out</span>
+	<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span>
+	<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_append</span><span class="p">(</span><span class="n">new_molecule</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+	
+<div class="viewcode-block" id="search_molecule">
+<a class="viewcode-back" href="../../index.html#picmol.search_molecule">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">search_molecule</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&#39;&#39;&#39;takes in molecule name search csv to find molecule&#39;&#39;&#39;</span>
+	<span class="n">df</span> <span class="o">=</span> <span class="n">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">mol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;molecule not found!!!&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;use &quot;add_molecule()&quot; method to add to molecule list&#39;</span><span class="p">)</span>
+		<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="load_molecular_properties">
+<a class="viewcode-back" href="../../index.html#picmol.load_molecular_properties">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+	<span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>	</div>
+
+	
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">picmol 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">picmol.get_molecular_properties</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Allison A. Peroutka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

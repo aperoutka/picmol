@@ -1,4 +1,4 @@
-Plotting functions (picmol.plotter)
+Plotting Functions (picmol.plotter)
 =============================================
 
 .. automodule:: picmol.plotter

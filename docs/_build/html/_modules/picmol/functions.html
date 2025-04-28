@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>picmol.functions &#8212; picmol 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/nature.css?v=279e0f84" />
+    <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">picmol 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">picmol.functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for picmol.functions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<div class="viewcode-block" id="mol2vol">
+<a class="viewcode-back" href="../../index.html#picmol.mol2vol">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mol2vol</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">V0</span><span class="p">):</span>
+<span class="w">	</span><span class="sd">&#39;&#39;&#39;convert mol frac to vol frac&#39;&#39;&#39;</span>
+	<span class="c1"># check that datatypes are arrays</span>
+	<span class="n">V0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">V0</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+		<span class="n">z_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">val</span><span class="p">])</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">z_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+	<span class="n">vbar</span> <span class="o">=</span> <span class="n">z_arr</span> <span class="o">@</span> <span class="n">V0</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">v_arr</span> <span class="o">=</span> <span class="n">z_arr</span> <span class="o">*</span> <span class="n">V0</span> <span class="o">/</span> <span class="n">vbar</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+		<span class="k">return</span> <span class="n">v_arr</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="n">v_arr</span> <span class="o">=</span> <span class="n">z_arr</span> <span class="o">*</span> <span class="n">V0</span> <span class="o">/</span> <span class="n">vbar</span>
+		<span class="k">return</span> <span class="n">v_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+  
+<div class="viewcode-block" id="get_solute_molid">
+<a class="viewcode-back" href="../../index.html#picmol.get_solute_molid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_solute_molid</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">mol_class</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&#39;&#39;&#39;get solute molid from the list of molecules, using priority of mol_class&#39;&#39;&#39;</span>
+  <span class="n">solute_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;solute&quot;</span><span class="p">,</span> <span class="s2">&quot;extractant&quot;</span><span class="p">,</span> <span class="s2">&quot;modifier&quot;</span><span class="p">,</span> <span class="s2">&quot;solvent&quot;</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">solute_type</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">solute_types</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">mol_class</span><span class="p">[</span><span class="n">mol</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">solute_type</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">mol</span></div>
+
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">picmol 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">picmol.functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Allison A. Peroutka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

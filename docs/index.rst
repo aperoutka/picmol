@@ -4,10 +4,16 @@
    contain the root `toctree` directive.
 
 picmol: Phase Instability Calculator for MOLecular design
-====================
+============================================================
+.. automodule:: picmol
+   :members: add_molecule, search_molecule, load_molecular_properties
+   :undoc-members:
+   :show-inheritance:
+
+Table of Contents
+------------------
 .. toctree::
    :maxdepth: 4
-   :caption: Contents:
 
    picmol.get_molecular_properties
    picmol.kbi
