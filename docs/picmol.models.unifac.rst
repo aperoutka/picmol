@@ -1,4 +1,4 @@
-UNIFAC Model (picmol.models.unifac)
+UNIFAC
 =============================================
 
 .. automodule:: picmol.models.unifac

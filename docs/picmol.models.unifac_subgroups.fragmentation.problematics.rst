@@ -1,4 +1,4 @@
-Correct Problematic Fragments (picmol.models.unifac_subgroups.fragmentation.problematics)
+Correct Problematic Fragments
 =============================================
 
 .. automodule:: picmol.models.unifac_subgroups.fragmentation.problematics

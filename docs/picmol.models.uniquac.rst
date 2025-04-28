@@ -1,4 +1,4 @@
-UNIQUAC Model (picmol.models.uniquac)
+UNIQUAC
 =============================================
 
 .. automodule:: picmol.models.uniquac

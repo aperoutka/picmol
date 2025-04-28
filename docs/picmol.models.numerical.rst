@@ -1,4 +1,4 @@
-Numerical (Taylor Series Expansion) Model (picmol.models.numerical)
+Numerical (Taylor Series Expansion)
 =============================================
 
 .. automodule:: picmol.models.numerical

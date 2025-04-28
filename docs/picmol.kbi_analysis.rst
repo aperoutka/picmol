@@ -1,4 +1,4 @@
-Kirkwood-Buff Integral Analysis CLI (picmol.kbi_analysis)
+Kirkwood-Buff Integral Analysis (picmol-kbi)
 =============================================
 
 .. automodule:: picmol.kbi_analysis

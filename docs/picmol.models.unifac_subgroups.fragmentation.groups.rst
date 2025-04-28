@@ -1,4 +1,4 @@
-UNIFAC Fragments of Molecule (picmol.models.unifac_subgroups.fragmentation.groups)
+Fragment Molecule 
 =============================================
 
 .. automodule:: picmol.models.unifac_subgroups.fragmentation.groups

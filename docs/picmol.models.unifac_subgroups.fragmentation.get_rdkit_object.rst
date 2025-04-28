@@ -1,4 +1,4 @@
-RDKit Object (picmol.models.unifac_subgroups.fragmentation.get_rdkit_object)
+RDKit Object
 =============================================
 
 .. automodule:: picmol.models.unifac_subgroups.fragmentation.get_rdkit_object

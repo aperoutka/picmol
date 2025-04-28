@@ -1,4 +1,4 @@
-Flory-Huggins Model (picmol.models.fh)
+Flory-Huggins
 =============================================
 
 .. automodule:: picmol.models.fh

@@ -1,4 +1,4 @@
-NRTL Model (picmol.models.nrtl)
+NRTL
 =============================================
 
 .. automodule:: picmol.models.nrtl
