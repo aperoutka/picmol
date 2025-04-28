@@ -41,7 +41,7 @@ class KBI:
 			pure_component_path: str,
 			rdf_dir: str = "rdf_files", 
 			kbi_method: str = "adj",
-			rkbi_min: float = 0.75,
+			rkbi_min = 0.75,
 			kbi_fig_dirname: str = "kbi_analysis",
 			avg_start_time = 100, 
 			avg_end_time = None,
@@ -64,6 +64,7 @@ class KBI:
 		# get min value for kbi extrapolation
 		# this is the minimum value of rkbi to use for extrapolation; this should be set based on the system being studied
 		# default value, 0.5 -> start at 1/2 max(r) in rdf
+		# if not float, use dict to assign value for each system
 		self.rkbi_min = rkbi_min
 
 		# geom mean pair should be a list of lists, i.e., which molecules together should be represented with a geometric mean rather than their pure components --> applied after pure component activity coefficient calculation
@@ -545,8 +546,8 @@ class KBI:
 						# calculate kbis in thermodynamic limit
 						V_cell = (4/3)*pi*r[:-1]**3 # volume of the spherical cell (for the integration)
 						L = (V_cell/V_cell.max())**(1/3)
-						if type(self.rkbi_min) == list:
-							sys_rkbi_min = self.rkbi_min[s]
+						if type(self.rkbi_min) == dict:
+							sys_rkbi_min = self.rkbi_min[sys]
 						else:
 							sys_rkbi_min = self.rkbi_min
 						min_L_idx = np.abs(r[:-1]/r.max() - sys_rkbi_min).argmin() # find the index of the minimum L value to start extrapolation

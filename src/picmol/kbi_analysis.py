@@ -16,7 +16,7 @@ def main():
   parser.add_argument('--rdf_dir', type=str, default='rdf_files', help='Name for rdf directory in each system (default: rdf_files)')
   parser.add_argument('--kbi_dir', type=str, default='kbi_analysis', help='Name for directory for kbi analysis (default: kbi_analysis)')
   parser.add_argument('--kbi_method', type=str, default='adj', choices=['raw', 'adj', 'gv', 'kgv'], help='KBI method name (default: adj)')
-  parser.add_argument('--rkbi_min', default='0.75', help='minimum ratio of r/max(r) for KBI extrapolation to thermodynamic limit (default: 0.75)')
+  parser.add_argument('--rkbi_min', default='0.75', help='minimum ratio of r/max(r) for KBI extrapolation to thermodynamic limit, float or dict (default: 0.75)')
   parser.add_argument('--start_time', type=float, default=100, help='Time in ns to start averaging for volume and enthalpy calculation (default: 100)')
   parser.add_argument('--end_time', type=float, default=None, help='Time in ns to end averaging for volume and enthalpy calculation (default: end of trajectory)')
   parser.add_argument('--solute_mol', type=str, default=None, help='solute mol_id, default preference is: solute > extractant > modifier > solvent (default: None)')

@@ -11,7 +11,7 @@ from scipy.spatial import Delaunay
 from scipy.interpolate import griddata
 import mpltern
 
-from .thermo_model import ThermoModel
+from .thermo_model import ThermoModel, UNIFACThermoModel
 from .conversions import mol2vol
 from .kbi import add_zeros
 
@@ -30,28 +30,28 @@ class KBIPlotter:
     self.kbi_model = model
     self.num_comp = len(self.kbi_model.unique_mols)
     
-  def make_figures(self, show_fig: bool = False):
+  def make_figures(self):
     '''creates figures based on number of components in system'''
     # kbi integral as a function of r
-    self.make_indiv_kbi_plots(show_fig=show_fig) # running kbi
-    self.plot_kbi_inf(show_fig=show_fig) # kbi extrapolation to infinity (thermodynamic limit)
+    self.make_indiv_kbi_plots() # running kbi
+    self.plot_kbi_inf() # kbi extrapolation to infinity (thermodynamic limit)
 
     for basis in ["mol", "vol"]:
       # kbi values & activities
-      self.plot_composition_kbis(basis=basis, show_fig=show_fig)
-      self.plot_dln_gammas(basis=basis, show_fig=show_fig)
-      self.plot_ln_gammas(basis=basis, show_fig=show_fig)
+      self.plot_composition_kbis(basis=basis)
+      self.plot_dln_gammas(basis=basis)
+      self.plot_ln_gammas(basis=basis)
 
       if self.num_comp == 2:
         # calculated excess parameters
-        self.plot_binary_Gex(basis=basis, show_fig=show_fig)
-        self.plot_binary_excess_contributions(basis=basis, show_fig=show_fig)
+        self.plot_binary_Gex(basis=basis)
+        self.plot_binary_excess_contributions(basis=basis)
         # plot fits for thermodynamic interaction parameters
         self.plot_NRTL_IP_fit()
         self.plot_FH_chi_fit()
         self.plot_UNIQUAC_IP_fit()
         self.plot_quartic_fit()
-        self.plot_binary_thermo_model_comparisons(show_fig=show_fig)
+        self.plot_binary_thermo_model_comparisons()
 
   def make_indiv_kbi_plots(self, show_fig: bool = False):
     ''' create plots for each system as a function of r '''
@@ -412,9 +412,14 @@ class KBIPlotter:
 
 
 class PhaseDiagramPlotter:
-  def __init__(self, model: ThermoModel):
+  def __init__(self, model):
     """ for visualizing phase behavior """
     self.thermo_model = model
+    if isinstance(model, ThermoModel):
+      self.solute_loc = self.thermo_model.kbi_model.solute_loc
+    elif isinstance(model, UNIFACThermoModel):
+      self.solute_loc = self.thermo_model.solute_loc
+
 
   def make_figures(self, T=300, colormap='jet', num_contours=40):
     if self.thermo_model.z.shape[1] == 2:
