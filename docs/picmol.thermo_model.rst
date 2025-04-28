@@ -1,4 +1,4 @@
-Thermodynamic Model Calculations (picmol.thermo_model)
+Liquid-Liquid Equilibria (picmol.thermo_model)
 =============================================
 
 .. automodule:: picmol.thermo_model

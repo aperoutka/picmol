@@ -13,7 +13,35 @@ release = '0.0.1'
 
 # -- General configuration ---------------------------------------------------
 
-extensions = []
+extensions = [
+  'sphinx.ext.autodoc',
+  'sphinx.ext.doctest',
+  'sphinx.ext.coverage',
+  # 'sphinx.ext.mathjax',
+  'sphinx.ext.viewcode',
+  'sphinx.ext.autosummary',
+  'numpydoc',
+  'IPython.sphinxext.ipython_console_highlighting',
+  'IPython.sphinxext.ipython_directive',
+  'sphinx.ext.intersphinx',
+  'nbsphinx',
+  'matplotlib.sphinxext.plot_directive',
+  'sphinxcontrib.katex',
+  'sphinx_sitemap',
+  'sphinxcontrib.googleanalytics',
+]
+googleanalytics_id = 'G-H82NH09HYY'
+                      
+katex_css_path = \
+    'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css'
+katex_js_path = 'katex.min.js'
+katex_autorender_path = 'auto-render.min.js'
+
+nbsphinx_requirejs_path = '' # fixes katex not working
+
+html_baseurl = 'https://picmol.readthedocs.io/'
+sitemap_url_scheme = "{link}"
+sitemap_filename = 'sitemap2.xml' # readthedocs generates its own
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
