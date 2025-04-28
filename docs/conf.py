@@ -20,7 +20,6 @@ extensions = [
   # 'sphinx.ext.mathjax',
   'sphinx.ext.viewcode',
   'sphinx.ext.autosummary',
-  'numpydoc',
   'IPython.sphinxext.ipython_console_highlighting',
   'IPython.sphinxext.ipython_directive',
   'sphinx.ext.intersphinx',
@@ -31,13 +30,6 @@ extensions = [
   'sphinxcontrib.googleanalytics',
 ]
 googleanalytics_id = 'G-H82NH09HYY'
-                      
-katex_css_path = \
-    'https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css'
-katex_js_path = 'katex.min.js'
-katex_autorender_path = 'auto-render.min.js'
-
-nbsphinx_requirejs_path = '' # fixes katex not working
 
 html_baseurl = 'https://picmol.readthedocs.io/'
 sitemap_url_scheme = "{link}"
