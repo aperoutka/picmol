@@ -12,9 +12,8 @@ picmol: Phase Instability Calculator for MOLecular design
    picmol.get_molecular_properties
    picmol.kbi
    picmol.thermo_model
-   models
+   picmol.models
    picmol.plotter
-   cmd_line_tools
    examples
 
 
