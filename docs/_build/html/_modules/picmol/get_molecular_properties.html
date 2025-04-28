@@ -118,8 +118,7 @@
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Loads `molecular_properties.csv` with pandas setting index to specified column</span>
 
-<span class="sd">	:param index: column to set as index in pandas DataFrame</span>
-
+<span class="sd">	:param index: column to set as index in pandas DataFrame (options: &#39;mol_name&#39;, &#39;mol_id&#39;, &#39;smiles&#39;)</span>
 <span class="sd">	:return: pandas DataFrame of `molecular_properties.csv` with specified index</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>	</div>

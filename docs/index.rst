@@ -4,7 +4,7 @@ picmol: Phase Instability Calculator for MOLecular design
 Table of Contents
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    picmol.get_molecular_properties
    picmol.kbi
@@ -14,3 +14,9 @@ Table of Contents
    examples
 
 
+Indices and tables
+===================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
