@@ -175,9 +175,7 @@ class ThermoModel:
 			quartic_gid_type = 'vol', # ideal gibbs type (x log(v) or x log(x))
 		):
 
-		self.save_dir = None # initialize
 		self.kbi_model = KBIModel
-
 		self.identifiers = self.kbi_model.unique_mols
 		self.identifier_type = "mol_id"
 		self.model_name = model_name.lower()
@@ -461,9 +459,11 @@ class UNIFACThermoModel:
 			solute_mol=None,
 			identifiers=None, 
 			identifier_type=None,
-			Tmin=100, Tmax=400, dT=10
+			Tmin=100, Tmax=400, dT=10,
+			save_dir=None
 		):
 
+		self.save_dir = save_dir
 		self.identifiers = identifiers
 		self.identifier_type = identifier_type
 

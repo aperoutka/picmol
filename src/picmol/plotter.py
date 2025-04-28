@@ -1,4 +1,3 @@
-from re import I
 import matplotlib.pyplot as plt 
 import matplotlib as mpl 
 from matplotlib.ticker import MultipleLocator
@@ -30,28 +29,28 @@ class KBIPlotter:
     self.kbi_model = model
     self.num_comp = len(self.kbi_model.unique_mols)
     
-  def make_figures(self):
+  def make_figures(self, show_fig: bool = False):
     '''creates figures based on number of components in system'''
     # kbi integral as a function of r
-    self.make_indiv_kbi_plots() # running kbi
-    self.plot_kbi_inf() # kbi extrapolation to infinity (thermodynamic limit)
+    self.make_indiv_kbi_plots(show_fig=show_fig) # running kbi
+    self.plot_kbi_inf(show_fig=show_fig) # kbi extrapolation to infinity (thermodynamic limit)
 
     for basis in ["mol", "vol"]:
       # kbi values & activities
-      self.plot_composition_kbis(basis=basis)
-      self.plot_dln_gammas(basis=basis)
-      self.plot_ln_gammas(basis=basis)
+      self.plot_composition_kbis(basis=basis, show_fig=show_fig)
+      self.plot_dln_gammas(basis=basis, show_fig=show_fig)
+      self.plot_ln_gammas(basis=basis, show_fig=show_fig)
 
       if self.num_comp == 2:
         # calculated excess parameters
-        self.plot_binary_Gex(basis=basis)
-        self.plot_binary_excess_contributions(basis=basis)
+        self.plot_binary_Gex(basis=basis, show_fig=show_fig)
+        self.plot_binary_excess_contributions(basis=basis, show_fig=show_fig)
         # plot fits for thermodynamic interaction parameters
         self.plot_NRTL_IP_fit()
         self.plot_FH_chi_fit()
         self.plot_UNIQUAC_IP_fit()
         self.plot_quartic_fit()
-        self.plot_binary_thermo_model_comparisons()
+        self.plot_binary_thermo_model_comparisons(show_fig=show_fig)
 
   def make_indiv_kbi_plots(self, show_fig: bool = False):
     ''' create plots for each system as a function of r '''
@@ -417,9 +416,10 @@ class PhaseDiagramPlotter:
     self.thermo_model = model
     if isinstance(model, ThermoModel):
       self.solute_loc = self.thermo_model.kbi_model.solute_loc
+      self.solute_name = self.thermo_model.kbi_model.solute_name
     elif isinstance(model, UNIFACThermoModel):
       self.solute_loc = self.thermo_model.solute_loc
-
+      self.solute_name = self.thermo_model.solute_name
 
   def make_figures(self, T=300, colormap='jet', num_contours=40):
     if self.thermo_model.z.shape[1] == 2:
@@ -442,15 +442,14 @@ class PhaseDiagramPlotter:
     elif self.thermo_model.z.shape[1] > 3:
       print("plotter functions only supported for binary and ternary systems")
   
-
   def x_basis(self, basis):
     if basis == "mol":
-      x_val = self.thermo_model.z[:,self.thermo_model.kbi_model.solute_loc].flatten()
+      x_val = self.thermo_model.z[:,self.solute_loc].flatten()
       x_lab = 'x'
       sp = self.thermo_model.x_sp
       bi = self.thermo_model.x_bi
     else:
-      x_val = self.thermo_model.v[:,self.thermo_model.kbi_model.solute_loc].flatten()
+      x_val = self.thermo_model.v[:,self.solute_loc].flatten()
       x_lab = '\phi'
       sp = self.thermo_model.v_sp
       bi = self.thermo_model.v_bi
@@ -470,7 +469,7 @@ class PhaseDiagramPlotter:
         # add binodals to plot
         ax.plot(bi[t], self.thermo_model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.thermo_model.T_values)+1)
     fig.colorbar(cmap, ax=ax, orientation='vertical', pad=0.02, label='Temperature [K]')
-    ax.set_xlabel(f"${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$")
+    ax.set_xlabel(f"${x_lab}_{{{self.solute_name}}}$")
     ax.set_xlim(-0.05,1.05)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
@@ -505,7 +504,7 @@ class PhaseDiagramPlotter:
       ax.plot(bi[t], self.thermo_model.GM_bi[t], marker='o', color='k', linestyle='', fillstyle='full', linewidth=1.5, zorder=len(self.thermo_model.T_values)+1)
       c_ind += 1
     ax.legend(loc='lower left', fontsize=9)
-    ax.set_xlabel(f"${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$")
+    ax.set_xlabel(f"${x_lab}_{{{self.solute_name}}}$")
     ax.set_xlim(-0.05,1.05)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
     ax.set_ylabel(f"$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}$]")
@@ -535,7 +534,7 @@ class PhaseDiagramPlotter:
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.thermo_model.save_dir is not None:
       plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_Gmix_heatmap_{basis}frac.png')
@@ -585,7 +584,7 @@ class PhaseDiagramPlotter:
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.thermo_model.save_dir is not None:
       plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_I0_heatmap_{basis}frac.png')
@@ -657,11 +656,11 @@ class PhaseDiagramPlotter:
     ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.thermo_model.kbi_model.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
-    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.thermo_model.save_dir is not None:
       plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_I0_heatmap_widomline_{basis}frac.png')
@@ -700,7 +699,7 @@ class PhaseDiagramPlotter:
     else:
       ax.set_ylim(min(self.thermo_model.T_values), max(self.thermo_model.T_values))
 
-    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.thermo_model.save_dir is not None:
       plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_{basis}frac.png')
@@ -721,7 +720,7 @@ class PhaseDiagramPlotter:
     ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.thermo_model.kbi_model.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
 
     legend_label = f"$T_c = {self.thermo_model.Tc:.0f}$ K\n${x_lab}_c = {self.xc(basis):.3f}$"
     ax.plot(self.xc(basis), self.thermo_model.Tc, color='none', marker='o', linestyle='', fillstyle='none', label=legend_label)
@@ -734,7 +733,7 @@ class PhaseDiagramPlotter:
     else:
       ax.set_ylim(min(self.thermo_model.T_values), max(self.thermo_model.T_values))
 
-    ax.set_xlabel(f'${x_lab}_{{{self.thermo_model.kbi_model.solute_name}}}$')  
+    ax.set_xlabel(f'${x_lab}_{{{self.solute_name}}}$')  
     ax.set_ylabel('Temperature [K]')
     if self.thermo_model.save_dir is not None:
       plt.savefig(f'{self.thermo_model.save_dir}/{self.thermo_model.model_name}_phase_diagram_widomline_{basis}frac.png')
