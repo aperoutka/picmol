@@ -3,7 +3,7 @@ from scipy.optimize import curve_fit
 from sympy import symbols, sympify, diff, preorder_traversal, lambdify
 from scipy import constants
 
-from ..conversions import mol2vol
+from ..functions import mol2vol
 from .cem import PointDisc
 
 
