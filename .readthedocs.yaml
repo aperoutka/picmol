@@ -1,25 +1,16 @@
 # Read the Docs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
-
-# Required
 version: 2
-
-# Set the OS, Python version, and other tools you might need
-build:
-  os: ubuntu-lts-latest  # Specify macOS
-  tools:
-    python: "3.10"
 
 # Specify the Conda environment
 conda:
   environment: environment.yaml
 
-# Build documentation in the "docs/" directory with Sphinx
-sphinx:
-  configuration: docs/conf.py
-  builder: html
+# Build documentation using explicit commands
+build:
+  os: ubuntu-lts-latest
+  tools:
+    python: "3.10"  # Keep this for compatibility
 
-# Explicitly disable the default Python installation step
-python:
-  install: []
-        
+  commands:
+    - conda activate picmol  # Replace 'picmol-docs' with the name of your Conda environment
+    - python -m sphinx -T -b html -d _build/doctrees docs $READTHEDOCS_OUTPUT/html
