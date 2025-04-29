@@ -4,7 +4,7 @@ picmol: Phase Instability Calculator for MOLecular design
 .. toctree::
    :maxdepth: 3
    :caption: API Reference:
-   :titlesonly:
+   .. :titlesonly:
 
    picmol.get_molecular_properties
    picmol.kbi
