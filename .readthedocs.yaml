@@ -12,6 +12,5 @@ build:
     python: "3.10"  # Keep this for compatibility
 
   commands:
-    - . /opt/conda/etc/profile.d/conda.sh
-    - conda activate picmol  # Replace 'picmol-docs' with the name of your Conda environment
-    - python -m sphinx -T -b html -d _build/doctrees docs $READTHEDOCS_OUTPUT/html
+    - conda run -n picmol python -m sphinx -T -b html -d _build/doctrees docs $READTHEDOCS_OUTPUT/html
+
