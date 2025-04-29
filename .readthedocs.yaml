@@ -10,12 +10,14 @@ build:
   tools:
     python: "3.10"
 
+# Specify the Conda environment
+conda:
+  environment: environment.yaml
+  
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
   configuration: docs/conf.py
   builder: html
 
-# Specify the Conda environment
-conda:
-  environment: environment.yaml
+
         
