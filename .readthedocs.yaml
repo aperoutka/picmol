@@ -14,7 +14,7 @@ build:
 sphinx:
   configuration: docs/conf.py
   builder: html
-  source: docs
+  source_dir: docs
 
 # Optionally, but recommended,
 # declare the Python requirements required to build your documentation
