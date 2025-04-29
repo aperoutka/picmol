@@ -12,5 +12,5 @@ build:
     python: "3.10"  # Keep this for compatibility
 
   commands:
-    - /opt/conda/envs/picmol/bin/conda run -n picmol python -m sphinx -T -b html -d _build/doctrees docs $READTHEDOCS_OUTPUT/html
-
+    - eval "$(conda shell.bash hook)" || true
+    - conda run -n picmol python -m sphinx -T -b html -d _build/doctrees docs $READTHEDOCS_OUTPUT/html
