@@ -14,4 +14,8 @@ build:
   tools:
     python: "3.10"
   python:
-    install: []
+    install:
+      - method: pip
+        requirements: environment.yaml  # Point to your Conda environment file
+        extra_pip_args:
+          - --no-deps  # Tell pip not to install dependencies (Conda handles them)
