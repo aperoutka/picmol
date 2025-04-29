@@ -6,5 +6,5 @@ conda:
   environment: environment.yaml
 
 sphinx:
-  configuration: doc/conf.py
+  configuration: docs/conf.py
   builder: html
