@@ -5,12 +5,16 @@ version: 2
 conda:
   environment: environment.yaml
 
-# Build documentation using explicit commands
-build:
-  os: ubuntu-lts-latest
-  tools:
-    python: "3.10"  # Keep this for compatibility
+sphinx:
+  configuration: doc/conf.py
+  builder: html
 
-  commands:
-    - eval "$(conda shell.bash hook)" || true
-    - conda run -n picmol python -m sphinx -T -b html -d _build/doctrees docs $READTHEDOCS_OUTPUT/html
+# # Build documentation using explicit commands
+# build:
+#   os: ubuntu-lts-latest
+#   tools:
+#     python: "3.10"  # Keep this for compatibility
+
+  # commands:
+  #   - eval "$(conda shell.bash hook)" || true
+  #   - conda run -n picmol python -m sphinx -T -b html -d _build/doctrees docs $READTHEDOCS_OUTPUT/html
