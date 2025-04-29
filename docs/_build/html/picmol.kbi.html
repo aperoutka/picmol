@@ -11,6 +11,7 @@
     <script src="_static/documentation_options.js?v=d45e8c67"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Liquid-Liquid Equilibria (picmol.thermo_model)" href="picmol.thermo_model.html" />
@@ -43,6 +44,369 @@
             
   <section id="module-picmol.kbi">
 <span id="kirkwood-buff-integral-analysis-picmol-kbi"></span><h1>Kirkwood-Buff Integral Analysis (picmol.kbi)<a class="headerlink" href="#module-picmol.kbi" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="picmol.kbi.KBI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.kbi.</span></span><span class="sig-name descname"><span class="pre">KBI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prj_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pure_component_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rdf_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'rdf_files'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kbi_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'adj'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rkbi_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kbi_fig_dirname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'kbi_analysis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_end_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solute_mol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geom_mean_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI" title="Link to this definition">¶</a></dt>
+<dd><p>Class for calculating Kirkwood-Buff Integrals from radial distribution functions in a GROMACS project</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prj_path</strong> (<em>str</em>) – absolute path to project directory; contains subdirectories containing systems as a function of composition</p></li>
+<li><p><strong>pure_component_path</strong> (<em>str</em>) – absolute path to pure component directory; contains subdirectories of molecules at a given temperature</p></li>
+<li><p><strong>rdf_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – directory name where RDF files are located in each system directory, default is <cite>rdf_files</cite></p></li>
+<li><p><strong>kbi_method</strong> (<em>str</em><em>, </em><em>optional</em>) – correction method to apply to correlation function, default is <cite>adj</cite></p></li>
+<li><p><strong>options</strong> (<em>kbi_method</em>) – <ul>
+<li><p>‘raw’: no correction</p></li>
+<li><p>’adj’: correcting for tail of RDF <span class="math notranslate nohighlight">\(\neq\)</span> 1 at large r</p></li>
+<li><p>’gv’: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt</p></li>
+<li><p>’kgv’: applying a damping function introduced by Kruger to the correction function by Ganguly and Van der Vegt</p></li>
+</ul>
+</p></li>
+<li><p><strong>rkbi_min</strong> (<em>float</em><em> or </em><em>dict</em><em>, </em><em>optional</em>) – fraction of r; lower bound for extrapolation to the thermodynamic limit, default is 0.75. float will be applied to all systems and dict uses systems as keys with corresponding float values.</p></li>
+<li><p><strong>kbi_fig_dirname</strong> (<em>str</em><em>, </em><em>optional</em>) – directory name for results from KBI analysis, default is <cite>kbi_analysis</cite></p></li>
+<li><p><strong>avg_start_time</strong> (<em>float</em><em>, </em><em>optional</em>) – start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is 100</p></li>
+<li><p><strong>avg_end_time</strong> – end time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is end of trajectory</p></li>
+<li><p><strong>solute_mol</strong> (<em>str</em>) – molecule name in .top file corresponding to molecule used to sort systems</p></li>
+<li><p><strong>geom_mean_pairs</strong> (<em>list</em><em>[</em><em>list</em><em>[</em><em>molecule_ids</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – pairs of molecules for taking the geometric mean of, default is empty list</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.run" title="Link to this definition">¶</a></dt>
+<dd><p>Run KBI analysis and calculate activity coefficients and Gibbs thermodynamic properties</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.T_sim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T_sim</span></span><a class="headerlink" href="#picmol.kbi.KBI.T_sim" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>average simulation temperature (K)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.unique_mols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unique_mols</span></span><a class="headerlink" href="#picmol.kbi.KBI.unique_mols" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>unique molecule names in .top file for the project</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.num_comp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_comp</span></span><a class="headerlink" href="#picmol.kbi.KBI.num_comp" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of components in project</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.mol_nums_by_component">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mol_nums_by_component</span></span><a class="headerlink" href="#picmol.kbi.KBI.mol_nums_by_component" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary of molecule numbers by component for each system, read from .top file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.total_num_mols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_num_mols</span></span><a class="headerlink" href="#picmol.kbi.KBI.total_num_mols" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary of total number of molecules in each system, read from .top file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.properties_by_molid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties_by_molid</span></span><a class="headerlink" href="#picmol.kbi.KBI.properties_by_molid" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas DataFrame only for molecules present in project. Load <cite>molecular_properties.csv</cite> and set molecule name in .top file as index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.molar_vol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">molar_vol</span></span><a class="headerlink" href="#picmol.kbi.KBI.molar_vol" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array of pure component molar volumes (cm3/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from <cite>molecular_properties.csv</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.kbi_npt">
+<span class="sig-name descname"><span class="pre">kbi_npt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_lo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_hi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.kbi_npt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.kbi_npt" title="Link to this definition">¶</a></dt>
+<dd><p>For a given radial distribution function, calculate KBI from r_lo to r_hi by applying a correction to the correlation function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>r</strong> (<em>np.array</em>) – distance (nm) between two molecules in radial distribution function</p></li>
+<li><p><strong>g</strong> (<em>np.array</em>) – radial distribution function for two molecules as a function of r</p></li>
+<li><p><strong>r_lo</strong> (<em>float</em>) – minimum r (nm) to evaluate integral over</p></li>
+<li><p><strong>r_hi</strong> (<em>float</em>) – maximum r (nm) to evaluate integral over</p></li>
+<li><p><strong>avg</strong> (<em>float</em>) – average value of g as r -&gt; R, i.e., average value of the tail of RDF</p></li>
+<li><p><strong>sys_num</strong> (<em>int</em>) – system index</p></li>
+<li><p><strong>mol_i</strong> (<em>str</em>) – molecule id in .top file for i in RDF, <span class="math notranslate nohighlight">\(g_ij(r)\)</span></p></li>
+<li><p><strong>mol_j</strong> (<em>str</em>) – molecule id in .top file for j in RDF, <span class="math notranslate nohighlight">\(g_ij(r)\)</span></p></li>
+<li><p><strong>method</strong> (<em>str</em>) – KBI correction method to implement</p></li>
+<li><p><strong>options</strong> (<em>method</em>) – <ul>
+<li><p>‘raw’: no correction</p></li>
+<li><p>’adj’: correcting for tail of RDF != 1 at large r</p></li>
+<li><p>’gv’: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt</p></li>
+<li><p>’kgv’: applying a damping function introduced by Kruger to the correction function by Ganguly and Van der Vegt</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+<p>Corrections to correlation function (<span class="math notranslate nohighlight">\(h_{ij}(r)\)</span>), where <span class="math notranslate nohighlight">\(g_{ij}^{NpT}\)</span> is the radial distribution function in NpT ensemble, <span class="math notranslate nohighlight">\(N_j\)</span> is the number of molecules of type j, <span class="math notranslate nohighlight">\(\Delta N_{ij}\)</span> is the number of molecules of type j around molecule i in radius of shell dr, and <span class="math notranslate nohighlight">\(V\)</span> is the volume of simulation box.</p>
+<div class="math notranslate nohighlight">
+\[h_{ij}^{raw}(r) = g_{ij}^{NpT}(r) - 1\]</div>
+<div class="math notranslate nohighlight">
+\[h_{ij}^{adj}(r) = g_{ij}^{NpT}(r) - avg\]</div>
+<div class="math notranslate nohighlight">
+\[h_{ij}^{gv}(r) = g_{ij}^{NpT}(r) \left(\frac{N_j\left(1 - \frac{4/3 \pi r^3}{V} \right)}{N_j \left(1 - \frac{4/3 \pi r^3}{V} \right) - \Delta N_{ij}  - \delta_{ij}} \right) - 1\]</div>
+<div class="math notranslate nohighlight">
+\[\Delta N_{ij} = \int_0^R 4 \pi r^2 \rho_j \left(g_{ij}^{NpT}(r) - 1\right) dr\]</div>
+<div class="math notranslate nohighlight">
+\[h_{ij}^{kgv}(r) = h_{ij}^{gv} \left(1 - \frac{3r}{2R} + \frac{r^3}{2r^3} \right)\]</div>
+<p>KBI (<span class="math notranslate nohighlight">\(G_{ij}^R\)</span>) calculations from corrected correlation functions (<span class="math notranslate nohighlight">\(h_{ij}(r)\)</span>).</p>
+<div class="math notranslate nohighlight">
+\[G_{ij}^R =      \int_0^R 4 \pi r^2 h_{ij}(r) dr\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>KBI in units of nm3 and cm3/mol.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.kbi_thermo_limit">
+<span class="sig-name descname"><span class="pre">kbi_thermo_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rkbi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_L_idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.kbi_thermo_limit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.kbi_thermo_limit" title="Link to this definition">¶</a></dt>
+<dd><p>Extrapolate KBI to the thermodynamic limit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>L</strong> (<em>np.array</em>) – fraction of linear dimension of box volume</p></li>
+<li><p><strong>rkbi</strong> (<em>np.array</em>) – KBI as a function of r in RDF, i.e., running KBI</p></li>
+<li><p><strong>min_L_idx</strong> (<em>float</em>) – lower bound of L for extrapolation</p></li>
+</ul>
+</dd>
+</dl>
+<div class="math notranslate nohighlight">
+\[\lambda G_{ij}^R = \lambda G_{ij}^{\infty} + F_{ij}^{\infty}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<span class="math notranslate nohighlight">\(G_{ij}^{\infty}\)</span>, <span class="math notranslate nohighlight">\(F_{ij}^{\infty}\)</span>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.z">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">z</span></span><a class="headerlink" href="#picmol.kbi.KBI.z" title="Link to this definition">¶</a></dt>
+<dd><p>Mol fraction array (<span class="math notranslate nohighlight">\(z\)</span>) with elements, <span class="math notranslate nohighlight">\(x_i\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[x_i = \frac{N_i}{\sum_j N_j}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mol fraction array, with shape(<span class="math notranslate nohighlight">\(len(\text{systems}) \times n\)</span>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.v">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><a class="headerlink" href="#picmol.kbi.KBI.v" title="Link to this definition">¶</a></dt>
+<dd><p>Volume fraction array (<span class="math notranslate nohighlight">\(v\)</span>) with elements, <span class="math notranslate nohighlight">\(\phi_i\)</span> where <span class="math notranslate nohighlight">\(V_i\)</span> is molar volume of molecule of type i.</p>
+<div class="math notranslate nohighlight">
+\[\phi_i = \frac{x_i V_i}{\sum_j x_j V_j}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>volume fraction array, with shape(<span class="math notranslate nohighlight">\(len(\text{systems}) \times n\)</span>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.G_matrix">
+<span class="sig-name descname"><span class="pre">G_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.G_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.G_matrix" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Construct a symmetric matrix (<span class="math notranslate nohighlight">\(\textbf{G}\)</span>) of KBI values in the thermodynamic limit</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\textbf{G} = \begin{bmatrix}
+        G_{11}^\infty &amp; G_{12}^\infty &amp; \cdots &amp; G_{1n}^\infty \\
+        G_{21}^\infty &amp; G_{22}^\infty &amp; \cdots &amp; G_{2n}^\infty \\
+        \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+        G_{n1}^\infty &amp; G_{n2}^\infty &amp; \cdots &amp; G_{nn}^\infty \\
+\end{bmatrix}\end{split}\]</div>
+</div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(G_{ij}^\infty\)</span> is the KBI in the thermodynamic limit in nm3 between molecules of type i and j, with <span class="math notranslate nohighlight">\(G_{ij}^\infty = G_{ji}^\infty\)</span>.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">return<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array of KBI values for each pairwise interaction, with <span class="math notranslate nohighlight">\(shape(\textbf{G}) = len(\text{systems}) \times n \times n\)</span></p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.B_matrix">
+<span class="sig-name descname"><span class="pre">B_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.B_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.B_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Construct a symmetric matrix (<span class="math notranslate nohighlight">\(\textbf{B}\)</span>) of number fluctuations from KBI values in <span class="math notranslate nohighlight">\(\textbf{G}\)</span>, with elements <span class="math notranslate nohighlight">\(\textbf{B}_{ij}\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\textbf{B}_{ij} = \rho_i \rho_j \textbf{G}_{ij} + \rho_i \delta_{ij}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\textbf{B} = \begin{bmatrix}
+        \rho_1^2 \textbf{G}_{11} + \rho_1 &amp; \rho_1 \rho_2 \textbf{G}_{12} &amp; \cdots &amp; \rho_1 \rho_n \textbf{G}_{1n} \\
+        \rho_1 \rho_2 \textbf{G}_{21} &amp; \rho_2^2 \textbf{G}_{22} + \rho_2 &amp; \cdots &amp; \rho_2 \rho_n \textbf{G}_{2n} \\
+        \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+        \rho_1 \rho_n \textbf{G}_{n1} &amp; \rho_2 \rho_n \textbf{G}_{n2} &amp; \cdots &amp; \rho_n^2 \textbf{G}_{nn} + \rho_n \\
+\end{bmatrix}\end{split}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array with <span class="math notranslate nohighlight">\(shape(\textbf{B}) = len(\text{systems}) \times n \times n\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.cofactors_Bij">
+<span class="sig-name descname"><span class="pre">cofactors_Bij</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.cofactors_Bij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.cofactors_Bij" title="Link to this definition">¶</a></dt>
+<dd><p>Get the cofactors of <span class="math notranslate nohighlight">\(\textbf{B}\)</span>, where elements are defined by <span class="math notranslate nohighlight">\(\textbf{B}^{ij}\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\textbf{B}^{ij} = \left(|\textbf{B}| \textbf{B}^{-1}\right)_{ij}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>cofactor matrix with shape, <span class="math notranslate nohighlight">\(len(\text{systems}) \times n \times n\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.dmu_dN">
+<span class="sig-name descname"><span class="pre">dmu_dN</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.dmu_dN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.dmu_dN" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate derivative of chemical potential with respect to number of molecules of type i</p>
+<div class="math notranslate nohighlight">
+\[\left(\frac{\partial \mu_i}{\partial N_j}\right)_{N, p, T} = \frac{k_bT}{\left&lt;V\right&gt; |\textbf{B}|}\left(\frac{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b\left|\textbf{B}^{ij}\textbf{B}^{ab}-\textbf{B}^{ai}\textbf{B}^{bj}\right|}{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b \textbf{B}^{ab}}\right)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array of shape, <span class="math notranslate nohighlight">\(len(\text{systems}) \times n \times n\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.dmu_dxs">
+<span class="sig-name descname"><span class="pre">dmu_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.dmu_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.dmu_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the chemical potential derivative with respect to mol fraction of each component.</p>
+<div class="math notranslate nohighlight">
+\[\left(\frac{\partial \mu_i}{\partial x_j}\right) = N \left(\frac{\partial \mu_i}{\partial N_j} - \frac{\partial \mu_i}{\partial N_n}\right)             \]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array of shape, <span class="math notranslate nohighlight">\(len(\text{systems}) \times n-1 \times n-1\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.dlngamma_dxs">
+<span class="sig-name descname"><span class="pre">dlngamma_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.dlngamma_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.dlngamma_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the activity coefficient derivative with respect to mol fraction of molecule of type i</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial \gamma_i}{\partial x_i} = \frac{\partial \mu_i}{\partial x_i} - \frac{1}{x_i}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array of shape, <span class="math notranslate nohighlight">\(len(\text{systems}) \times n\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.gammas">
+<span class="sig-name descname"><span class="pre">gammas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.gammas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.gammas" title="Link to this definition">¶</a></dt>
+<dd><p>Numerical integration of activity coefficient derivatives.</p>
+<div class="math notranslate nohighlight">
+\[\ln{\gamma_i}(x_i) =  \sum_{a_0}^{x_i} \frac{\Delta x}{2} \left[\left(\frac{\partial \ln{\gamma_i}}{\partial x_i}\right)_{a_0} + \left(\frac{\partial \ln{\gamma_i}}{\partial x_i}\right)_{a_1}\right]\]</div>
+<p>where <span class="math notranslate nohighlight">\(a_0\)</span> is the reference state with <span class="math notranslate nohighlight">\(a_0 = 1\)</span> for pure component and  <span class="math notranslate nohighlight">\(a_0 = 0\)</span> for infinite dilution. 
+For <span class="math notranslate nohighlight">\(a_0 = 1\)</span>,  <span class="math notranslate nohighlight">\(a_1 = a_0 - \Delta x\)</span> and for <span class="math notranslate nohighlight">\(a_0 = 0\)</span>, <span class="math notranslate nohighlight">\(a_1 = a_0 + \Delta x\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array of activity coefficients as a function of composition for each component</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.GE">
+<span class="sig-name descname"><span class="pre">GE</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.GE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.GE" title="Link to this definition">¶</a></dt>
+<dd><p>Excess Gibbs energy.</p>
+<div class="math notranslate nohighlight">
+\[G^E = RT\left(\sum_{i=1}^{n} x_i \ln{\gamma_i}\right)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D np.array for excess Gibbs energy as a function of composition</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.GM">
+<span class="sig-name descname"><span class="pre">GM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.GM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.GM" title="Link to this definition">¶</a></dt>
+<dd><p>Gibbs mixing free energy.</p>
+<div class="math notranslate nohighlight">
+\[\Delta G_{mix} = RT\left(\sum_{i=1}^{n} x_i \ln{\left(\gamma_i x_i\right)}\right)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D np.array for Gibbs mixing free energy as a function of composition</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.Hmix">
+<span class="sig-name descname"><span class="pre">Hmix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.Hmix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.Hmix" title="Link to this definition">¶</a></dt>
+<dd><p>Mixing enthalpy from molecular simulation.</p>
+<div class="math notranslate nohighlight">
+\[\Delta H_{mix} = H - \sum_{i=1}^{n} x_i H_{i}^{pc} \label{eqn:Hmix}\]</div>
+<p>where <span class="math notranslate nohighlight">\(H\)</span> is the enthalpy for a simulation at a given composition and <span class="math notranslate nohighlight">\(H_i^{pc}\)</span> is the pure component enthalpy for molecule of type i.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D np.array for enthalpy as a function of composition</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.SE">
+<span class="sig-name descname"><span class="pre">SE</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.SE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.SE" title="Link to this definition">¶</a></dt>
+<dd><p>Excess entropy from Gibbs excess property relations.</p>
+<div class="math notranslate nohighlight">
+\[S^E = \frac{\Delta H_{mix} - G^E}{T}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1D np.array for excess entropy as a function of composition</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -52,6 +416,41 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Kirkwood-Buff Integral Analysis (picmol.kbi)</a><ul>
+<li><a class="reference internal" href="#picmol.kbi.KBI"><code class="docutils literal notranslate"><span class="pre">KBI</span></code></a><ul>
+<li><a class="reference internal" href="#picmol.kbi.KBI.run"><code class="docutils literal notranslate"><span class="pre">KBI.run()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.T_sim"><code class="docutils literal notranslate"><span class="pre">KBI.T_sim</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.unique_mols"><code class="docutils literal notranslate"><span class="pre">KBI.unique_mols</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.num_comp"><code class="docutils literal notranslate"><span class="pre">KBI.num_comp</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.mol_nums_by_component"><code class="docutils literal notranslate"><span class="pre">KBI.mol_nums_by_component</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.total_num_mols"><code class="docutils literal notranslate"><span class="pre">KBI.total_num_mols</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.properties_by_molid"><code class="docutils literal notranslate"><span class="pre">KBI.properties_by_molid</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.molar_vol"><code class="docutils literal notranslate"><span class="pre">KBI.molar_vol</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.kbi_npt"><code class="docutils literal notranslate"><span class="pre">KBI.kbi_npt()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.kbi_thermo_limit"><code class="docutils literal notranslate"><span class="pre">KBI.kbi_thermo_limit()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.z"><code class="docutils literal notranslate"><span class="pre">KBI.z</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.v"><code class="docutils literal notranslate"><span class="pre">KBI.v</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.G_matrix"><code class="docutils literal notranslate"><span class="pre">KBI.G_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.B_matrix"><code class="docutils literal notranslate"><span class="pre">KBI.B_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.cofactors_Bij"><code class="docutils literal notranslate"><span class="pre">KBI.cofactors_Bij()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.dmu_dN"><code class="docutils literal notranslate"><span class="pre">KBI.dmu_dN()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.dmu_dxs"><code class="docutils literal notranslate"><span class="pre">KBI.dmu_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.dlngamma_dxs"><code class="docutils literal notranslate"><span class="pre">KBI.dlngamma_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.gammas"><code class="docutils literal notranslate"><span class="pre">KBI.gammas()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.GE"><code class="docutils literal notranslate"><span class="pre">KBI.GE()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.GM"><code class="docutils literal notranslate"><span class="pre">KBI.GM()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.Hmix"><code class="docutils literal notranslate"><span class="pre">KBI.Hmix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.SE"><code class="docutils literal notranslate"><span class="pre">KBI.SE()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
   <div>
     <h4>Previous topic</h4>
     <p class="topless"><a href="picmol.get_molecular_properties.html"

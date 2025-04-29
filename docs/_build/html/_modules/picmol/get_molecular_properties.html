@@ -46,14 +46,17 @@
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Adds a molecule to `molecular_properties.csv` file, using user specified information and rdkit properties</span>
 <span class="sd">	</span>
-<span class="sd">	:param mol_name: molecule name used in figure labels</span>
+<span class="sd">	:param mol_name: molecule name identifier</span>
 <span class="sd">	:type mol_name: str</span>
-<span class="sd">	:param mol_id: molecule name used in .top files </span>
+<span class="sd">	:param mol_id: molecule name in .top file</span>
 <span class="sd">	:type mol_id: str</span>
-<span class="sd">	:param mol_class: molecule type </span>
-<span class="sd">		* options: &#39;solute&#39;, &#39;solvent&#39;, &#39;extractant&#39;</span>
+<span class="sd">	:param mol_class: molecule type</span>
+<span class="sd">	:param mol_class options: </span>
+<span class="sd">		* &#39;solute&#39;</span>
+<span class="sd">		* &#39;solvent&#39;</span>
+<span class="sd">		* &#39;extractant&#39;</span>
 <span class="sd">	:type mol_class: str </span>
-<span class="sd">	:param smiles: molecule SMILES to identify molecule using RDkit</span>
+<span class="sd">	:param smiles: SMILES string representation of the molecule</span>
 <span class="sd">	:type smiles: str</span>
 <span class="sd">	:param density: mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit</span>
 <span class="sd">	:type density: float, optional</span>
@@ -109,9 +112,12 @@
 <span class="sd">	:param mol: molecule to look up using identifer `index`</span>
 <span class="sd">	:type mol: str</span>
 <span class="sd">	:param index: molecule identifier type</span>
-<span class="sd">		* options: &#39;mol_name&#39;, &#39;mol_id&#39;, &#39;smiles&#39;</span>
+<span class="sd">	:param index options:</span>
+<span class="sd">		* &#39;mol_name&#39;: molecule name identifier</span>
+<span class="sd">		* &#39;mol_id&#39;: molecule name in .top file</span>
+<span class="sd">		* &#39;smiles&#39;: SMILES string representation of the molecule</span>
 <span class="sd">	:type index: str</span>
-<span class="sd">	:raises SystemExit: if `mol` is not found</span>
+<span class="sd">	:raises SystemExit: if `mol` is not found in `index`</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="n">df</span> <span class="o">=</span> <span class="n">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 	<span class="k">if</span> <span class="n">mol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
@@ -128,7 +134,10 @@
 <span class="sd">	Loads `molecular_properties.csv` with pandas setting index to specified column</span>
 
 <span class="sd">	:param index: column to set as `index` in pandas DataFrame</span>
-<span class="sd">		* options: &#39;mol_name&#39;, &#39;mol_id&#39;, &#39;smiles&#39;</span>
+<span class="sd">	:param index options:</span>
+<span class="sd">		* &#39;mol_name&#39;: molecule name identifier</span>
+<span class="sd">		* &#39;mol_id&#39;: molecule name in .top file</span>
+<span class="sd">		* &#39;smiles&#39;: SMILES string representation of the molecule</span>
 <span class="sd">	:type index: str</span>
 <span class="sd">	:return: pandas DataFrame of `molecular_properties.csv` with specified index</span>
 <span class="sd">	:rtype: pd.DataFrame</span>

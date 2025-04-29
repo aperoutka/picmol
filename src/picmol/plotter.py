@@ -246,7 +246,7 @@ class KBIPlotter:
     xplot0 = self.xplot0(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    ax.scatter(xplot0, add_zeros(self.kbi_model.G_ex), c='m', linewidth=1.8, marker='s')
+    ax.scatter(xplot0, add_zeros(self.kbi_model.GE()), c='m', linewidth=1.8, marker='s')
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
     ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
@@ -262,9 +262,9 @@ class KBIPlotter:
     xplot0 = self.xplot0(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
-    ax.scatter(xplot0, add_zeros(self.kbi_model.G_ex), c='violet', linewidth=1.8, marker='s', label="$G^E$")
-    ax.scatter(xplot0, add_zeros(self.kbi_model.Hmix), c='mediumblue', linewidth=1.8, marker='o', label="$\Delta$ $H_{mix}$")
-    ax.scatter(xplot0, -self.kbi_model.T_sim * add_zeros(self.kbi_model.S_ex), c='limegreen', linewidth=1.8, marker='^', label="$-TS^E$")
+    ax.scatter(xplot0, add_zeros(self.kbi_model.GE()), c='violet', linewidth=1.8, marker='s', label="$G^E$")
+    ax.scatter(xplot0, add_zeros(self.kbi_model.Hmix()), c='mediumblue', linewidth=1.8, marker='o', label="$\Delta$ $H_{mix}$")
+    ax.scatter(xplot0, -self.kbi_model.T_sim * add_zeros(self.kbi_model.SE()), c='limegreen', linewidth=1.8, marker='^', label="$-TS^E$")
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     ax.set_xticks(ticks=np.arange(0,1.1,0.1))
@@ -281,7 +281,7 @@ class KBIPlotter:
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
     xplot = self.kbi_model.z_plot[:,self.kbi_model.solute_loc]
     
-    ax[0].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.Hmix, c='k', zorder=10)
+    ax[0].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.Hmix(), c='k', zorder=10)
     ax[0].plot(xplot, self.kbi_model.quartic_Hmix, c='k', ls='solid')
     ax[0].plot(xplot, self.kbi_model.uniquac_Hmix, c='dodgerblue', ls='dashed')
     ax[0].plot(xplot, self.kbi_model.unifac_Hmix, c='limegreen', ls='dotted')
@@ -333,11 +333,6 @@ class KBIPlotter:
     # if not a binary system skip the function
     if len(self.kbi_model.unique_mols) != 2:
       return
-
-    try:
-      self.kbi_model.nrtl_taus
-    except:
-      self.kbi_model.fit_binary_NRTL_IP()
 
     tau12, tau21 = list(self.kbi_model.nrtl_taus.values())
 

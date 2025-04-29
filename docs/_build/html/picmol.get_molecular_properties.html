@@ -50,31 +50,18 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mol_name</strong> (<em>str</em>) – molecule name used in figure labels</p></li>
-<li><p><strong>mol_id</strong> (<em>str</em>) – molecule name used in .top files</p></li>
-<li><p><strong>mol_class</strong> (<em>str</em>) – molecule type 
-* options: ‘solute’, ‘solvent’, ‘extractant’</p></li>
-<li><p><strong>smiles</strong> (<em>str</em>) – molecule SMILES to identify molecule using RDkit</p></li>
+<li><p><strong>mol_name</strong> (<em>str</em>) – molecule name identifier</p></li>
+<li><p><strong>mol_id</strong> (<em>str</em>) – molecule name in .top file</p></li>
+<li><p><strong>mol_class</strong> (<em>str</em>) – molecule type</p></li>
+<li><p><strong>options</strong> (<em>mol_class</em>) – <ul>
+<li><p>‘solute’</p></li>
+<li><p>’solvent’</p></li>
+<li><p>’extractant’</p></li>
+</ul>
+</p></li>
+<li><p><strong>smiles</strong> (<em>str</em>) – SMILES string representation of the molecule</p></li>
 <li><p><strong>density</strong> (<em>float</em><em>, </em><em>optional</em>) – mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="picmol.get_molecular_properties.load_molecular_properties">
-<span class="sig-prename descclassname"><span class="pre">picmol.get_molecular_properties.</span></span><span class="sig-name descname"><span class="pre">load_molecular_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/get_molecular_properties.html#load_molecular_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.get_molecular_properties.load_molecular_properties" title="Link to this definition">¶</a></dt>
-<dd><p>Loads <cite>molecular_properties.csv</cite> with pandas setting index to specified column</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>index</strong> (<em>str</em>) – column to set as <cite>index</cite> in pandas DataFrame
-* options: ‘mol_name’, ‘mol_id’, ‘smiles’</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>pandas DataFrame of <cite>molecular_properties.csv</cite> with specified index</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -87,12 +74,42 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mol</strong> (<em>str</em>) – molecule to look up using identifer <cite>index</cite></p></li>
-<li><p><strong>index</strong> (<em>str</em>) – molecule identifier type
-* options: ‘mol_name’, ‘mol_id’, ‘smiles’</p></li>
+<li><p><strong>index</strong> (<em>str</em>) – molecule identifier type</p></li>
+<li><p><strong>options</strong> (<em>index</em>) – <ul>
+<li><p>‘mol_name’: molecule name identifier</p></li>
+<li><p>’mol_id’: molecule name in .top file</p></li>
+<li><p>’smiles’: SMILES string representation of the molecule</p></li>
+</ul>
+</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>SystemExit</strong> – if <cite>mol</cite> is not found</p>
+<dd class="field-even"><p><strong>SystemExit</strong> – if <cite>mol</cite> is not found in <cite>index</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="picmol.get_molecular_properties.load_molecular_properties">
+<span class="sig-prename descclassname"><span class="pre">picmol.get_molecular_properties.</span></span><span class="sig-name descname"><span class="pre">load_molecular_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/get_molecular_properties.html#load_molecular_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.get_molecular_properties.load_molecular_properties" title="Link to this definition">¶</a></dt>
+<dd><p>Loads <cite>molecular_properties.csv</cite> with pandas setting index to specified column</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> (<em>str</em>) – column to set as <cite>index</cite> in pandas DataFrame</p></li>
+<li><p><strong>options</strong> (<em>index</em>) – <ul>
+<li><p>‘mol_name’: molecule name identifier</p></li>
+<li><p>’mol_id’: molecule name in .top file</p></li>
+<li><p>’smiles’: SMILES string representation of the molecule</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas DataFrame of <cite>molecular_properties.csv</cite> with specified index</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -111,8 +128,8 @@
     <ul>
 <li><a class="reference internal" href="#">Molecular Properties (picmol.get_molecular_properties)</a><ul>
 <li><a class="reference internal" href="#picmol.get_molecular_properties.add_molecule"><code class="docutils literal notranslate"><span class="pre">add_molecule()</span></code></a></li>
-<li><a class="reference internal" href="#picmol.get_molecular_properties.load_molecular_properties"><code class="docutils literal notranslate"><span class="pre">load_molecular_properties()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.get_molecular_properties.search_molecule"><code class="docutils literal notranslate"><span class="pre">search_molecule()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.get_molecular_properties.load_molecular_properties"><code class="docutils literal notranslate"><span class="pre">load_molecular_properties()</span></code></a></li>
 </ul>
 </li>
 </ul>

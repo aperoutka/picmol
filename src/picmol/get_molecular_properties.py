@@ -8,14 +8,17 @@ def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, densit
 	"""
 	Adds a molecule to `molecular_properties.csv` file, using user specified information and rdkit properties
 	
-	:param mol_name: molecule name used in figure labels
+	:param mol_name: molecule name identifier
 	:type mol_name: str
-	:param mol_id: molecule name used in .top files 
+	:param mol_id: molecule name in .top file
 	:type mol_id: str
-	:param mol_class: molecule type 
-		* options: 'solute', 'solvent', 'extractant'
+	:param mol_class: molecule type
+	:param mol_class options: 
+		* 'solute'
+		* 'solvent'
+		* 'extractant'
 	:type mol_class: str 
-	:param smiles: molecule SMILES to identify molecule using RDkit
+	:param smiles: SMILES string representation of the molecule
 	:type smiles: str
 	:param density: mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit
 	:type density: float, optional
@@ -68,9 +71,12 @@ def search_molecule(mol, index):
 	:param mol: molecule to look up using identifer `index`
 	:type mol: str
 	:param index: molecule identifier type
-		* options: 'mol_name', 'mol_id', 'smiles'
+	:param index options:
+		* 'mol_name': molecule name identifier
+		* 'mol_id': molecule name in .top file
+		* 'smiles': SMILES string representation of the molecule
 	:type index: str
-	:raises SystemExit: if `mol` is not found
+	:raises SystemExit: if `mol` is not found in `index`
 	"""
 	df = load_molecular_properties(index)
 	if mol not in df.index:
@@ -85,9 +91,9 @@ def load_molecular_properties(index):
 
 	:param index: column to set as `index` in pandas DataFrame
 	:param index options:
-		* 'mol_name'
-		* 'mol_id'
-		* 'smiles'
+		* 'mol_name': molecule name identifier
+		* 'mol_id': molecule name in .top file
+		* 'smiles': SMILES string representation of the molecule
 	:type index: str
 	:return: pandas DataFrame of `molecular_properties.csv` with specified index
 	:rtype: pd.DataFrame
