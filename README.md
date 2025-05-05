@@ -170,7 +170,7 @@ Default is to calculate molar volume from experimental mass density
 If density is not entered, molar volume will be calculated from RDkit and the mass density will be calculated from molar volume
 """
 
-add_molecule(mol_name, mol_id, density, mol_class, smiles)
+add_molecule(mol_name, mol_id, mol_class, smiles, density)
 ```
 
 

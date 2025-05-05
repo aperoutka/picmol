@@ -4,163 +4,117 @@ import os
 import sys
 from pathlib import Path
 from scipy.optimize import curve_fit
+from scipy import constants
 import copy
 
-from .unifac_subgroups.unifac_subgroup_parameters import UFIP, UFSG, UFLLEIP, UFLLESG, UFILIP, UFILSG, UFKBIIP, UFKBISG
+from .unifac_subgroups.unifac_subgroup_parameters import UFIP, UFSG, UFILIP, UFILSG, UFKBIIP, UFKBISG, UNIFAC_subgroup
 from .unifac_subgroups.fragmentation import Groups
 from .cem.point_discretization import PointDisc
 
-# core functions to be used in unifac class for mixtures
-def unifac_R(subgroup_dict: dict, subgroup_data):
-  '''get UNIFAC R "volume" parameter
-  r: float = molecule parameter'''
-  return sum([occurence * subgroup_data[group].R for group, occurence in subgroup_dict.items()])
+def unifac_version_mapping(map_type: str):
+  r"""
+  Map UNIFAC version parameters to their corresponding ID.
 
+  This function retrieves a dictionary that maps UNIFAC version parameters
+  to their corresponding IDs or data structures.  The specific mapping
+  depends on the provided ``map_type``.
 
-def unifac_Q(subgroup_dict: dict, subgroup_data):
-  '''get UNIFAC Q "surface area" parameter
-  q: float = molecule parameter'''
-  return sum([occurence * subgroup_data[group].Q for group, occurence in subgroup_dict.items()])
+  :param map_type: identifier to retrieve the desired mapping dictionary. Valid options are:
 
+      * 'version':  dictionary with UNIFAC version strings as keys and version IDs as values.
+      * 'subgroup': dictionary with version IDs as keys and subgroup parameter objects as values.
+      * 'interaction': dictionary with version IDs as keys and interaction parameter objects as values.
 
-def unifac_psi(T, subgroup1, subgroup2, subgroup_data, interaction_data):
-  """get interaction parameters for a given subgroup combination"""
-  main1 = subgroup_data[subgroup1].main_group_id
-  main2 = subgroup_data[subgroup2].main_group_id
-  try: # for cross-terms
-    a = interaction_data[main1][main2]
-    return np.exp(-a/T)
-  except: # for same group interaction
-    return 1. 
-    
-
-def unifac_psis_matrix(T, unique_subgroups, subgroup_data, interaction_data):
-  """get interaction parameters for a given subgroup combination"""
-
-  # map subgorup IDs to main group IDs
-  subgroup_ids = np.unique(unique_subgroups)
-  subgroup_to_main = {s: subgroup_data[s].main_group_id for s in subgroup_ids}
-
-  # create index mapping for main group IDs
-  main_group_ids = np.array([subgroup_to_main[s] for s in subgroup_ids])
-
-  # Create 2D grids of main group IDs for all pairs
-  main1_grid, main2_grid = np.meshgrid(main_group_ids, main_group_ids, indexing='ij')
-
-  # Initialize the psi matrix with ones
-  psi_matrix = np.ones_like(main1_grid, dtype=float)
-
-  # Identify same group interactions
-  same_group = main1_grid == main2_grid
-
-  a_matrix = np.zeros_like(main1_grid, dtype=float)
-
-  # Create masks for unique pairs of main groups
-  unique_pairs = np.unique(
-      np.stack((main1_grid[~same_group], main2_grid[~same_group]), axis=1), axis=0
-  )
-
-  # Assign interaction parameters to the matrices
-  for m1, m2 in unique_pairs:
-      mask = (main1_grid == m1) & (main2_grid == m2)
-      try:
-          a_val = interaction_data[m1][m2]
-          a_matrix[mask] = a_val
-      except KeyError:
-          # Missing interaction parameters; psi remains as 1.0
-          pass
-
-  # Compute psi values where main groups are different
-  psi_matrix[~same_group] = np.exp(-a_matrix[~same_group] / T)
-
-  # psi_matrix already has ones on the diagonal for same group interactions
-
-  return psi_matrix
-
-def unifac_subgroups(identifiers):
-  # get subgroups in each molecule
-  subgroup_nums = []
-  for indentifier in identifiers:
-    if type(indentifier) == dict:
-      subgroup_nums.append(indentifier)
-    else:
-      group_obj = Groups(indentifier, "smiles")
-      if '.' in indentifier:
-        subgroup_nums.append(group_obj.unifac_IL.to_num)
-      else:
-        subgroup_nums.append(group_obj.unifac.to_num)
-  return subgroup_nums
-
-def unifac_main_group_ids(identifiers, version: int):
-  # get subgroups in each molecule
-  subgroup_nums = unifac_subgroups(identifiers)
-
-  all_subgroups = []
-  for mol in subgroup_nums:
-    all_subgroups.extend(list(mol.keys()))
-  unique_subgroups = np.unique(all_subgroups)
-
-  subgroup_version_dict = {0: UFSG, 1: UFILSG, 2: UFMDSG}
-  subgroup_data = subgroup_version_dict[version]
-  main_group_ids = np.array([subgroup_data[sg].main_group_id for sg in unique_subgroups])
-
-  return main_group_ids
-
-def unifac_main_groups(identifiers, version: int):
-  # get subgroups in each molecule
-  subgroup_nums = unifac_subgroups(identifiers)
-
-  all_subgroups = []
-  for mol in subgroup_nums:
-    all_subgroups.extend(list(mol.keys()))
-  unique_subgroups = np.unique(all_subgroups)
-
-  subgroup_version_dict = {0: UFSG, 1: UFILSG, 2: UFMDSG}
-  subgroup_data = subgroup_version_dict[version]
-  main_groups = np.array([subgroup_data[sg].main_group for sg in unique_subgroups])
-
-  return main_groups
-
+  :type map_type: str
+  :return: dictionary containing the mapped UNIFAC version parameters.
+  :rtype: dict
+  """
+  # get unifac version id from str
+  version_str_to_id = {
+    'unifac': 0,
+    'unifac-il': 1,
+    'unifac-kbi': 2
+  }
+  # get subgroup paramters for unifac version
+  subgroup_dict = {
+    0: UFSG,
+    1: UFILSG,
+    2: UFKBISG
+  }
+  # get interaction parameters for unifac version
+  interaction_dict = {
+    0: UFIP,
+    1: UFILIP,
+    2: UFKBIIP
+  }
+  # map a key to different dictionaries
+  dict_map = {
+    'version': version_str_to_id, 
+    'subgroup': subgroup_dict,
+    'interaction': interaction_dict  
+  }
+  return dict_map[map_type]
 
 def get_unifac_version(version_str: str, smiles=None):
+  r"""
+  Determine the UNIFAC version from a string and optionally SMILES strings.
+
+  This function determines the UNIFAC version based on a provided string
+  and optionally a list of SMILES strings.  It prioritizes detecting
+  "unifac-il" if any of the SMILES strings contain a '.' (indicating an
+  ionic liquid).
+
+  :param version_str: a string indicating the UNIFAC version (e.g.,
+                      "unifac", "unifac-il", "unifac-kbi").  Case-insensitive.
+  :type version_str: str
+  :param smiles: an optional list of SMILES strings. If provided, the
+                function checks for '.' in any of the SMILES strings to
+                identify ionic liquids and force the version to "unifac-il".
+  :type smiles: list, optional
+  :returns: A string representing the determined UNIFAC version
+            ("unifac", "unifac-il", or "unifac-kbi").
+  :rtype: str
+  """
   version_str = version_str.lower()
   # first check if IL molecule in smiles
   if smiles is not None:
     version = ['il' for smile in smiles if '.' in smile]
     if len(version) > 0:
-     return 'unifac-il'
+      return 'unifac-il'
   # if not found proceed with finding version from string
   if ("md" in version_str) or ("kbi" in version_str):
     return "unifac-kbi"
   elif "il" in version_str:
     return "unifac-il"
-  elif "lle" in version_str:
-    return "unifac-lle"
   else:
     return "unifac"
 
 
 class UNIFAC:
 
-  '''using uniquac, calculate the mixing free energy and derivatives for a matrix'''
+  r"""
+  UNIFAC (UNIversal Functional Activity Coefficient) model class.
 
-  def __init__(self, T: float, smiles: list, z = None, IP = None, version = "unifac"):
-    """
-    parameters:
-    z: mol fractions (type: array)
-    T: temperature [K]
-    subgroup_dict: unifac subgroups (type: dict) by group_id: occurance
-    interaction_parameters: (type: dict) -- UFIP, UFILIP
-    version: unifac-il or unifac
-    """
+  This class implements the UNIFAC activity coefficient model for calculating
+  thermodynamic properties of multi-molecule mixtures.
 
-    self.zc = 10
+  :param T: temperature (K)
+  :type T: float
+  :param smiles: list of smiles string representing molecules in mixture.
+  :type smiles: list
+  :param z: composition array (mol fractions). If None, it defaults to values from PointDisc.
+  :type z: numpy.ndarray, optional
+  :param version: UNIFAC version to use for interaction data, as well as R and Q parameters.
+  :type version: str
+  """
+
+  def __init__(self, T: float, smiles: list, z = None, version = "unifac"):
+
     self.T = T
-    self.Rc = 8.314E-3
+    self.Rc = constants.R / 1000
+    self.smiles = smiles 
 
-    num_pts = {
-      2:10, 3:7, 4:6, 5:5, 6:4
-    }
+    num_pts = {2:10, 3:7, 4:6, 5:5, 6:4}
     self.num_comp = len(smiles)
     self.rec_steps = num_pts[self.num_comp]
 
@@ -168,208 +122,44 @@ class UNIFAC:
       self.z = z
     else:
       point_disc = PointDisc(num_comp=self.num_comp, recursion_steps=self.rec_steps, load=True, store=False)
-      self.z = point_disc.points_mfr    
+      self.z = point_disc.points_mfr
     
-    # get subgroups in each molecule
-    self.subgroups = unifac_subgroups(smiles)
-    
-    self.smiles = smiles 
-
-    version = get_unifac_version(version, self.smiles)
-
+    # get unifac version
+    version_str = get_unifac_version(version, self.smiles)
     # get a numeric key for unifac version
-    # version_key: version_value
-    version_dict = {'unifac': 0,
-                    'unifac-lle': 1,
-                    'unifac-il': 2,
-                    'unifac-kbi': 3}
-    self.version = version_dict[version.lower()]
+    self.version = unifac_version_mapping('version')[version_str]
 
-    # version: interaction parameters dictionary
-    ip_dict = {0: UFIP, 1: UFLLEIP, 2: UFILIP, 3: UFKBIIP}
-    self.interaction_data = ip_dict[self.version]
-
-    # subgroup data
-    sg_dict = {0: UFSG, 1: UFLLESG, 2: UFILSG, 3: UFKBISG}
-    self.subgroup_data = sg_dict[self.version]
-
-    self.main_groups =  np.array([self.subgroup_data[sg].main_group for sg in self.unique_groups()])
-    self.main_group_ids = np.array([self.subgroup_data[sg].main_group_id for sg in self.unique_groups()])
-
-    self.unique_main_groups = np.unique(self.main_groups)
-    self.unique_main_group_ids = np.unique(self.main_group_ids)
-
-
-    if IP is not None:
-      self._psis = IP
-
-  @staticmethod
-  def fit_many_ip_to_GE(Ts, smiles_ls, zs, GE_data, mg1, mg2, version=None):
-    """ fit UNIFAC interaction parameters to several systems """
-
-    du_list = [f"du_{i}_{j}" for i in [mg1, mg2] for j in [mg1, mg2] if i != j]
-
-    if type(version) == str:
-      version = 1 if "il" in version else 2
-
-    mgs = [unifac_main_group_ids(smiles, version) for smiles in smiles_ls]
-    inds = [[(i, j) for i in range(mg.size) for j in range(mg.size)] for mg in mgs]
-    inds_flat = [(i, j) for mg in mgs for i in range(mg.size) for j in range(mg.size)]
-
-    def fit_psis(indices, *params):
-      """Function to be fitted, incorporating the 'du' parameters."""
-      y_fit = []
-      ii = [[(i, j) for i in range(mg.size) for j in range(mg.size)] for mg in mgs]
-      for a in range(len(Ts)):
-        T = Ts[a]
-        ind = ii[a]
-        main_groups = mgs[a]
-
-        unif_i = UNIFAC(T=T, smiles=smiles_ls[a], z=zs[a], version="unifac")
-        psis_i = unif_i.psis().flatten()
-        ip_i = -np.log(psis_i) * T
-
-        du_result = copy.deepcopy(ip_i) #initialize result
-        for idx, (i, j) in enumerate(ind):
-          mg_i = main_groups[int(i)]
-          mg_j = main_groups[int(j)]
-          #check if du parameter should be used
-          if ((mg_i == mg1) and (mg_j == mg2)) or ((mg_i == mg2) and (mg_j == mg1)): 
-            du_name = f"du_{mg_i}_{mg_j}"
-            if du_name in du_list:
-              du_index = du_list.index(du_name)
-              du_result[idx] = params[du_index] # set the value to the du parameter
-        
-        ip_adj = du_result.reshape(main_groups.size, main_groups.size)
-        psis_adj = np.exp(-ip_adj/T)
-
-        unif_up = UNIFAC(T=T, smiles=smiles_ls[a], z=zs[a], IP=psis_adj, version="unifac")
-        ge_calc = unif_up.GE()
-        ge_calc = np.nan_to_num(ge_calc, 0)
-        y_fit.append(ge_calc)
-
-      y_fit_flat = np.array(y_fit).flatten()
-      return y_fit_flat
-
-    # Initial guesses for the 'du' parameters
-    p0 = np.full(len(du_list), fill_value=0.1)
-    ip_vals, pcov = curve_fit(fit_psis, inds_flat, GE_data.flatten(), p0=p0)
-
-    # instead lets use pd df
-    ip_file_dict = {
-      1: "unifac_il_ip.csv",
-      2: "unifac_md_ip.csv",
-    }
-
-    ip_file = Path(__file__).parent / "unifac_subgroups" / ip_file_dict[version]
-    ip_df = pd.read_csv(ip_file, header=None)
-
-    ip_fit_df = pd.DataFrame(index=range(ip_vals.size), columns=range(3))
-    
-    counter = 0
-    for du_name, ip in zip(du_list, ip_vals):
-      mg1 = int(du_name.split('_')[1])
-      mg2 = int(du_name.split('_')[2])
-      with open(ip_file, "a") as f:
-        f.write(f"{int(mg1)},{int(mg2)},{float(ip)}\n")
-      ip_fit_df.iloc[counter,:] = [mg1, mg2, ip]
-      counter += 1
-
-    return ip_fit_df
-
-
-  @staticmethod
-  def fit_ip_to_GE(T, smiles: list, z: np.array, GE_data: np.array, mg1, mg2, version=None):
-    """ fit UNIFAC interaction parameters to the mixing enthalpy """
-    init_model = UNIFAC(T=T, smiles=smiles, z=z, version=version)
-    main_groups = init_model.main_group_ids
-    psis = init_model.psis()
-
-    du_list = []
-    for i in range(psis.shape[0]):  # rows
-      for j in range(psis.shape[1]):  # cols
-        mg_i = main_groups[i]
-        mg_j = main_groups[j]
-        if mg_i != mg_j:  # same maingroups have ip = 1
-          if ((mg_i == mg1) and (mg_j == mg2)) or ((mg_i == mg2) and (mg_j == mg1)):  # make sure at least one has amide group
-            du_name = f"du_{mg_i}_{mg_j}"
-            du_list.append(du_name)
-
-    du_list = np.unique(np.array(du_list)).tolist()
-
-    # Flatten psis for curve_fit
-    psis_flat = psis.flatten()
-    x_indices = [(i, j) for i in range(psis.shape[0]) for j in range(psis.shape[1])]
-
-    # Function to be fitted
-    def fit_psis(indices, *params):
-      """Function to be fitted, incorporating the 'du' parameters."""
-      du_result = np.ones(len(indices)) #initialize result
-      for idx, (i, j) in enumerate(indices):
-        mg_i = main_groups[int(i)]
-        mg_j = main_groups[int(j)]
-        #check if du parameter should be used
-        if ((mg_i == mg1) and (mg_j == mg2)) or ((mg_i == mg2) and (mg_j == mg1)): 
-          du_name = f"du_{mg_i}_{mg_j}"
-          if du_name in du_list:
-            du_index = du_list.index(du_name)
-            du_result[idx] = params[du_index] # set the value to the du parameter
-        else:
-          du_result[idx] = psis_flat[idx] # or any other default value if needed.
-      psi_adj = du_result.reshape(main_groups.size, main_groups.size)
-      unif_up = UNIFAC(T=T, smiles=smiles, z=z, IP=psi_adj, version=version)
-      y_fit = unif_up.GE()
-      y_fit = np.nan_to_num(y_fit, 0)
-      return y_fit
-
-    # Initial guesses for the 'du' parameters
-    p0 = np.full(len(du_list), fill_value=0.1)
-    params, pcov = curve_fit(fit_psis, x_indices, GE_data, p0=p0)
-
-    ip_vals = -np.log(np.array(params)) * T
-    ip_dict = {}
-
-    # instead lets use pd df
-    ip_file_dict = {
-      "unifac-kbi": "unifac_md_ip.csv",
-      "unifac-il": "unifac_il_ip.csv"
-    }
-    version_corr = "unifac-il" if "il" in version else "unifac-kbi"
-
-    ip_file = Path(__file__).parent / "unifac_subgroups" / ip_file_dict[version_corr]
-    ip_df = pd.read_csv(ip_file, header=None)
-
-    ip_fit_df = pd.DataFrame(index=range(ip_vals.size), columns=range(3))
-    
-    counter = 0
-    for du_name, ip in zip(du_list, ip_vals):
-      mg1 = int(du_name.split('_')[1])
-      mg2 = int(du_name.split('_')[2])
-      with open(ip_file, "a") as f:
-        f.write(f"{int(mg1)},{int(mg2)},{float(ip)}\n")
-      # add to fit df
-      ip_fit_df.iloc[counter,:] = [mg1, mg2, ip]
-      counter += 1
-
-    return ip_fit_df
-
-
-  def update_z(self, new_value):
-    self.z = new_value
-
-  def update_psis(self, new_value):
-    self._psis = new_value
-
+    # get interaction data dictionary
+    self.interaction_data = unifac_version_mapping('interaction')[self.version]
+    # get subgroup data dictionary
+    self.subgroup_data = unifac_version_mapping('subgroup')[self.version]
+  
   def unique_groups(self):
-    '''unique subgroups present'''
+    r"""
+    Identifies the unique subgroups present in the mixture.
+
+    :return: array of unique subgroup IDs
+    :rtype: numpy.ndarray
+    """
+    try:
+      self._subgroups
+    except AttributeError:
+      self.subgroups()
     all_subgroups = []
-    for mol in self.subgroups:
-      all_subgroups.extend(list(mol.keys()))
+    if type(self._subgroups) == list:
+      for mol in self._subgroups:
+        all_subgroups.extend(list(mol.keys()))
+    elif type(self._subgroups) == dict:
+      all_subgroups.extend(list(self._subgroups.keys()))
     self._unique_groups = np.unique(all_subgroups)
     return self._unique_groups
 
   @property
-  def N_groups(self):
+  def M(self):
+    r"""
+    :return: number of unique subgroups in the mixture
+    :rtype: int
+    """
     try:
       self._unique_groups
     except AttributeError:
@@ -378,33 +168,124 @@ class UNIFAC:
   
   @property
   def N(self):
-    return len(self.subgroups)
+    r"""
+    :return: number of molecules in the mixture
+    :rtype: int
+    """
+    return len(self.smiles)
 
+  @property 
+  def zc(self):
+    r"""
+    :return: coordination number (set to 10)
+    :rtype: int
+    """
+    return 10
 
-  def occurrance_matrix(self):
-    '''create a matrix of subgroup occurrance for each molecule'''
+  def subgroups(self):
+    r"""
+    Get the subgroups present in each molecule.
+
+    This function determines the UNIFAC subgroups from molecule
+    SMILES strings, using the :class:`Groups` class to perform subgroup fragmentation.
+
+    :returns: list of dictionaries. Each dictionary represents the subgroups
+              found in the corresponding molecule, with subgroup IDs as keys
+              and their occurrences as values.
+    :rtype: list[dict[int, int]]
+    """
+    subgroup_nums = []
+    for smiles in self.smiles:
+      group_obj = Groups(smiles, "smiles")
+      if '.' in smiles:
+        subgroup_nums.append(group_obj.unifac_IL.to_num)
+      else:
+        subgroup_nums.append(group_obj.unifac.to_num)
+    self._subgroups = subgroup_nums
+    return self._subgroups
+
+  def r(self):
+    r"""
+    Calculates the relative size of a molecule. 
+    This property is determined by summing the product of each subgroup's r parameter (:math:`r_k`) and its frequency (:math:`\nu_{ki}`) within the molecule (:math:`i`).
+
+    .. math::
+        r_i = \sum_k^N \nu_{ki} r_k
+
+    :returns: array of r parameters for each molecule
+    :rtype: numpy.ndarray
+    """
+    try:
+      self._subgroups
+    except AttributeError:
+      self.subgroups()
+    rs = np.zeros(self.N)
+    for i, mol_subgroup in enumerate(self._subgroups):
+      rs[i] = sum([occurance * self.subgroup_data[group].R for group, occurance in mol_subgroup.items()])
+    self._r = rs
+    return self._r
+
+  def q(self):
+    r"""
+    Calculates the relative surface area of a molecule. 
+    This property is determined by summing the product of each subgroup's q parameter (:math:`q_k`) and its frequency (:math:`\nu_{ki}`) within the molecule (:math:`i`).
+
+    .. math::
+        q_i = \sum_k^N \nu_{ki} q_k
+    
+    :returns: array of q parameters for each molecule
+    :rtype: numpy.ndarray
+    """
+    try:
+      self._subgroups
+    except AttributeError:
+      self.subgroups()
+    qs = np.zeros(self.N)
+    for i, mol_subgroup in enumerate(self._subgroups):
+      qs[i] = sum([occurance * self.subgroup_data[group].Q for group, occurance in mol_subgroup.items()])
+    self._q = qs
+    return self._q
+
+  def occurance_matrix(self):
+    r"""
+    Generates a matrix representing subgroup occurrences in each molecule.
+
+    This method generates a matrix where each row represents a unique subgroup and each column corresponds to a molecule in the mixture. Each element, :math:`\nu_{ji}`, indicates the number of times subgroup :math:`j` appears in molecule :math:`i`.
+   
+    :return: subgroup occurrence matrix
+    :rtype: numpy.ndarray
+    """
     try:
       self._unique_groups
     except:
       self.unique_groups()
-    occurrance_matrix = np.zeros((self.N_groups, self.N))
-    for i, mol in enumerate(self.subgroups):
+    occurance_matrix = np.zeros((self.M, self.N))
+    for i, mol in enumerate(self._subgroups):
       subgroup_arr = np.array(list(mol.keys()))
       occurance_arr = np.array(list(mol.values()))
       for g, group in enumerate(subgroup_arr):
-        occurrance_matrix[self._unique_groups == group, i] = occurance_arr[g]
-    self._occurrance_matrix = occurrance_matrix
-    return self._occurrance_matrix
-
+        occurance_matrix[self._unique_groups == group, i] = occurance_arr[g]
+    self._occurance_matrix = occurance_matrix
+    return self._occurance_matrix
 
   def subgroup_matrix(self):
-    '''create a matrix of subgroups for each molecule'''
+    r"""
+    Generates a matrix representing subgroup IDs for each molecule.
+
+    This method creates a matrix where rows correspond to unique subgroups
+    and columns correspond to molecules. Each element (:math:`j`, :math:`i`) represents the
+    ID of subgroup :math:`j` in molecule :math:`i`. If a molecule does not contain a
+    particular subgroup, the corresponding element is 0.
+    
+    :return: subgroup ID matrix
+    :rtype: numpy.ndarray
+    """
     try:
       self._unique_groups
     except:
       self.unique_groups()
-    subgroup_matrix = np.zeros((self.N_groups, self.N))
-    for i, mol in enumerate(self.subgroups):
+    subgroup_matrix = np.zeros((self.M, self.N))
+    for i, mol in enumerate(self._subgroups):
       subgroup_arr = np.array(list(mol.keys()))
       occurance_arr = np.array(list(mol.values()))
       for g, group in enumerate(subgroup_arr):
@@ -412,9 +293,16 @@ class UNIFAC:
     self._subgroup_matrix = subgroup_matrix
     return self._subgroup_matrix
   
-
   def Q_matrix(self):
-    '''create a matrix of Q values'''
+    r"""
+    Generates a matrix of subgroup area parameters (:func:`q` values).
+
+    This method creates a matrix with the same shape as :func:`subgroup_matrix`, where
+    each element (:math:`j`, :math:`i`) represents the ID of subgroup :math:`j` in molecule :math:`i`.
+
+    :return: array of subgroup Q values.
+    :rtype: numpy.ndarray
+    """
     try:
       self._subgroup_matrix
     except AttributeError:
@@ -425,57 +313,113 @@ class UNIFAC:
         if self._subgroup_matrix[row,col] != 0.:
           Q_matrix[row,col] = self.subgroup_data[self._subgroup_matrix[row,col]].Q
     self._Q_matrix = Q_matrix
-    return self._Q_matrix
-  
-
-  def R(self):
-    '''unifac volume parameter'''
-    self._r = np.array([unifac_R(mol_subgroups, self.subgroup_data) for mol_subgroups in self.subgroups])
-    return self._r
-
-
-  def Q(self):
-    '''unifac area parameter'''
-    self._q = np.array([unifac_Q(mol_subgroups, self.subgroup_data) for mol_subgroups in self.subgroups])
-    return self._q
-  
+    return self._Q_matrix  
   
   def psis(self):
+    r"""
+    Calculates a *matrix* of UNIFAC interaction parameters for *all 
+    possible pairs* within a given set of unique subgroups.
+    This function computes the :math:`\psi` matrix, where each element, :math:`\psi_{ij}`, represents the
+    interaction parameter between two subgroups. 
+
+    .. math::
+      \psi_{ij} = \exp \left( \frac{-a_{ij}}{T} \right)
+
+    where:
+
+      * :math:`a_{ij}` is the interaction energy parameter between subgroups :math:`i` and :math:`j`
+      * :math:`\psi_{ij}` is the corresponding interaction parameter
+
+    :return: array of interaction parameters between unique subgroups present
+    :rtype: numpy.ndarray
+    """
     try:
       self._unique_groups
     except AttributeError: 
       self.unique_groups()
-    self._psis = unifac_psis_matrix(T=self.T, unique_subgroups=self._unique_groups, subgroup_data=self.subgroup_data, interaction_data=self.interaction_data)
+    # map subgorup IDs to main group IDs
+    subgroup_to_main = {s: self.subgroup_data[s].main_group_id for s in self._unique_groups}
+    # create index mapping for main group IDs
+    main_group_ids = np.array([subgroup_to_main[s] for s in self._unique_groups])
+    # Create 2D grids of main group IDs for all pairs
+    main1_grid, main2_grid = np.meshgrid(main_group_ids, main_group_ids, indexing='ij')
+    # Initialize the psi matrix with ones
+    psi_matrix = np.ones_like(main1_grid, dtype=float)
+    # Identify same group interactions
+    same_group = main1_grid == main2_grid
+    a_matrix = np.zeros_like(main1_grid, dtype=float)
+    # Create masks for unique pairs of main groups
+    unique_pairs = np.unique(np.stack((main1_grid[~same_group], main2_grid[~same_group]), axis=1), axis=0)
+    # Assign interaction parameters to the matrices
+    for m1, m2 in unique_pairs:
+        mask = (main1_grid == m1) & (main2_grid == m2)
+        try:
+            a_val = self.interaction_data[m1][m2]
+            a_matrix[mask] = a_val
+        except KeyError:
+            # Missing interaction parameters; psi remains as 1.0
+            pass
+    # Compute psi values where main groups are different
+    psi_matrix[~same_group] = np.exp(-a_matrix[~same_group] / self.T)
+    # psi_matrix already has ones on the diagonal for same group interactions
+    self._psis = psi_matrix
     return self._psis
 
-
   def group_counts(self):
-    '''number of unique subgroups present'''
+    r"""
+    Calculates the total occurrences of each unique subgroup
+    across all molecules in the mixture.
+
+    :return: array of counts for each unique subgroup
+    :rtype: numpy.ndarray
+    """
     try:
       self._unique_groups
     except AttributeError:
       self.unique_groups()
     group_counts = {}
     for i in range(len(self._unique_groups)):
-      for group, occurrance in self.subgroups[i].items():
+      for group, occurrance in self._subgroups[i].items():
         group_counts[group] += occurrance
     self._group_counts = np.array(list(group_counts.values()))
     return self._group_counts
   
-
   def weighted_number(self):
-    '''weighted X, by occurrance; returns a 3D matrix'''
-    try:
-      self._occurrance_matrix
-    except AttributeError:
-      self.occurrance_matrix()  
+    r"""
+    Weighted mol fraction matrix.
 
-    self._weighted_number = self.z[:,np.newaxis,:] * self._occurrance_matrix[np.newaxis,:,:]
+    This method calculates a matrix, with elements :math:`W_{ijk}`, 
+    where each element represents the mol fraction of molecule :math:`i`, 
+    weighted by the occurrence of subgroup :math:`j` in molecule :math:`k`.
+
+    .. math::
+        W_{ijk} = x_i \nu_{jk}
+
+    :return: matrix of subgroup occurrence weighted mol fractions
+    :rtype: numpy.ndarray
+    """
+    try:
+      self._occurance_matrix
+    except AttributeError:
+      self.occurance_matrix()  
+    self._weighted_number = self.z[:,np.newaxis,:] * self._occurance_matrix[np.newaxis,:,:]
     return self._weighted_number
 
 
   def group_X(self):
-    '''mol fraction of groups in a mixture'''
+    r"""
+    Mol fraction of each subgroup in the mixture.
+
+    This method calculates :math:`X_j`, the mol fraction of subgroup :math:`j`
+    in the entire mixture considering the contributions from all
+    molecules.
+
+    .. math::
+        X_j = \frac{\sum_i^N x_i \nu_{ji}}{\sum_i^N \sum_k^M x_i \nu_{ki}}
+
+    :return: matrix of subgroup mol fractions
+    :rtype: numpy.ndarray
+    """
     try:
       self._weighted_number
     except AttributeError:
@@ -495,9 +439,31 @@ class UNIFAC:
     self._group_X = group_X
     return self._group_X
   
+  def X_pure(self):
+    r"""
+    Calculates the fraction of subgroup :math:`j` for molecule :math:`i` in the entire mixture.
+
+    .. math::
+      X_{ji} = \frac{\nu_{ji}}{\sum_i^N \sum_k^M \nu_{ki}}
+
+    :return: matrix of subgroup fractions
+    :rtype: numpy.ndarray
+    """
+    try:
+      self._occurance_matrix
+    except AttributeError:
+      self.occurance_matrix()
+    self._X_pure = self._occurance_matrix / np.sum(self._occurance_matrix, axis=0)
+    return self._X_pure
 
   def group_Q(self):
-    '''Q for unique groups'''
+    r"""
+    Retrieves :math:`Q_i`, the :func:`q` parameter for each
+    unique subgroup from ``subgroup_data``.
+
+    :return: array of :math:`Q_i` values for each unique subgroup
+    :rtype: numpy.ndarray
+    """
     try:
       self._unique_groups
     except AttributeError:
@@ -508,29 +474,16 @@ class UNIFAC:
     self._group_Q = group_Q
     return self._group_Q
 
-
-  def thetas(self):
-    '''
-    Area term for each molecule in mixture
-
-    .. math::
-      \theta_i = \Frac{x_i * q_i}{\sum_{j=1}^{n} x_j * q_j}
-    '''
-    try:
-      self._Ais
-    except AttributeError:
-      self.Ais()
-    self._thetas = self._Ais * self.z
-    return self._thetas
-  
-
   def Thetas(self):
-    '''
-    Area term for each group in mixture
+    r"""
+    Calculates the area fraction, :math:`\Theta_i`, for subgroup :math:`i` in the entire mixture.
 
     .. math::
-      \Theta_i = \Frac{X_i * Q_i}{\sum_{j=1}^{n} X_j * Q_j}
-    '''
+      \Theta_i = \frac{X_i Q_i}{\sum_j^N X_j Q_j}
+
+    :return: matrix of area terms for each group in each composition
+    :rtype: numpy.ndarray
+    """
     try:
       self._group_Q
     except AttributeError:
@@ -544,43 +497,106 @@ class UNIFAC:
     self._Thetas = Thetas.T # change to composition x groups
     return self._Thetas
 
+  def Thetas_pure(self):
+    r"""
+    Calculates the subgroup area fraction, :math:`\Theta_{ji}`, for subgroup :math:`j` in molecule :math:`i`.
+
+    .. math::
+      \Theta_{ji} = \frac{X_{ji} Q_j}{\sum_k^M X_{ki} Q_l}
+
+    :return: matrix of subgroup fractions
+    :rtype: numpy.ndarray
+    """
+    """area group fractions for each molecule"""
+    try:
+      self._Q_matrix
+    except AttributeError:
+      self.Q_matrix()
+    try:
+      self._X_pure
+    except AttributeError:
+      self.X_pure()
+    self._Thetas_pure = (self._X_pure * self._Q_matrix) / np.sum(self._X_pure * self._Q_matrix, axis=0)
+    return self._Thetas_pure
+
   def rbar(self):
+    r"""
+    Calculates the linear combination of the :func:`r` parameters for each molecule, :math:`\overline{r}`.
+
+    .. math::
+        \overline{r} = \sum_j^N x_i r_i
+
+    :return: linear combination of :func:`r`
+    :rtype: numpy.ndarray
+    """
     try:
       self._r
     except AttributeError:
-      self.R()
+      self.r()
     self._rbar = self.z @ self._r # takes the dot product
     return self._rbar
   
   def Vis(self):
-    '''
-    Volume term for each molecule in mixture, without molar fraction contribution of i
-    
+    r"""
+    Calculates the volume term, :math:`V_i`, for molecule :math:`i` in the mixture.
+
     .. math::
-      \Vis_i = \Frac{r_i}{\sum_{j=1}^{n} x_j * r_j}
-    '''
+        V_i = \frac{r_i}{\sum_j^N x_j r_j}
+
+    :return: array of volume terms for each molecule
+    :rtype: numpy.ndarray
+    """
     try:
       self._rbar
     except AttributeError:
       self.rbar()
     self._Vis = self._r / self._rbar[:,np.newaxis] # divides each row in r by column in rbar
     return self._Vis 
+
+  def phis(self):
+    r"""
+    Calculates :math:`\phi_i`, the volume term (:func:`Vis`) weighted by mol fraction of molecule :math:`i`.
+
+    .. math::
+        \phi_i = \frac{x_i r_i}{\sum_j^N x_j r_j}
+
+    :return: array of weighted volume terms for each molecule
+    :rtype: numpy.ndarray
+    """
+    try:
+      self._Vis
+    except AttributeError:
+      self.Vis()
+    self._phis = self._Vis * self.z
+    return self._phis
   
   def qbar(self):
+    r"""
+    Calculates the linear combination of the :func:`q` parameters for each molecule, :math:`\overline{q}`.
+
+    .. math::
+        \overline{q} = \sum_j^N x_i q_i
+
+    :return: linear combination of :func:`q`
+    :rtype: numpy.ndarray
+    """
     try:
       self._q
     except AttributeError:
-      self.Q()
+      self.q()
     self._qbar = self.z @ self._q # takes the dot product
     return self._qbar
 
   def Ais(self):
-    '''
-    Area term for each molecule in mixture, without molar fraction contribution of i
-    
+    r"""
+    Calculates the area term, :math:`A_i`, for molecule :math:`i` in the mixture.
+
     .. math::
-      \Ais_i = \Frac{q_i}{\sum_{j=1}^{n} x_j * q_j}
-    '''
+        A_i = \frac{q_i}{\sum_j^N x_j q_j}
+
+    :return: array of area terms for each molecule
+    :rtype: numpy.ndarray
+    """
     try:
       self._qbar
     except AttributeError:
@@ -588,27 +604,32 @@ class UNIFAC:
     self._Ais = self._q / self._qbar[:,np.newaxis] # divides each row in q by column in qbar
     return self._Ais
 
-  def phis(self):
-    '''
-    Volume term for each molecule in mixture
+  def thetas(self):
+    r"""
+    Calculates :math:`\theta_i`, the area term (:func:`Ais`) weighted by mol fraction of molecule :math:`i`.
 
     .. math::
-      \phis_i = \Frac{x_i * q_i}{\sum_{j=1}^{n} x_j * q_j}
-    '''
-    try:
-      self._Vis
-    except AttributeError:
-      self.Vis()
-    self._phis = self._Vis * self.z
-    return self._phis
-    
-  
-  def gammas(self):
+      \theta_i = \frac{x_i q_i}{\sum_j^N x_j q_j}
+
+    :return: array of weighted area terms for each molecule
+    :rtype: numpy.ndarray
     """
-    total activity coefficients
-    
-    ..math::
-      \ln \gamma_i = \ln \gamma_i^c + \ln \gamma_i^r
+    try:
+      self._Ais
+    except AttributeError:
+      self.Ais()
+    self._thetas = self._Ais * self.z
+    return self._thetas
+
+  def gammas(self):
+    r"""
+    Total activity coefficients of molecule :math:`i` in a mixture. These coefficients are the sum of combinatorial (:math:`\gamma_i^c`) and residual (:math:`\gamma_i^r`) contributions, as shown below:
+
+    .. math::
+      \gamma_i = \gamma_i^c + \gamma_i^r
+
+    :return: array of activity coefficients
+    :rtype: numpy.ndarray
     """
     try:
       self._lngammas_c
@@ -621,24 +642,24 @@ class UNIFAC:
     self._gammas = np.exp(self._lngammas_c + self._lngammas_r)
     return self._gammas
 
-
   def lngammas_c(self):
-    """
-    get combinatorial activity coefficients
+    r"""
+    Calculates the combinatorial contribution (:math:`\gamma_i^c`) to the activity coefficient of molecule :math:`i` in a mixture. The combinatorial contribution accounts for differences in molecular size and shape and is calculated using the following equation:
 
-    ..math::
-      \gamma_i^c = \ln\frac{\phi_i}{x_i} + (self.z/2) * q_i * \ln\frac{\theta_i}{\phi_i} + \ell_i - \frac{\phi_i}{x_i} * \sum_{j=1} x_j * \ell_j
-      \ell_i = (self.z/2) * (r_i - q_i) - (r_i - 1)
-      z = 10
+    .. math::
+      \ln \gamma_i^c = 1 - V_i + \ln V_i - 5 q_i \left( 1 - \frac{V_i}{A_i} + \ln \frac{V_i}{A_i} \right)
+
+    :return: array of combinatorial activity coefficients
+    :rtype: numpy.ndarray
     """
     try:
       self._q
     except AttributeError:
-      self.Q()
+      self.q()
     try:
       self._r
     except AttributeError:
-      self.R()
+      self.r()
     try:
       self._thetas
     except AttributeError:
@@ -647,17 +668,19 @@ class UNIFAC:
       self._phis
     except AttributeError: 
       self.phis()
-    self._ell = (self.zc/2) * (self._r - self._q) - (self._r - 1)
-    self._lngammas_c = np.log(self._phis/self.z) + (self.zc/2) * self._q * np.log(self._thetas/self._phis) + self._ell - (self._phis/self.z) * (self.z @ self._ell)[:,np.newaxis]
+
+    self._lngammas_c = 1 - self.Vis() + np.log(self.Vis()) - 5 * self._q * (1 - (self.Vis()/self.Ais()) + np.log(self.Vis()/self.Ais()))
     return self._lngammas_c
   
-
   def lngammas_r(self):
-    """
-    get residual activity coefficients
+    r"""
+    Calculates residual (:math:`\gamma_i^r`) contribution to activity coefficients of molecule :math:`i` in mixture. The residual contribution accounts for the difference compared to the residual activity coefficient of subgroup :math:`k` in the pure component reference state of molecule :math:`i`.
 
-    ..math::
-      \gamma_i^r = \sum_{k=1} \nu_k^(i) * [\ln{\Gamma_k} - \ln{\Gamma_k^(i)}]
+    .. math::
+      \ln \gamma_i^r = \sum_k^M \nu_{ki} \left( \ln \Gamma_k - \ln \Gamma_{ki}  \right)
+
+    :return: array of residual activity coefficients
+    :rtype: numpy.ndarray    
     """
     try:
       self._lnGammas_subgroups
@@ -668,40 +691,18 @@ class UNIFAC:
     except AttributeError:
       self.lnGammas_subgroups_pure()
     
-    self._lngammas_r = np.sum(self._occurrance_matrix * (self._lnGammas_subgroups[:,np.newaxis] - self._lnGammas_subgroups_pure), axis=2)[:,0,:]
+    self._lngammas_r = np.sum(self._occurance_matrix * (self._lnGammas_subgroups[:,np.newaxis] - self._lnGammas_subgroups_pure), axis=2)[:,0,:]
     return self._lngammas_r
 
-
-  def X_pure(self):
-    """group fractions for each molecule"""
-    try:
-      self._occurrance_matrix
-    except AttributeError:
-      self.occurrance_matrix()
-    self._X_pure = self._occurrance_matrix / np.sum(self._occurrance_matrix, axis=0)
-    return self._X_pure
-  
-
-  def Thetas_pure(self):
-    """area group fractions for each molecule"""
-    try:
-      self._Q_matrix
-    except AttributeError:
-      self.Q_matrix()
-    try:
-      self._X_pure
-    except AttributeError:
-      self.X_pure()
-    self._Thetas_pure = (self._X_pure * self._Q_matrix) / np.sum(self._X_pure * self._Q_matrix, axis=0)
-    return self._Thetas_pure
-  
-  
   def lnGammas_subgroups_pure(self):
-    """
-    residual activity coefficient of group k in a ref. solution containing only molecules of type i
+    r"""
+    Calculates the residual activity coefficient (:math:`\Gamma_{ki}`) of subgroup :math:`k` in a reference solution consisting solely of molecules of type :math:`i`. In this method, :math:`\Theta` values come from :func:`Thetas_pure` method, where each molecule is assumed to be a pure component.
 
-    ..math::
-      \Gamma_k = Q_k * [1 - \ln{\sum_{m=1} \Theta_m * \Psi_{mk}} - \sum_{m=1} \frac{\Theta_m * \Psi_{km}}{\sum_{n=1} \Theta_n * \Psi_{nm}}
+    .. math::
+      \ln \Gamma_{ki} = Q_k \left( 1 - \ln \sum_i^N \Theta_i \psi_{ik} - \sum_i^N \frac{\Theta_i \psi_{ki}}{\sum_j^N \Theta_j \psi_{ji}}  \right)
+
+    :return: array of residual contributions for the subgroup reference state
+    :rtype: numpy.ndarray
     """
     try:
       self._Thetas_pure
@@ -722,13 +723,15 @@ class UNIFAC:
     self._lnGammas_subgroups_pure = self._Q_matrix * (1 - np.log(thetas_psis_12) - sum_thetas_psis_12_thetas_psis_21)
     return self._lnGammas_subgroups_pure
 
-
   def lnGammas_subgroups(self):
-    """
-    residual activity coefficient of group k in mixture
+    r"""
+    Calculates the residual activity coefficient (:math:`\Gamma_{k}`) of subgroup :math:`k` in a mixture.
 
-    ..math::
-      \Gamma_k = Q_k * [1 - \ln{\sum_{m=1} \Theta_m * \Psi_{mk}} - \sum_{m=1} \frac{\Theta_m * \Psi_{km}}{\sum_{n=1} \Theta_n * \Psi_{nm}}
+    .. math::
+      \ln \Gamma_{k} = Q_k \left( 1 - \ln \sum_i^N \Theta_i \psi_{ik} - \sum_i^N \frac{\Theta_i \psi_{ki}}{\sum_j^N \Theta_j \psi_{ji}}  \right)
+
+    :return: array of residual contributions for each subgroup
+    :rtype: numpy.ndarray
     """
     try:
       self._Thetas
@@ -754,7 +757,7 @@ class UNIFAC:
     Theta_psi_km = Theta_m * psi_km # shape: (S, G, G)
     sum_Theta_psi_km_Theta_psi_nm = (Theta_psi_km / Theta_psi_nm).sum(axis=2) # shape: (S, G)
 
-    # compute the residual activity coef. for each group in each component
+    # compute the residual activity coef. for each group in each molecule
     subgroup_lnGammas_subgroups = self._group_Q[np.newaxis,:] * (1 - np.log(Theta_psi) - sum_Theta_psi_km_Theta_psi_nm) # shape: (S, G)
 
     # convert to appropriate dimensions
@@ -765,14 +768,16 @@ class UNIFAC:
 
     self._lnGammas_subgroups = subgroup_lnGammas_subgroups_matrix
     return self._lnGammas_subgroups
-  
 
   def GE(self):
-    """
-    Gibbs excess energy
+    r"""
+    Gibbs excess energy of the mixture.
 
-    ..math:
-      GE = R * T *  \sum_{i=1} x_i * log(gamma_i)
+    .. math::
+      \frac{G^E}{RT} = \sum_{i}^N x_i \ln \gamma_i
+
+    :return: array of Gibbs excess energy
+    :rtype: numpy.ndarray
     """
     try:
       self._gammas
@@ -781,21 +786,15 @@ class UNIFAC:
     self._GE = (self.Rc * self.T * np.sum(self.z * np.log(self._gammas), axis=1))
     return self._GE
 
-  def Hmix(self):
-    """Enthalpy of Mixing """
-    return self.Rc * self.T * np.sum(self.z * self.lngammas_r(), axis=1)
-
-  def Smix(self):
-    ''' Entropy of Mixing '''
-    return self.Rc * self.T * np.sum(self.z * (self.lngammas_c() + np.log(self.z)), axis=1)
-  
-
   def GM(self):
-    """
-    Gibbs mixing energy
+    r"""
+    Gibbs mixing free energy of the mixture.
 
-    ..math:
-      GM = R * T *  \sum_{i=1} x_i * log(gamma_i * x_i)
+    .. math::
+      \frac{\Delta G_{mix}}{RT} = \sum_{i}^N x_i \ln \left( x_i \gamma_i \right)
+
+    :return: array of Gibbs mixing free energy
+    :rtype: numpy.ndarray
     """
     try:
       self._gammas
@@ -804,8 +803,16 @@ class UNIFAC:
     self._GM = (self.Rc * self.T * np.sum(self.z * np.log(self._gammas * self.z), axis=1))
     return self._GM
   
-  
   def dlngammas_c_dxs(self):
+    r"""
+    Calculates the derivative of the combinatorial contribution to the activity coefficients with respect to the mol fractions.
+
+    .. math::
+      \frac{\partial \ln \gamma_i^c}{\partial x_j} = -5 q_i \left( \frac{\frac{\partial V_i}{\partial x_j}}{V_i} - \frac{V_i \frac{\partial A_i}{\partial x_j}}{A_i^2} \frac{A_i}{V_i} - \frac{\frac{\partial V_i}{\partial x_j}}{A_i} + \frac{V_i \frac{\partial A_i}{\partial x_j}}{A_i^2} \right) - \frac{\partial V_i}{\partial x_j} + \frac{\frac{\partial V_i}{\partial x_j}}{V_i}
+
+    :return: Array of the derivatives of the combinatorial activity coefficients with respect to mol fractions
+    :rtype: numpy.ndarray    
+    """
 
     try:
       self._dVis_dxs
@@ -830,26 +837,40 @@ class UNIFAC:
     self._dlngammas_c_dxs = dlngammas_c_dxs
     return self._dlngammas_c_dxs
 
-
   def dlngammas_r_dxs(self):
+    r"""
+    Calculates the derivative of the residual contribution to the activity coefficients with respect to the mol fractions.
 
+    .. math::
+      \frac{\partial \ln \gamma_i^r}{\partial x_j} = \sum_k \nu_{ki} \frac{\partial \ln \Gamma_k}{\partial x_j}
+
+    :return: array of the derivatives of the residual activity coefficients with respect to mol fractions
+    :rtype: numpy.ndarray
+    """
     try:
-      self._occurrance_matrix
+      self._occurance_matrix
     except AttributeError: 
-      self.occurrance_matrix()
+      self.occurance_matrix()
     try:
       self._dlnGammas_subgroups_dxs 
     except AttributeError: 
       self.dlnGammas_subgroups_dxs()
 
-    dlngammas_r_dxs = self._occurrance_matrix.T @ self._dlnGammas_subgroups_dxs
+    dlngammas_r_dxs = self._occurance_matrix.T @ self._dlnGammas_subgroups_dxs
     dlngammas_r_dxs = dlngammas_r_dxs.reshape(np.shape(self.z)[0], self.N, self.N)
     self._dlngammas_r_dxs = dlngammas_r_dxs
     return self._dlngammas_r_dxs
 
-
   def dAis_dxs(self):
+    r"""
+    Calculates the derivative of the surface area fractions with respect to the mol fractions.
 
+    .. math::
+      \frac{\partial A_i}{\partial x_j} = -\frac{q_i q_j}{\overline{q}^2}
+    
+    :return: array of the derivatives of the surface area term with respect to mol fractions
+    :rtype: numpy.ndarray
+    """
     try:
       self._qbar
     except AttributeError: 
@@ -858,9 +879,16 @@ class UNIFAC:
     self._dAis_dxs = (-np.outer(self._q, self._q)) / self._qbar[:,np.newaxis,np.newaxis]**2
     return self._dAis_dxs
 
-
   def dVis_dxs(self):
+    r"""
+    Calculates the derivative of the volume fractions with respect to the mol fractions.
 
+    .. math::
+      \frac{\partial V_i}{\partial x_j} = -\frac{r_i r_j}{\overline{r}^2}
+
+    :return: array of the derivatives of the volume term with respect to mol fractions
+    :rtype: numpy.ndarray
+    """
     try:
       self._rbar
     except AttributeError: 
@@ -871,15 +899,33 @@ class UNIFAC:
   
 
   def F(self):
+    r"""
+    Calculates the inverse of a weighted sum of molecule :math:`i`, where the sum is over the occurance of subgroups :math:`j` in molecules :math:`k` within the mixture.
+
+    .. math::
+      F = \frac{1}{\sum_i^N \sum_j^M x_i \nu_{ji}}
+
+    :return: :math:`F` parameter of the mixture
+    :rtype: float
+    """
     try:
       self._weighted_number
     except AttributeError: 
       self.weighted_number()
     self._F = 1/(self._weighted_number.sum(axis=1)).sum(axis=1) 
     return self._F
-  
 
   def G(self):
+    r"""
+    Calculates a parameter, :math:`G`, related to the group contributions in the mixture.
+    This method computes :math:`G` as the inverse of the sum of the products of :math:`X_k` and :math:`Q_k` for all subgroups in the mixture.
+
+    .. math::
+      G = \frac{1}{\sum_j^M X_j Q_j}
+
+    :return: The calculated parameter :math:`G`.
+    :rtype: numpy.ndarray
+    """
     try:
       self._group_X
     except AttributeError:
@@ -891,19 +937,33 @@ class UNIFAC:
     self._G = 1/(self._group_X * self._group_Q).sum(axis=1)
     return self._G
   
-
   def sum_occurance_matrix(self):
-    # ie, VS in thermo pkg
+    r"""
+    Calculates the total number of subgroups in molecule :math:`i`.
+
+    .. math::
+      \left( \nu \right)_{sum,i} = \sum_j^M \nu_{ji}
+
+    :return: array of number of subgroups in a molecule
+    :rtype: numpy.ndarray
+    """
     try:
-      self._occurrance_matrix
+      self._occurance_matrix
     except AttributeError: 
-      self.occurrance_matrix()
-    self._sum_occurance_matrix = self._occurrance_matrix.sum(axis=0)
+      self.occurance_matrix()
+    self._sum_occurance_matrix = self._occurance_matrix.sum(axis=0)
     return self._sum_occurance_matrix
-  
 
   def sum_weighted_number(self):
-    # ie., VSXS in thermo pkg
+    r"""
+    Calculates the total weighted number of molecule :math:`i` with occurance of subgroup :math:`j` for all molecules in mixture.
+
+    .. math::
+      (\nu x)_{sum,k} = \sum_k^N W_{ijk}
+
+    :return: array of weighted sums of molecule :math:`i`
+    :rtype: numpy.ndarray
+    """
     try:
       self._weighted_number
     except AttributeError: 
@@ -911,10 +971,16 @@ class UNIFAC:
     self._sum_weighted_number = self._weighted_number.sum(axis=2)
     return self._sum_weighted_number
 
-
-
   def dThetas_dxs(self):
+    r"""
+    Calculates the derivative of the surface area term (:math:`\Theta_i`) with respect to the mol fractions (:math:`x_j`).
 
+    .. math::
+      \frac{\partial \Theta_i}{\partial x_j} = F G Q_i \left( F G (\nu x)_{sum,i} \left( \sum_k^M F Q_k \left( \nu \right)_{sum,j} - \sum_k^M Q_k \nu_{jk} \right) - F \left( \nu \right)_{sum,j} (\nu x)_{sum,i} + \nu_{ji} \right)
+
+    :return: array of the derivatives of the surface area fractions with respect to mole fractions.
+    :rtype: numpy.ndarray
+    """
     try:
       self._F
     except AttributeError:
@@ -935,14 +1001,14 @@ class UNIFAC:
     lenF = self._F.shape[0] # Number of F and G values
 
     # Initialize output arrays 
-    dThetas_dxs = np.zeros((lenF, self.N_groups, self.N))
+    dThetas_dxs = np.zeros((lenF, self.M, self.N))
     vec0 = np.zeros((lenF, self.N))
 
     # Compute tot0: F multiplied by the sum over N_groups of sum_weighted_number * self._group_Q
     tot0 = self._F * np.sum(self._sum_weighted_number * self._group_Q[np.newaxis, :], axis=1)
 
     # Compute tot1: Negative sum over N_groups of self._group_Q * vs
-    tot1 = -np.sum(self._group_Q[:, np.newaxis] * self._occurrance_matrix, axis=0)
+    tot1 = -np.sum(self._group_Q[:, np.newaxis] * self._occurance_matrix, axis=0)
 
     # Compute vec0: Vector of size (lenF, N)
     # Expand dimensions for broadcasting
@@ -963,7 +1029,7 @@ class UNIFAC:
     outer = self._sum_weighted_number[:, :, np.newaxis] * vec0[:, np.newaxis, :]
 
     # Broadcast vs to match dimensions
-    vs_expanded = self._occurrance_matrix[np.newaxis, :, :]
+    vs_expanded = self._occurance_matrix[np.newaxis, :, :]
 
     # Compute dThetas_dxs
     dThetas_dxs = ci[:, :, np.newaxis] * (outer + vs_expanded)
@@ -973,6 +1039,15 @@ class UNIFAC:
 
 
   def Ws(self):
+    r"""
+    Calculates the weights of :math:`\psi` interaction parameters by derivative of area terms for molecule :math:`i` over occurance of subgroups :math:`j` in molecule :math:`k`.
+
+    .. math::
+      W_{ki} = \sum_j^M \psi_{jk} \frac{\partial \Theta_j}{\partial x_i}
+
+    :return: array of weighted :math:`\psi` values by first derivative of area term
+    :rtype: numpy.ndarray
+    """
     try:
       self._psis
     except AttributeError:
@@ -986,6 +1061,15 @@ class UNIFAC:
   
 
   def Theta_Psi_sum_invs(self):
+    r"""
+    Calculates sum area terms for subgroup :math:`m` and the corresponding interaction parameter for molecule :math:`k`.
+    
+    .. math::
+        Z_k = \frac{1}{\sum_m^M \Theta_m \psi_{mk}}
+
+    :return: inverse sum of area term and interaction paramter for molecule :math:`k`
+    :rtype: numpy.ndarray
+    """
     try:
       self._Thetas
     except AttributeError: 
@@ -999,6 +1083,20 @@ class UNIFAC:
   
 
   def dlnGammas_subgroups_dxs(self):
+    r"""
+    Calculates the first derivative of residual activity coefficient (:math:`\Gamma_{k}`) of subgroup :math:`k` in a mixture with respect to mol fraction of molecule :math:`j`.
+
+    .. math::
+      \frac{\partial \ln \Gamma_k}{\partial x_j} = Q_k 
+        \left( 
+          - \frac{\sum_l^M \psi_{lk} \frac{\partial \Theta_l}{\partial x_j}}{\sum_l^M \Theta_l \psi_{lk}}
+          - \sum_l^M \frac{\psi_{kl} \frac{\partial \Theta_l}{\partial x_j}}{\sum_m^M \Theta_m \psi_{ml}}
+          + \sum_l^M \frac{\left( \sum_m^M \psi_{ml} \frac{\partial \Theta_m}{\partial x_j} \right) \Theta_l \psi_{kl}}{\left( \sum_m^M \Theta_m \psi_{ml} \right)^2} 
+        \right)
+
+    :return: mol fraction derivatives of :math:`\Gamma_{k}` for each subgroup
+    :rtype: numpy.ndarray
+    """
     try:
       self._Ws
     except AttributeError:
@@ -1035,7 +1133,15 @@ class UNIFAC:
 
 
   def dGE_dxs(self):
-    
+    r"""
+    Calculates the first derivative of Gibbs excess energy with respect to mol fraction of molecule :math:`i`.
+
+    .. math::
+      \frac{1}{RT}\frac{\partial G^E}{\partial x_i} = \ln \gamma_i^c + \ln \gamma_i^r + \sum_j^N x_j \left( \frac{\partial \ln \gamma_j^c}{\partial x_i} + \frac{\partial \ln \gamma_j^r}{\partial x_i} \right)
+
+    :return: first component derivative of excess Gibbs energy
+    :rtype: numpy.ndarray
+    """
     try:
       self._dlngammas_c_dxs
     except AttributeError: 
@@ -1062,7 +1168,18 @@ class UNIFAC:
 
 
   def mu(self):
-    
+    r"""
+    Calculates the chemical potential of molecule :math:`i`.
+
+    .. math::
+      \frac{\mu_i}{RT} = 
+        1 + \ln x_i 
+        + \ln \gamma_i^c + \ln \gamma_i^r + 
+        \sum_j^N x_j \left( \frac{\partial \ln \gamma_j^c}{\partial x_i} + \frac{\partial \ln \gamma_j^r}{\partial x_i} \right)
+
+    :return: chemical potential of molecule :math:`i`
+    :rtype: numpy.ndarray
+    """
     try:
       self._dlngammas_c_dxs
     except AttributeError: 
@@ -1089,7 +1206,16 @@ class UNIFAC:
   
 
   def dGM_dxs(self):
-    '''calculates the first derivative of mixing free energy'''
+    r"""
+    Calculates first derivative of Gibbs mixing free energy with respect to mol fraction of molecule :math:`i`.
+
+    .. math::
+     \frac{\partial \Delta G_{mix}}{\partial x_i} = \mu_i - \mu_N
+
+    :return: first component derivative of Gibbs mixing free energy
+    :rtype: numpy.ndarray
+    """
+    
     try:
       self._mu 
     except:
@@ -1103,6 +1229,32 @@ class UNIFAC:
   
   
   def d2lngammas_c_dxixjs(self):
+    r"""
+    Calculates the second mol fraction derivative with respect to molecule :math:`j` and molecule :math:`k` of combinatorial contribution to activity coefficients of molecule :math:`i`.
+
+    .. math::
+      \frac{\partial \ln \gamma^c_i}{\partial x_j \partial x_k} =
+      5 q_{i} \left(\frac{- \frac{\partial^{2}V_{i}}{\partial x_{k}\partial x_{j}} + \frac{V_{i}
+      \frac{\partial^{2}A_{i}}{\partial x_{k}\partial x_{j}}}{A_{i}} + \frac{\frac{\partial A_{i}}{\partial x_{j}} 
+      \frac{\partial V_{i}}{\partial x_{k}}}{A_{i}} + \frac{\frac{\partial A_{i}}{\partial x_{k}} 
+      \frac{\partial V_{i}}{\partial x_{j}}}{A_{i}} - \frac{2 V_{i} \frac{\partial A_{i}}{\partial x_{j}}
+       \frac{\partial A_{i}}{\partial x_{k}}}{A_{i}^{2}}}{V_{i}} + \frac{\left(
+      \frac{\partial V_{i}}{\partial x_{j}} - \frac{V_{i} \frac{\partial A_{i}}{\partial x_{j}}}
+      {A_{i}}\right) \frac{\partial V_{i}}{\partial x_{k}}}{V_{i}^{2}}
+      + \frac{\frac{\partial^{2} V_{i}}{\partial x_{k}\partial x_{j}}}{A_{i}} - \frac{\left(
+      \frac{\partial V_{i}}{\partial x_{j}} - \frac{V_{i} \frac{\partial A_{i}}{\partial x_{j}}}{
+      A_{i}}\right) \frac{\partial A_{i}}{\partial x_{k}}}{A_{i} V_{i}} - \frac{V_{i}
+      \frac{\partial^{2} A_{i}}{\partial x_{k}\partial x_{j}}}{A_{i}^{2}} - \frac{\frac{\partial A_{i}}
+      {\partial x_{j}} \frac{\partial V_{i}}{\partial x_{k}}}{A_{i}^{2}}
+      - \frac{\frac{\partial A_{i}}{\partial x_{k}} \frac{\partial V_{i}}{\partial x_{j}}}{A_{i}^{2}}
+      + \frac{2 V_{i} \frac{\partial A_{i}}{\partial x_{j}} \frac{\partial A_{i}}{\partial x_{k}}}
+      {A_{i}^{3}}\right) - \frac{\partial^{2} V_i}{\partial x_{k}\partial x_{j}}
+      + \frac{\frac{\partial^{2} V_i}{\partial x_{k}\partial x_{j}}}{V_i} - \frac{\frac{\partial  V_i}
+      {\partial x_{j}} \frac{\partial  V_i}{\partial x_{k}}}{V_i^{2}}
+
+    :return: array of second derivative of combinatorial activity coefficient with respect to mol fractions
+    :rtype: numpy.ndarray
+    """
     try:
       self._Vis
     except AttributeError:
@@ -1186,22 +1338,39 @@ class UNIFAC:
     # Assign the computed values to the output array
     return self._d2lngammas_c_dxixjs  # Shape: (3, N, N, N)
 
-
   def d2lngammas_r_dxixjs(self):
+    r"""
+    Calculates the second mol fraction derivative with respect to molecule :math:`j` and molecule :math:`k` of residual contribution to activity coefficients of molecule :math:`i`.
 
+    .. math::
+      \frac{\partial^2 \ln \gamma_i^r}{\partial x_j \partial x_k} = \sum_{m}^{M}
+      \nu_m^{mi} \frac{\partial^2 \ln \Gamma_m}{\partial x_j^2}
+
+    :return: array of second derivative of combinatorial activity coefficient with respect to mol fractions
+    :rtype: numpy.ndarray
+    """
     try:
       self._d2lnGammas_subgroups_dxixjs
     except AttributeError:
       self.d2lnGammas_subgroups_dxixjs()
     try:
-      self._occurrance_matrix
+      self._occurance_matrix
     except AttributeError:
-      self.occurrance_matrix()
-    self._d2lngammas_r_dxixjs = np.einsum('mi,fjkm->fijk', self._occurrance_matrix, self._d2lnGammas_subgroups_dxixjs)
+      self.occurance_matrix()
+    self._d2lngammas_r_dxixjs = np.einsum('mi,fjkm->fijk', self._occurance_matrix, self._d2lnGammas_subgroups_dxixjs)
     return self._d2lngammas_r_dxixjs
 
 
   def d2Vis_dxixjs(self):
+    r"""
+    Calculates the second mol fraction derivatives of volume term with respect to molecule :math:`i` and molecule :math:`j`.
+
+    .. math::
+      \frac{\partial^2 V_i}{\partial x_j \partial x_k} = \frac{2 r_i r_j r_k}{\left( \sum_l r_l x_l \right)^3}
+
+    :return: second derivative of volume terms
+    :rtype: numpy.ndarray
+    """
     try:
       self._rbar
     except AttributeError: 
@@ -1217,6 +1386,15 @@ class UNIFAC:
 
 
   def d2Ais_dxixjs(self):
+    r"""
+    Calculates the second mol fraction derivatives of surface area term with respect to molecule :math:`i` and molecule :math:`j`.
+
+    .. math::
+      \frac{\partial^2 A_i}{\partial x_j \partial x_k} = \frac{2 q_i q_j q_k}{ \left( \sum_l q_l x_l \right)^3}
+
+    :return: second derivative of surface area terms
+    :rtype: numpy.ndarray
+    """
     try:
       self._qbar
     except AttributeError: 
@@ -1243,8 +1421,27 @@ class UNIFAC:
     self._Zs = 1/(self._Thetas @ self._psis)
     return self._Zs
 
-
   def d2lnGammas_subgroups_dxixjs(self):
+    r"""
+    Calculate the second mol fraction derivatives of the :math:`\ln \Gamma_k` parameters for the phase with respect to molecule :math:`i` and molecule :math:`j`.
+
+    .. math::
+        \frac{\partial^2 \ln \Gamma_k}{\partial x_i \partial x_j} = -Q_k\left(
+        -Z_k K_{kij} - \sum_m^M Z_m^2 K_{mij}\Theta_m \psi_{km}
+        -W_{ki} W_{kj}) Z_k^2
+        + \sum_m^M Z_m \psi_{km} \frac{\partial^2 \Theta_m}{\partial x_i \partial x_j}
+        - \sum_m \left(W_{mj} Z_m^2 \psi_{km} \frac{\partial \Theta_m}{\partial x_i}
+        + W_{mi} Z_m^2 \psi_{km} \frac{\partial \Theta_m}{\partial x_j}\right)
+        + \sum_m^M 2 W_{mi} W_{mj} Z_m^3 \Theta_m \psi_{km}\right)  
+    
+    where: 
+
+    .. math::
+        K_{kij} = \sum_m^M \psi_{mk} \frac{\partial^2 \Theta_m}{\partial x_i \partial x_j}
+    
+    :return: array of second mol fraction derivatives of Gamma parameters for each subgroup
+    :rtype: numpy.ndarray
+    """
     try:
       self._Zs
     except AttributeError: 
@@ -1258,7 +1455,7 @@ class UNIFAC:
     except AttributeError:
       self.d2Thetas_dxixjs()
 
-    d2lnGammas_subgroups_dxixjs = np.empty((np.shape(self.z)[0], self.N, self.N, self.N_groups))
+    d2lnGammas_subgroups_dxixjs = np.empty((np.shape(self.z)[0], self.N, self.N, self.M))
 
     for f in range(np.shape(self.z)[0]):
       for i in range(self.N):
@@ -1301,6 +1498,37 @@ class UNIFAC:
 
 
   def d2Thetas_dxixjs(self):
+    r"""
+    Calculates the second derivative of the area term of subgroup :math:`i` with respect to mol fractions of molecule :math:`j` and molecule :math:`k`.
+
+    .. math::
+      \frac{\partial^2 \Theta_i}{\partial x_j \partial x_k} =
+      \frac{Q_i}{\sum_n^N Q_n (\nu x)_{sum,n}}\left(
+      -F(\nu)_{sum,j} \nu_{ik} - F (\nu)_{sum,k}\nu_{ij}
+      + 2F^2(\nu)_{sum,j} (\nu)_{sum,k} (\nu x)_{sum,i}
+      + \frac{F (\nu x)_{sum,i}\left[
+      \sum_n^M(-2 F Q_n (\nu)_{sum,j} (\nu)_{sum,k}
+      (\nu x)_{sum,n} + Q_n (\nu)_{sum,j} \nu_{nk} + Q_n (\nu)_{sum,k}\nu_{nj}
+      )\right] }
+      {\sum_n^M Q_n (\nu x)_{sum,n} }
+      + \frac{2(\nu x)_{sum,i}(\sum_n^M[-FQ_n (\nu)_{sum,j} (\nu x)_{sum,n} + Q_n \nu_{nj}])
+      (\sum_n^M[-FQ_n (\nu)_{sum,k} (\nu x)_{sum,n} + Q_n \nu_{nk}])  }
+      {\left( \sum_n^M Q_n (\nu x)_{sum,n} \right)^2}
+      - \frac{\nu_{ij}(\sum_n^M -FQ_n (\nu)_{sum,k} (\nu x)_{sum,n} + Q_n \nu_{nk} )}
+      {\left( \sum_n^M Q_n (\nu x)_{sum,n} \right)}
+      - \frac{\nu_{ik}(\sum_n^M -FQ_n (\nu)_{sum,j} (\nu x)_{sum,n} + Q_n \nu_{nj} )}
+      {\left( \sum_n^M Q_n (\nu x)_{sum,n} \right)}
+      + \frac{F(\nu)_{sum,j} (\nu x)_{sum,i} (\sum_n^M -FQ_n (\nu)_{sum,k}
+      (\nu x)_{sum,n} + Q_n \nu_{nk})}
+      {\left(\sum_n^M Q_n (\nu x)_{sum,n} \right)}
+      + \frac{F(\nu)_{sum,k} (\nu x)_{sum,i} (\sum_n^M -FQ_n (\nu)_{sum,j}
+      (\nu x)_{sum,n} + Q_n \nu_{nj})}
+      {\left(\sum_n^M Q_n (\nu x)_{sum,n} \right)}
+      \right)
+
+    :return: array of second mol fraction derivative of area fractions
+    :rtype: numpy.ndarray
+    """
 
     try:
       self._F
@@ -1335,7 +1563,7 @@ class UNIFAC:
     VSXS_transposed = np.transpose(self._sum_weighted_number[:, :, np.newaxis] , (1, 2, 0)).reshape(len(self._group_Q), np.shape(self.z)[0], 1)
 
     # Add vs and multiply by Qs
-    vec0 = np.sum(self._group_Q[:,np.newaxis,np.newaxis] * (VSXS_transposed * nffVSj_expanded + self._occurrance_matrix.reshape(len(self._group_Q),1,np.shape(self.z)[1])), axis=0)
+    vec0 = np.sum(self._group_Q[:,np.newaxis,np.newaxis] * (VSXS_transposed * nffVSj_expanded + self._occurance_matrix.reshape(len(self._group_Q),1,np.shape(self.z)[1])), axis=0)
 
     # for tot0 calculation
     # Reshape variables to align dimensions for broadcasting
@@ -1348,18 +1576,18 @@ class UNIFAC:
     VS_j_expanded = self._sum_occurance_matrix[np.newaxis, :, np.newaxis, np.newaxis]  # (1, N, 1, 1)
     # VS: (1, 1, 2, 1)
     VS_k_expanded = self._sum_occurance_matrix[np.newaxis, np.newaxis, :, np.newaxis]  # (1, 1, N, 1)
-    # self._occurrance_matrix[n, k]: (1, 1, 2, 4)
-    occurrance_matrix_nk_expanded = self._occurrance_matrix.T[np.newaxis, np.newaxis, :, :]  # vs.T shape is (2, 4), transpose vs to get (2, N_groups)
+    # self._occurance_matrix[n, k]: (1, 1, 2, 4)
+    occurance_matrix_nk_expanded = self._occurance_matrix.T[np.newaxis, np.newaxis, :, :]  # vs.T shape is (2, 4), transpose vs to get (2, N_groups)
     # vs[n, j]: (1, 2, 1, 4)
-    occurrance_matrix_nj_expanded = self._occurrance_matrix.T[np.newaxis, :, np.newaxis, :]  # vs.T shape is (2, 4)
+    occurance_matrix_nj_expanded = self._occurance_matrix.T[np.newaxis, :, np.newaxis, :]  # vs.T shape is (2, 4)
     # Qs: (1, 1, 1, 4)
     Qs_expanded = self._group_Q[np.newaxis, np.newaxis, np.newaxis, :]  # (1, 1, 1, N_groups)
 
     # Compute the first term: VS[j] * (n2FVsK * VSXS + vs[n, k])
-    term1 = VS_j_expanded * (n2FVsK_expanded * VSXS_expanded + occurrance_matrix_nk_expanded)
+    term1 = VS_j_expanded * (n2FVsK_expanded * VSXS_expanded + occurance_matrix_nk_expanded)
 
     # Compute the second term: VS[k] * vs[n, j]
-    term2 = VS_k_expanded * occurrance_matrix_nj_expanded
+    term2 = VS_k_expanded * occurance_matrix_nj_expanded
 
     # Sum both terms
     terms = term1 + term2  # Shape: (3, 2, 2, 4)
@@ -1377,17 +1605,17 @@ class UNIFAC:
     tot0 *= F_expanded * QsVSXS_sum_inv_expanded # shape: (3, 2, 2)
 
     # Initialize d2Thetas_dxixjs with the appropriate shape
-    d2Thetas_dxixjs = np.zeros((np.shape(self.z)[0], self.N, self.N, self.N_groups))
+    d2Thetas_dxixjs = np.zeros((np.shape(self.z)[0], self.N, self.N, self.M))
 
     for f in range(np.shape(self.z)[0]):
       for j in range(self.N):
         VS_j = self._sum_occurance_matrix[j]  # Scalar
-        vs_j = self._occurrance_matrix[:, j]  # Shape: (self.N_groups,)
+        vs_j = self._occurance_matrix[:, j]  # Shape: (self.M,)
         vec0_fj = vec0[f, j]  # Scalar
 
         # Shapes for broadcasting
         VS_k = self._sum_occurance_matrix  # Shape: (self.N,)
-        vs_k = self._occurrance_matrix  # Shape: (self.N_groups, self.N)
+        vs_k = self._occurance_matrix  # Shape: (self.M, self.N)
         vec0_fk = vec0[f]  # Shape: (self.N,)
 
         # Compute terms using broadcasting
@@ -1416,7 +1644,23 @@ class UNIFAC:
 
 
   def d2GE_dxixjs(self):
+    r"""
+    Calculate the second composition derivative of excess Gibbs energy with respect to mol fractions of molecule :math:`j` and molecule :math:`k`.
 
+    .. math::
+        \frac{1}{RT}\frac{\partial^2 G^E}{\partial x_i \partial x_j} = 
+          \frac{\partial \ln \gamma_i^c}{\partial x_j}
+        + \frac{\partial \ln \gamma_i^r}{\partial x_j}
+        + \frac{\partial \ln \gamma_j^c}{\partial x_i}
+        + \frac{\partial \ln \gamma_j^r}{\partial x_i}
+        +\sum_k \left(
+          \frac{\partial^2 \ln \gamma_k^c}{\partial x_i \partial x_j}
+          + \frac{\partial^2 \ln \gamma_k^r}{\partial x_i \partial x_j}
+        \right)
+
+    :return: second composition derivative of excess Gibbs energy
+    :rtype: numpy.ndarray
+    """
     try:
       self._dlngammas_c_dxs
     except AttributeError:
@@ -1449,7 +1693,24 @@ class UNIFAC:
 
 
   def dmu_dz(self):
+    r"""
+    Calculates the derivative of the chemical potential (:math:`\mu_i`) with respect to the composition (:math:`j`).
 
+    .. math::
+      \frac{1}{RT}\frac{\partial \mu_i}{\partial x_j} = 
+        \frac{1}{x_i}
+        + \frac{\partial \ln \gamma_i^c}{\partial x_j}
+        + \frac{\partial \ln \gamma_i^r}{\partial x_j}
+        + \frac{\partial \ln \gamma_j^c}{\partial x_i}
+        + \frac{\partial \ln \gamma_j^r}{\partial x_i}
+        +\sum_k \left(
+          \frac{\partial^2 \ln \gamma_k^c}{\partial x_i \partial x_j}
+          + \frac{\partial^2 \ln \gamma_k^r}{\partial x_i \partial x_j}
+        \right)
+       
+    :return: derivative of chemical potential with respect to composition
+    :rtype: numpy.ndarray
+    """
     try:
       self._dlngammas_c_dxs
     except AttributeError:
@@ -1480,55 +1741,22 @@ class UNIFAC:
     self._dmu_dz = self.Rc * self.T * (dmu_initial + sum_over_k)  # Shape: (3, 2, 2)
     return self._dmu_dz
   
-  # def Mij(self):
-  #   ''' create Mij matrix '''
-  #   try:
-  #     self._dmu_dz
-  #   except AttributeError:
-  #     self.dmu_dz()
-
-  #   Mij = np.empty((np.shape(self.z)[0], np.shape(self.z)[1], np.shape(self.z)[1]))
-  #   n = np.shape(self.z)[1]
-
-  #   if n == 2:
-  #     for ii in range(n):
-  #       for jj in range(n):
-  #         if ii == jj:
-  #           Mij[:,ii,jj] = self._dmu_dz[:,ii,jj]
-  #         else:
-  #           Mij[:,ii,jj] = self._dmu_dz[:,jj,jj] - self._dmu_dz[:,ii,jj]
-  #   elif n > 2:
-  #     # Assign diagonal elements
-  #     for i in range(n):
-  #       if i==0:
-  #         Mij[:,i,i] = (self._dmu_dz[:,i,i] + self._dmu_dz[:,i+1,i]) / 2
-  #       else:
-  #         Mij[:,i,i] = self._dmu_dz[:,i,i] - self._dmu_dz[:,0,i]
-  #     # Assign off-diagonal elements
-  #     for i in range(n):
-  #       for j in range(i+1, n):
-  #         Mij[:,i,j] = Mij[:,j,i] = (self._dmu_dz[:,i,j] - self._dmu_dz[:,j,j])/2
-    
-  #   self._Mij = Mij
-  #   return self._Mij
-  
-  # def Hij(self):
-  #   try:
-  #     self._Mij 
-  #   except AttributeError:
-  #     self.Mij()
-    
-  #   Hij = np.empty((np.shape(self.z)[0], np.shape(self.z)[1]-1, np.shape(self.z)[1]-1))
-  #   n = np.shape(self.z)[1]-1
-  #   for ii in range(n):
-  #     for jj in range(n):
-  #       Hij[:,ii,jj] = self._Mij[:,ii,jj] - self._Mij[:,ii,n] - self._Mij[:,n,jj] + self._Mij[:,n,n]
-    
-  #   self._Hij = Hij
-  #   return self._Hij
-  
   def Mij(self):
-    ''' Create Mij matrix '''
+    r"""
+    Calculate the :math:`M` matrix with elements :math:`M_{i,j}` from :func:`dmu_dz`.
+
+    .. math::
+      M_{i,j} = 
+      \begin{align}
+      \begin{cases}
+        & \frac{\partial \mu_i}{\partial x_j}, & \text{if } i = j \\
+        & \frac{\partial \mu_i}{\partial x_j} - \frac{\partial \mu_i}{\partial x_{N-1}} - \frac{\partial \mu_{N-1}}{\partial x_j} + \frac{\partial \mu_{N-1}}{\partial x_{N-1}}, & \text{if } i \neq j \\
+      \end{cases}
+      \end{align}
+
+    :return: :math:`M` matrix from second derivative of Gibbs mixing free energy with respect to mol fractions
+    :rtype: numpy.ndarray
+    """
     try:
         self._dmu_dz
     except AttributeError:
@@ -1548,6 +1776,15 @@ class UNIFAC:
     return self._Mij
 
   def Hij(self):
+    r"""
+    Calculate the Hessian (:math:`H`) of Gibbs mixing free energy, with elements :math:`H_{ij}`.
+
+    .. math::
+      H_{i,j} = M_{i,j} - M_{i,N-1} - M_{N-1,j} + M_{N-1,N-1}
+
+    :return: Hessian matrix
+    :rtype: numpy.ndarray    
+    """
     try:
         self._Mij
     except AttributeError:
@@ -1564,11 +1801,16 @@ class UNIFAC:
 
   
   def det_Hij(self):
+    r"""
+    Calculates the determinant (:math:`|H|`) of Hessian matrix of Gibbs mixing free energy.
+
+    :return: Hessian determinant
+    :rtype: numpy.ndarray
+    """
     try:
       self._Hij 
     except AttributeError:
       self.Hij()
 
     return np.linalg.det(self._Hij)
-    
-
+  

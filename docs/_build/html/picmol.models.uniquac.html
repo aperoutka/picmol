@@ -1,112 +1,907 @@
-<!DOCTYPE html>
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="UNIFAC (picmol.models.unifac)" href="picmol.models.unifac.html" /><link rel="prev" title="NRTL (picmol.models.nrtl)" href="picmol.models.nrtl.html" />
 
-<html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>UNIQUAC (picmol.models.uniquac) - picmol 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
 
-    <title>UNIQUAC (picmol.models.uniquac) &#8212; picmol 0.0.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=279e0f84" />
-    <script src="_static/documentation_options.js?v=d45e8c67"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Numerical (picmol.models.numerical)" href="picmol.models.numerical.html" />
-    <link rel="prev" title="NRTL (picmol.models.nrtl)" href="picmol.models.nrtl.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.numerical.html" title="Numerical (picmol.models.numerical)"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.nrtl.html" title="NRTL (picmol.models.nrtl)"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">picmol 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="picmol.models.html" accesskey="U">Thermodynamic Models (picmol.models)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">UNIQUAC (picmol.models.uniquac)</a></li> 
-      </ul>
-    </div>  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <section id="module-picmol.models.uniquac">
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #6851ff;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #a08cff;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #a08cff;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Check out our latest release! 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">picmol 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">picmol 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="picmol.models.html">Thermodynamic Models (picmol.models)</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Thermodynamic Models (picmol.models)</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.numerical.html">Numerical (picmol.models.numerical)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.fh.html">Flory-Huggins (picmol.models.fh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.nrtl.html">NRTL (picmol.models.nrtl)</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">UNIQUAC (picmol.models.uniquac)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.unifac.html">UNIFAC (picmol.models.unifac)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.unifac_subgroups.fragmentation.html">Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.cem.html">Convex Envelope Method (picmol.models.cem)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/01_kbi_analysis.html">01_comparing_KBI_correction_methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/02_thermo_models.html">02_themodynamic_model_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/blob/main/docs/picmol.models.uniquac.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/edit/main/docs/picmol.models.uniquac.rst" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-picmol.models.uniquac">
 <span id="uniquac-picmol-models-uniquac"></span><h1>UNIQUAC (picmol.models.uniquac)<a class="headerlink" href="#module-picmol.models.uniquac" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC_R">
+<span class="sig-prename descclassname"><span class="pre">picmol.models.uniquac.</span></span><span class="sig-name descname"><span class="pre">UNIQUAC_R</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC_R"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC_R" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the UNIQUAC r parameter for a list of molecules.</p>
+<p>The r parameter represents the relative size of a molecule in the UNIQUAC model.
+It is calculated by summing the r parameters of the subgroups (<em>k</em>) present in the molecule.</p>
+<p>The UNIQUAC r parameter for molecule <em>i</em> is calculated using the following equation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[r_i = \sum_k \nu_{ki} r_k\]</div>
+</div>
+<p>where:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\nu_{ki}\)</span> is the number of occurrences of subgroup k in molecule i</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – a list of SMILES strings representing the molecules</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array containing the r parameters for each molecule</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC_Q">
+<span class="sig-prename descclassname"><span class="pre">picmol.models.uniquac.</span></span><span class="sig-name descname"><span class="pre">UNIQUAC_Q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC_Q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC_Q" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the UNIQUAC q parameter for a list of molecules.</p>
+<p>The q parameter represents the relative surface area of a molecule in the UNIQUAC model.
+It is calculated by summing the q parameters of the subgroups (<em>k</em>) present in the molecule.</p>
+<p>The UNIQUAC q parameter is calculated for molecule <em>i</em> using the following equation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[q_i = \sum_k \nu_{ki} q_k\]</div>
+</div>
+<p>where:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\nu_{ki}\)</span> is the number of occurrences of subgroup k in molecule i</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of SMILES strings representing the molecules</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array containing the q parameters for each molecule</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="picmol.models.uniquac.fit_du_to_Hmix">
+<span class="sig-prename descclassname"><span class="pre">picmol.models.uniquac.</span></span><span class="sig-name descname"><span class="pre">fit_du_to_Hmix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hmix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#fit_du_to_Hmix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.fit_du_to_Hmix" title="Link to this definition">¶</a></dt>
+<dd><p>Fits UNIQUAC interaction parameters (<span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>) to experimental heat of mixing (<code class="docutils literal notranslate"><span class="pre">Hmix</span></code>) data.</p>
+<p>This function uses the scipy.optimize.curve_fit function to determine the UNIQUAC
+interaction parameters (<span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>) that best fit the experimental heat of mixing data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p></li>
+<li><p><strong>Hmix</strong> (<em>numpy.ndarray</em>) – array of experimental enthalpy of mixing values</p></li>
+<li><p><strong>z</strong> (<em>numpy.ndarray</em>) – array of mole fractions</p></li>
+<li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of SMILES strings representing the molecules</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array of fitted UNIQUAC interaction parameters (<span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="picmol.models.uniquac.fit_du_to_GM">
+<span class="sig-prename descclassname"><span class="pre">picmol.models.uniquac.</span></span><span class="sig-name descname"><span class="pre">fit_du_to_GM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#fit_du_to_GM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.fit_du_to_GM" title="Link to this definition">¶</a></dt>
+<dd><p>Fits UNIQUAC interaction parameters (<span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>) to experimental Gibbs free energy of mixing (<code class="docutils literal notranslate"><span class="pre">GM</span></code>) data.</p>
+<p>This function uses the scipy.optimize.curve_fit function to determine the UNIQUAC
+interaction parameters (<span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>) that best fit the experimental Gibbs free energy of
+mixing data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p></li>
+<li><p><strong>GM</strong> (<em>numpy.ndarray</em>) – array of experimental Gibbs free energy of mixing values.</p></li>
+<li><p><strong>z</strong> (<em>numpy.ndarray</em>) – array of mole fractions.</p></li>
+<li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of SMILES strings representing the molecules.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array of fitted UNIQUAC interaction parameters (<span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.uniquac.</span></span><span class="sig-name descname"><span class="pre">UNIQUAC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">IP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC" title="Link to this definition">¶</a></dt>
+<dd><p>UNIQUAC (UNIversal QUAsiChemical) model class.</p>
+<p>This class implements the UNIQUAC activity coefficient model for calculating
+thermodynamic properties of multi-component mixtures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>IP</strong> (<em>numpy.ndarray</em>) – array of interaction parameters (<span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>).</p></li>
+<li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of SMILES strings representing the molecules in the mixture.</p></li>
+<li><p><strong>z</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – composition array (mole fractions). If None, it defaults to
+values from PointDisc.</p></li>
+<li><p><strong>r</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – UNIQUAC r parameters for each component. If None, it will be
+calculated from smiles.</p></li>
+<li><p><strong>q</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – UNIQUAC q parameters for each component. If None, it will be
+calculated from smiles.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.zc">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zc</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.zc" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>coordination number, set to 10</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.r">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.r" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the r parameter (i.e., relative size of a molecule) for each component from <a class="reference internal" href="#picmol.models.uniquac.UNIQUAC_R" title="picmol.models.uniquac.UNIQUAC_R"><code class="xref py py-func docutils literal notranslate"><span class="pre">UNIQUAC_R()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of r parameters for each component</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.q">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">q</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.q" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the q parameter (i.e., the relative surface area of a molecule) for each component from <a class="reference internal" href="#picmol.models.uniquac.UNIQUAC_Q" title="picmol.models.uniquac.UNIQUAC_Q"><code class="xref py py-func docutils literal notranslate"><span class="pre">UNIQUAC_Q()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of q parameters for each component</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.l">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">l</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.l" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the UNIQUAC parameter l for each component from <code class="docutils literal notranslate"><span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">q</span></code> parameters using the coordination number z<sub>c</sub>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[l_i =  \frac{z_c}{2}(r_i - q_i) - (r_i - 1)    \]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of l parameters for each component</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.rbar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rbar</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.rbar" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the mixture average <code class="docutils literal notranslate"><span class="pre">r</span></code> parameter.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\overline{r} = \sum_i^n x_i r_i\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>linear combination of <code class="docutils literal notranslate"><span class="pre">r</span></code> parameter for each component in mixture</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.qbar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qbar</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.qbar" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the mixture average <code class="docutils literal notranslate"><span class="pre">q</span></code> parameter.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\overline{q} = \sum_i^n x_i q_i\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>linear combination of <code class="docutils literal notranslate"><span class="pre">q</span></code> parameter for each component in mixture</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.lbar">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lbar</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.lbar" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the mixture average <code class="docutils literal notranslate"><span class="pre">l</span></code> parameter.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\overline{l} = \sum_i^n x_i l_i\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>linear combination of <code class="docutils literal notranslate"><span class="pre">l</span></code> parameter for each component in mixture</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.phi">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phi</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.phi" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the segment fraction <span class="math notranslate nohighlight">\(\phi\)</span> for each component.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\phi_i = \frac{x_i r_i}{\bar{r}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of segment fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.theta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">theta</span></span><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.theta" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the area fraction <span class="math notranslate nohighlight">\(\theta\)</span> for each component.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\theta_i = \frac{x_i q_i}{\bar{q}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of area fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.tau">
+<span class="sig-name descname"><span class="pre">tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.tau"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.tau" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the UNIQUAC interaction parameter <span class="math notranslate nohighlight">\(\tau\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\tau_{ij} = \exp\left( -\frac{\Delta u_{ij}}{RT} \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array of <span class="math notranslate nohighlight">\(\tau\)</span> parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.rho">
+<span class="sig-name descname"><span class="pre">rho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.rho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.rho" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the <span class="math notranslate nohighlight">\(\rho\)</span> parameter.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\rho_i = \sum_j^n \theta_j \tau_{ji}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array of <span class="math notranslate nohighlight">\(\rho\)</span> parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.Gid">
+<span class="sig-name descname"><span class="pre">Gid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.Gid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.Gid" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the ideal Gibbs energy of mixing.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{G^{id}}{RT} = \sum_i^n x_i \ln x_i\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ideal Gibbs energy of mixing</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.GE">
+<span class="sig-name descname"><span class="pre">GE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.GE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.GE" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the excess Gibbs energy.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{G^E}{RT} = \sum_i^n x_i \ln \frac{\phi_i}{x_i} + \frac{z_c}{2} \sum_i^n x_i q_i \ln \frac{\theta_i}{\phi_i} - \sum_i^n \left( x_i q_i \ln \sum_j^n \theta_j \tau_{ji} \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>total excess Gibbs energy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.GM">
+<span class="sig-name descname"><span class="pre">GM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.GM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.GM" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the total Gibbs free energy of mixing.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+  \frac{\Delta G_{mix}}{RT} &amp;= \frac{G^{id}}{RT} + \frac{G^E}{RT} \\
+  &amp;= \sum_i^n x_i \ln \phi_i + \frac{z_c}{2} \sum_i^n x_i q_i \ln \frac{\theta_i}{\phi_i} - \sum_i^n \left( x_i q_i \ln \sum_j^n \theta_j \tau_{ji} \right)
+\end{align}\end{split}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>total Gibbs free energy of mixing</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.gammas">
+<span class="sig-name descname"><span class="pre">gammas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.gammas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.gammas" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the activity coefficients of each component in the mixture.</p>
+<p>The activity coefficients are calculated using the following equation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\ln \gamma_i = \ln \frac{\phi_i}{x_i} + \frac{z_c}{2} q_i \ln \frac{\theta_i}{\phi_i} + l_i - \frac{\phi_i}{x_i} \bar{l} - q_i \ln \sum_j^n \theta_j \tau_{ji} + q_i - q_i \sum_j^n \frac{\theta_j \tau_{ji}}{\sum_k^n \theta_k \tau_{kj}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>numpy.ndarray</em>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>activity coefficients of each component</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.mu">
+<span class="sig-name descname"><span class="pre">mu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.mu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.mu" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the chemical potential of each component in the mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\mu_i}{RT} = \ln \phi_i + \frac{z_c}{2} q_i \ln{\frac{\theta_i}{\phi_i}} + l_i - \overline{l}\frac{\phi_i}{x_i} - q_i \ln \sum_{j=1}^n \theta_j \tau_{ji} + q_i - q_i \sum_{j=1}^n \left(\frac{\theta_j \tau_{ij}}{\sum_{k=1}^n \theta_k \tau_{kj}}\right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>chemical potential of each component</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.dGM_dxs">
+<span class="sig-name descname"><span class="pre">dGM_dxs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.dGM_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.dGM_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the first derivative of the Gibbs free energy of mixing
+with respect to the mol fractions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \Delta G_{mix}}{\partial x_i} = \mu_i - \mu_n\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>numpy.ndarray</em>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>first derivative of mixing free energy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.dmu_dxs">
+<span class="sig-name descname"><span class="pre">dmu_dxs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.dmu_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.dmu_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the derivative of the chemical potential with respect to the mol fractions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{1}{RT}\frac{\partial \mu_i}{\partial x_j} = 
+\frac{1}{\phi_i} \frac{\partial \phi_i}{\partial x_j} \left( 1 - q_i \frac{z_c}{2} \right) + \frac{1}{\theta_i} \frac{\partial \theta_i}{\partial x_j} q_i \frac{z_c}{2}
+- \overline{l} \left( \frac{1}{x_i} \frac{\partial \phi_i}{\partial x_j} - \frac{\delta_{ij} \phi_i}{x_j^2} \right) 
++ \frac{q_i q_j}{\overline{q}} \left( 1 - \frac{\tau_{ji}}{\sum_k^n \theta_k \tau_{kj}} - \frac{\tau_{ij}}{\sum_k^n \theta_k \tau_{ki}} + \sum_l^n \frac{\theta_l \tau_{jl} \tau_{il}}{\left( \sum_k^n \theta_k \tau_{kl} \right)^2} \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>numpy.ndarray</em>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>second derivative of Gibbs free energy / derivative of
+chemical potential</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.Hij">
+<span class="sig-name descname"><span class="pre">Hij</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.Hij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.Hij" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the Hessian matrix (<span class="math notranslate nohighlight">\(H_{ij}\)</span>) of the Gibbs free energy of mixing
+with respect to the mol fractions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[H_{ij} = \frac{\partial \mu_i}{\partial x_j} - \frac{\partial \mu_n}{\partial x_j} - \frac{\partial \mu_i}{\partial x_n} + \frac{\partial \mu_n}{\partial x_n}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>numpy.ndarray</em>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Hessian matrix of the mixing free energy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.uniquac.UNIQUAC.det_Hij">
+<span class="sig-name descname"><span class="pre">det_Hij</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/uniquac.html#UNIQUAC.det_Hij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.uniquac.UNIQUAC.det_Hij" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the determinant of the Hessian matrix of the Gibbs free energy
+of mixing. This determinant is often used to assess the stability of a mixture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>numpy.ndarray</em>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Determinant of the Hessian matrix.
+Shape is (number of conditions,).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="picmol.models.unifac.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">UNIFAC (picmol.models.unifac)</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="picmol.models.nrtl.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">NRTL (picmol.models.nrtl)</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Allison A. Peroutka
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/aperoutka/picmol/" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">UNIQUAC (picmol.models.uniquac)</a><ul>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC_R"><code class="docutils literal notranslate"><span class="pre">UNIQUAC_R()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC_Q"><code class="docutils literal notranslate"><span class="pre">UNIQUAC_Q()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.fit_du_to_Hmix"><code class="docutils literal notranslate"><span class="pre">fit_du_to_Hmix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.fit_du_to_GM"><code class="docutils literal notranslate"><span class="pre">fit_du_to_GM()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC"><code class="docutils literal notranslate"><span class="pre">UNIQUAC</span></code></a><ul>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.zc"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.zc</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.r"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.r</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.q"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.q</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.l"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.l</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.rbar"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.rbar</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.qbar"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.qbar</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.lbar"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.lbar</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.phi"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.phi</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.theta"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.theta</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.tau"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.tau()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.rho"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.rho()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.Gid"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.Gid()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.GE"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.GE()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.GM"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.GM()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.gammas"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.gammas()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.mu"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.mu()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.dGM_dxs"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.dGM_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.dmu_dxs"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.dmu_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.Hij"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.Hij()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.uniquac.UNIQUAC.det_Hij"><code class="docutils literal notranslate"><span class="pre">UNIQUAC.det_Hij()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
-            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="picmol.models.nrtl.html"
-                          title="previous chapter">NRTL (picmol.models.nrtl)</a></p>
+      
+      
+    </aside>
   </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="picmol.models.numerical.html"
-                          title="next chapter">Numerical (picmol.models.numerical)</a></p>
-  </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/picmol.models.uniquac.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<search id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.numerical.html" title="Numerical (picmol.models.numerical)"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.nrtl.html" title="NRTL (picmol.models.nrtl)"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">picmol 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="picmol.models.html" >Thermodynamic Models (picmol.models)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">UNIQUAC (picmol.models.uniquac)</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-    &#169; Copyright 2025, Allison A. Peroutka.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
-    </div>
-  </body>
+</div><script src="_static/documentation_options.js?v=f539c95a"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
 </html>

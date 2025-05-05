@@ -12,10 +12,23 @@ import mpltern
 
 from .thermo_model import ThermoModel, UNIFACThermoModel
 from .functions import mol2vol
-from .kbi import add_zeros
+from .kbi import add_zeros, KBI
 
 
 def get_cmap(xx, colormap: str = 'jet', levels: int = 40):
+  r"""
+  Generates a color map based on the input data.
+
+  :param xx: Data to base the color map on.
+  :type xx: numpy.ndarray
+  :param colormap: Name of the color map. Defaults to 'jet'.
+  :type colormap: str, optional
+  :param levels: Number of color levels. Defaults to 40.
+  :type levels: int, optional
+
+  :return: A tuple containing the input data and the color map.
+  :rtype: tuple(numpy.ndarray, matplotlib.cm.ScalarMappable)
+  """
   c = xx
   norm = mpl.colors.Normalize(vmin=min(c), vmax=max(c))
   cmap = mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap(colormap, levels))
@@ -24,13 +37,24 @@ def get_cmap(xx, colormap: str = 'jet', levels: int = 40):
 
 
 class KBIPlotter:
+  r"""
+  A class for visualizing KBI (Kirkwood-Buff Integral) analysis results.
+
+  :param model: KBI class object containing Kirkwood-Buff integrals and related data.
+  :type model: KBI
+  """
   def __init__(self, model):
     """ visualizing kbi analysis """
     self.kbi_model = model
     self.num_comp = len(self.kbi_model.unique_mols)
     
   def make_figures(self, show_fig: bool = False):
-    '''creates figures based on number of components in system'''
+    r"""
+    Generates various KBI-related figures.
+
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     # kbi integral as a function of r
     self.make_indiv_kbi_plots(show_fig=show_fig) # running kbi
     self.plot_kbi_inf(show_fig=show_fig) # kbi extrapolation to infinity (thermodynamic limit)
@@ -53,8 +77,13 @@ class KBIPlotter:
         self.plot_binary_thermo_model_comparisons(show_fig=show_fig)
 
   def make_indiv_kbi_plots(self, show_fig: bool = False):
-    ''' create plots for each system as a function of r '''
-    # if kbi's not found, run kbi_analysis
+    r"""
+    Plot of KBI as a function of distance r.
+
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """   
+     # if kbi's not found, run kbi_analysis
     try:
       self.kbi_model.df_kbi
     except AttributeError: 
@@ -83,7 +112,12 @@ class KBIPlotter:
         plt.close()
 
   def plot_kbi_inf(self, show_fig: bool = False):
-    ''' create kbi plots for extrapolating to the thermodynamic limit'''
+    r"""
+    Plot KBI extrapolated to infinity.
+
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """    
     try:
       self.kbi_model.df_kbi
     except AttributeError: 
@@ -134,7 +168,14 @@ class KBIPlotter:
     return zplot, xplot, x_lab
 
   def plot_composition_kbis(self, basis, show_fig: bool = False):
-    '''kbi integral values as a function of composition'''
+    r"""
+    Plot KBI as a function of composition.
+
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     try:
       self.kbi_model.df_kbi
     except AttributeError: 
@@ -167,7 +208,16 @@ class KBIPlotter:
       plt.close()
 
   def plot_dln_gammas(self, basis, ylimits=[], show_fig: bool = False):
-    '''derivative of log activity coefficients'''
+    r"""
+    Plot derivative of log activity coefficients with respect to composition.
+
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param ylimits: Bounds for y-axis plotted.
+    :type ylimits: list, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
@@ -199,7 +249,16 @@ class KBIPlotter:
       plt.close()
 
   def plot_ln_gammas(self, basis, ylimits=[], show_fig: bool = False):
-    '''log activity coefficients'''
+    r"""
+    Plot log activity coefficients as a function of composition.
+
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param ylimits: Bounds for y-axis plotted.
+    :type ylimits: list, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
@@ -241,7 +300,14 @@ class KBIPlotter:
     return xplot0
   
   def plot_binary_Gex(self, basis, show_fig: bool = False):
+    r"""
+    Plot excess Gibbs energy.
 
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     zplot, xplot, x_lab = self.x_basis(basis)
     xplot0 = self.xplot0(basis)
 
@@ -258,6 +324,14 @@ class KBIPlotter:
       plt.close()
 
   def plot_binary_excess_contributions(self, basis, show_fig: bool = False):
+    r"""
+    Plot excess thermodynamic properties.
+
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     zplot, xplot, x_lab = self.x_basis(basis)
     xplot0 = self.xplot0(basis)
 
@@ -277,7 +351,12 @@ class KBIPlotter:
       plt.close()
 
   def plot_binary_thermo_model_comparisons(self, show_fig: bool = False):
-    """compare UNIQUAC, UNIFAC, QuarticModel"""
+    r"""
+    Plot Quartic, UNIFAC, and UNIQUAC enthalpic and entropic contributions to Gibbs mixing free energy.
+
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
     xplot = self.kbi_model.z_plot[:,self.kbi_model.solute_loc]
     
@@ -316,6 +395,9 @@ class KBIPlotter:
 
 
   def plot_UNIQUAC_IP_fit(self):
+    r"""
+    Plot UNIQUAC :math:`\Delta G_{mix}` and compares to results from KBI.
+    """
     xplot0 = self.xplot0("mol")
 
     fig, ax = plt.subplots()
@@ -330,7 +412,9 @@ class KBIPlotter:
     plt.close()
 
   def plot_NRTL_IP_fit(self):
-    # if not a binary system skip the function
+    r"""
+    Plot NRTL :math:`\Delta G_{mix}` and compares to results from KBI.
+    """
     if len(self.kbi_model.unique_mols) != 2:
       return
 
@@ -363,6 +447,9 @@ class KBIPlotter:
 
 
   def plot_FH_chi_fit(self):
+    r"""
+    Plot Flory-Huggins :math:`\Delta G_{mix}` and compares to results from KBI.
+    """
     try:
       self.kbi_model.fh_chi
     except:
@@ -389,6 +476,9 @@ class KBIPlotter:
     plt.close()
 
   def plot_quartic_fit(self):
+    r"""
+    Plot Quartic :math:`\Delta G_{mix}` and compares to results from KBI.
+    """
     xplot0 = self.xplot0("mol")
 
     fig, ax = plt.subplots()
@@ -406,6 +496,20 @@ class KBIPlotter:
 
 
 class PhaseDiagramPlotter:
+  r"""
+  A class for visualizing phase behavior of thermodynamic models.
+
+  This plotter supports binary and ternary systems, generating various
+  phase diagrams and related plots based on the provided thermodynamic model.
+
+  Initializes the PhaseDiagramPlotter with a thermodynamic model.
+
+  The model can be either a ThermoModel or a UNIFACThermoModel.
+  It extracts solute location and name information from the model.
+
+  :param model: An instance of ThermoModel or UNIFACThermoModel.
+  :type model: ThermoModel or UNIFACThermoModel
+  """
   def __init__(self, model):
     """ for visualizing phase behavior """
     self.thermo_model = model
@@ -417,6 +521,22 @@ class PhaseDiagramPlotter:
       self.solute_name = self.thermo_model.solute_name
 
   def make_figures(self, T=300, colormap='jet', num_contours=40):
+    r"""
+    Generates various phase diagrams and related figures based on the system dimensionality.
+
+    For binary systems, it generates plots of Gibbs mixing energy, selected points,
+    phase diagrams (based on Gibbs energy and I0), and Widom lines.
+    For ternary systems, it generates Gibbs mixing energy and I0 plots with and
+    without spinodal/binodal information, and binodal curves as a function of temperature.
+
+    :param T: Temperature for ternary plots (default: 300 K).
+    :type T: float, optional
+    :param colormap: Colormap to use for heatmap plots (default: 'jet').
+    :type colormap: str, optional
+    :param num_contours: Number of contour lines for heatmap plots (default: 40).
+    :type num_contours: int, optional
+    :raises ValueError: If the number of components in the thermodynamic model is not 2 or 3.
+    """
     if self.thermo_model.z.shape[1] == 2:
       for basis in ["mol", "vol"]:
         self.binary_gmix(basis=basis)
@@ -451,7 +571,14 @@ class PhaseDiagramPlotter:
     return x_val, x_lab, sp, bi
    
   def binary_gmix(self, basis: str, show_fig: bool = False):
-    '''get mixing free energy with binodal & spinodal points'''
+    r"""
+    Plot Gibbs mixing free energy with binodal and spinodal points as a function of temperature.
+
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     c, cmap = get_cmap(self.thermo_model.T_values)
     x_val, x_lab, sp, bi = self.x_basis(basis)
     fig, ax = plt.subplots(1, 1, figsize=(5, 3.5))
@@ -476,7 +603,14 @@ class PhaseDiagramPlotter:
       plt.close()
 
   def binary_gmix_selectpts(self, basis: str, show_fig: bool = False):
-    ''' get select mixing free energy lines '''
+    r"""
+    Plot Gibbs mixing free energy with binodal and spinodal points as a function of temperature, only highlighting a few points near the critical point.
+
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     c, cmap = get_cmap(self.thermo_model.T_values)
     x_val, x_lab, sp, bi = self.x_basis(basis)
     # get temperature just above phase spliting, 5 degree intervals
@@ -512,6 +646,16 @@ class PhaseDiagramPlotter:
 
 
   def binary_phase_diagram_Gmix_heatmap(self, basis: str, num_contours=40, show_fig: bool = False):
+    r"""
+    Plot heatmap of Gibbs mixing free energy with overlaid phase diagram as a function of temperature.
+
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param num_contours: Number of contours for heatmap. Defaults to 40.
+    :type num_contours: int, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
 
     x_val, x_lab, sp, bi = self.x_basis(basis)
 
@@ -539,6 +683,20 @@ class PhaseDiagramPlotter:
       plt.close()
 
   def binary_phase_diagram_I0_heatmap(self, ymin: float = 0.01, ymax: float = 1., basis: str = 'vol', num_contours=40, show_fig: bool = False):
+    r"""
+    Plot heatmap of SAXS :math:`I_o` with overlaid phase diagram as a function of temperature.
+
+    :param ymin: lower bound y-limit
+    :type ymin: float, optional
+    :param ymax: upper bound y-limit
+    :type ymax: float, optional
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param num_contours: Number of contours for heatmap. Defaults to 40.
+    :type num_contours: int, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     
     x_val, x_lab, sp, bi = self.x_basis(basis)
 
@@ -589,7 +747,7 @@ class PhaseDiagramPlotter:
       plt.close()
 
   def widom(self, basis):
-    ''' return widom line for I0 max '''
+    # return widom line for I0 max 
     def moving_avg(data, window_size):
       '''get moving average to smooth the I0 max line'''
       moving_averages = []
@@ -612,7 +770,20 @@ class PhaseDiagramPlotter:
 
 
   def binary_phase_diagram_I0_heatmap_widomline(self, ymin: float = 0.01, ymax: float = 1., basis: str = 'vol', num_contours=40, show_fig: bool = False):
-    
+    r"""
+    Plot heatmap of SAXS :math:`I_o` with overlaid phase diagram and widom line as a function of temperature.
+
+    :param ymin: lower bound y-limit
+    :type ymin: float, optional
+    :param ymax: upper bound y-limit
+    :type ymax: float, optional
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param num_contours: Number of contours for heatmap. Defaults to 40.
+    :type num_contours: int, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     x_val, x_lab, sp, bi = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5.5,4))
@@ -651,7 +822,7 @@ class PhaseDiagramPlotter:
     ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.solute_loc], self.thermo_model.T_values, c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
 
     ax.set_xlim(0, 1.)
     ax.set_xticks(ticks=np.arange(0,1.01,0.2))
@@ -666,13 +837,27 @@ class PhaseDiagramPlotter:
 
 
   def xc(self, basis):
-    ''' return critical point mol or vol frac '''
+    # return critical point mol or vol frac
     if basis == "mol":
       return self.thermo_model.xc
     else:
       return self.thermo_model.phic
 
   def binary_phase_diagram(self, plot_Tmin=0, plot_Tmax=500, basis: str = 'vol', color='mediumblue', show_fig: bool = False):
+    r"""
+    Plot temperature-composition phase diagram.
+
+    :param plot_Tmin: lower bound y-limit
+    :type plot_Tmin: float, optional
+    :param plot_Tmax: upper bound y-limit
+    :type plot_Tmax: float, optional
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param color: color for phase diagram. Defaults to "mediumblue".
+    :type color: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
 
     x_val, x_lab, sp, bi = self.x_basis(basis)
 
@@ -704,6 +889,20 @@ class PhaseDiagramPlotter:
       plt.close()
 
   def binary_phase_diagram_widomline(self, plot_Tmin=0, plot_Tmax=500, basis: str = 'vol', color='mediumblue', show_fig: bool = False):
+    r"""
+    Plot temperature-composition phase diagram with widom line.
+
+    :param plot_Tmin: lower bound y-limit
+    :type plot_Tmin: float, optional
+    :param plot_Tmax: upper bound y-limit
+    :type plot_Tmax: float, optional
+    :param basis: Basis for plotting ('mol' or 'vol'). Defaults to "mol".
+    :type basis: str, optional
+    :param color: color for phase diagram. Defaults to "mediumblue".
+    :type color: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
 
     x_val, x_lab, sp, bi = self.x_basis(basis)
 
@@ -715,7 +914,7 @@ class PhaseDiagramPlotter:
     ax.plot(bi[:,1], self.thermo_model.T_values, c='k', linestyle='solid', linewidth=2, zorder=len(self.thermo_model.T_values)+1)
 
     # add widom line
-    ax.plot(self.widom(basis)[:,self.solute_loc], self.thermo_model.I0_max['T'], c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
+    ax.plot(self.widom(basis)[:,self.solute_loc], self.thermo_model.T_values, c='k', linestyle='solid', lw=2, zorder=len(self.thermo_model.T_values)+1)
 
     legend_label = f"$T_c = {self.thermo_model.Tc:.0f}$ K\n${x_lab}_c = {self.xc(basis):.3f}$"
     ax.plot(self.xc(basis), self.thermo_model.Tc, color='none', marker='o', linestyle='', fillstyle='none', label=legend_label)
@@ -741,7 +940,18 @@ class PhaseDiagramPlotter:
 #### ternary plots ####
 
   def ternary_GM(self, T, plot_spbi: bool = False, num_contours: int = 20, colormap: str = 'jet', show_fig: bool = False):
-    ''' mixing free energy at T '''
+    r"""
+    Plot heatmap of Gibbs mixing free energy for a ternary system at a given temperature (K).
+
+    :param plot_spbi: add spinodal and binodal points to plot. Default to False.
+    :type plot_spbi: bool, optional
+    :param num_contours: number of contours for heatmap. Defaults to 20.
+    :type num_contours: int, optional
+    :param colormap: colormap to use for heatmap. Defaults to "jet".
+    :type colormap: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
 
     xtext, ytext, ztext = self.thermo_model.mol_name
 
@@ -795,7 +1005,18 @@ class PhaseDiagramPlotter:
 
 
   def ternary_Io(self, T, plot_spbi: bool = False, num_contours: int = 20, colormap: str = 'jet', show_fig: bool = False):
-    ''' mixing free energy at T '''
+    r"""
+    Plot heatmap of SAXS :math:`I_0` for a ternary system at a given temperature (K).
+
+    :param plot_spbi: add spinodal and binodal points to plot. Default to False.
+    :type plot_spbi: bool, optional
+    :param num_contours: number of contours for heatmap. Defaults to 20.
+    :type num_contours: int, optional
+    :param colormap: colormap to use for heatmap. Defaults to "jet".
+    :type colormap: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
 
     xtext, ytext, ztext = self.thermo_model.mol_name
 
@@ -863,8 +1084,14 @@ class PhaseDiagramPlotter:
 
 
   def ternary_binodals_fTemp(self, colormap: str = 'jet', show_fig: bool = False):
-    '''create ternary figure with heatmap of binodals as a function of temperature'''
+    r"""
+    Plot ternary figure of heatmap of Gibbs mixing free energy for a ternary system as a function of temperature (K).
 
+    :param colormap: colormap to use for heatmap. Defaults to "jet".
+    :type colormap: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     fig, ax = plt.subplots(figsize=(8,6), subplot_kw={'projection': 'ternary'})
 
     cs, cmap = get_cmap(self.thermo_model.T_values, colormap=colormap)
@@ -895,8 +1122,14 @@ class PhaseDiagramPlotter:
 
 
   def ternary_plotly_GM_3D(self, colormap: str = 'jet', show_fig: bool = False):
-    ''' create 3D ternary plots of mixing free energy '''
+    r"""
+    Plot 3D ternary figure using plotly of heatmap of Gibbs mixing free energy for a ternary system as a function of temperature (K).
 
+    :param colormap: colormap to use for heatmap. Defaults to "jet".
+    :type colormap: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
     # Verify the shapes
     num_layers = len(self.thermo_model.T_values)
 
@@ -1076,7 +1309,14 @@ class PhaseDiagramPlotter:
 
 
   def ternary_plotly_GM_flat(self, colormap: str = 'rainbow', num_contours: int = 40, show_fig: bool = False):
-    ''' create flat ternary diagrams of mixing free energy '''
+    r"""
+    Plot flat ternary figure using plotly of heatmap of Gibbs mixing free energy for a ternary system as a function of temperature (K).
+
+    :param colormap: colormap to use for heatmap. Defaults to "jet".
+    :type colormap: str, optional
+    :param show_fig: Whether to display the figures. Defaults to False.
+    :type show_fig: bool, optional
+    """
 
     num_layers = len(self.thermo_model.T_values)
 

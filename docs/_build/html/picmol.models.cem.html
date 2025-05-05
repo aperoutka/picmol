@@ -1,113 +1,887 @@
-<!DOCTYPE html>
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Plotting Functions (picmol.plotter)" href="picmol.plotter.html" /><link rel="prev" title="Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)" href="picmol.models.unifac_subgroups.fragmentation.html" />
 
-<html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Convex Envelope Method (picmol.models.cem) - picmol 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
 
-    <title>Convex Envelope Method (picmol.models.cem) &#8212; picmol 0.0.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=279e0f84" />
-    <script src="_static/documentation_options.js?v=d45e8c67"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Plotting Functions (picmol.plotter)" href="picmol.plotter.html" />
-    <link rel="prev" title="Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)" href="picmol.models.unifac_subgroups.fragmentation.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="picmol.plotter.html" title="Plotting Functions (picmol.plotter)"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.unifac_subgroups.fragmentation.html" title="Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">picmol 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="picmol.models.html" accesskey="U">Thermodynamic Models (picmol.models)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Convex Envelope Method (picmol.models.cem)</a></li> 
-      </ul>
-    </div>  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <section id="module-picmol.models.cem.__init__">
-<span id="convex-envelope-method-picmol-models-cem"></span><h1>Convex Envelope Method (picmol.models.cem)<a class="headerlink" href="#module-picmol.models.cem.__init__" title="Link to this heading">¶</a></h1>
-<p>cem analysis</p>
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #6851ff;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #a08cff;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #a08cff;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Check out our latest release! 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">picmol 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">picmol 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="picmol.models.html">Thermodynamic Models (picmol.models)</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Thermodynamic Models (picmol.models)</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.numerical.html">Numerical (picmol.models.numerical)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.fh.html">Flory-Huggins (picmol.models.fh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.nrtl.html">NRTL (picmol.models.nrtl)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.uniquac.html">UNIQUAC (picmol.models.uniquac)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.unifac.html">UNIFAC (picmol.models.unifac)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.unifac_subgroups.fragmentation.html">Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Convex Envelope Method (picmol.models.cem)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/01_kbi_analysis.html">01_comparing_KBI_correction_methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/02_thermo_models.html">02_themodynamic_model_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/blob/main/docs/picmol.models.cem.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/edit/main/docs/picmol.models.cem.rst" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-picmol.models.cem.cem_analysis">
+<span id="convex-envelope-method-picmol-models-cem"></span><h1>Convex Envelope Method (picmol.models.cem)<a class="headerlink" href="#module-picmol.models.cem.cem_analysis" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="picmol.models.cem.cem_analysis.CEM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.cem.cem_analysis.</span></span><span class="sig-name descname"><span class="pre">CEM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G_mix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_coefs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/cem_analysis.html#CEM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.cem_analysis.CEM" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates Liquid-Liquid Equilibrium (LLE) data.</p>
+<p>This class takes component names and other inputs to set up and execute an
+LLE analysis to determine the binodal curve. The calculated
+LLE data is then stored as class attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_comp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of components in the system.</p></li>
+<li><p><strong>rec_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of recursion steps used in the point discretization.</p></li>
+<li><p><strong>G_mix</strong> (<em>numpy.ndarray</em>) – Array of Gibbs free energy of mixing as a function of mol fractions in point discretization mol fraction matrix.</p></li>
+<li><p><strong>activity_coefs</strong> (<em>numpy.ndarray</em>) – Array of activity coefficients for each component present.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>point_disc</strong> (<a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc" title="picmol.models.cem.point_discretization.PointDisc"><em>PointDisc</em></a>) – A PointDisc object representing the point discretization of the
+composition space.</p></li>
+<li><p><strong>binodal_matrix_molfrac</strong> (<em>numpy.ndarray</em>) – A numpy array containing the compositions of the phases at
+equilibrium, expressed as mol fractions. The rows correspond to
+unique points on the binodal curve, and the columns correspond to
+the components.</p></li>
+<li><p><strong>binodal_matrix_cartcoords</strong> (<em>numpy.ndarray</em>) – A numpy array containing the compositions of the phases at
+equilibrium, expressed as Cartesian coordinates. The rows
+correspond to unique points on the binodal curve.</p></li>
+<li><p><strong>binodal_matrix_inds</strong> (<em>numpy.ndarray</em>) – A numpy array containing the indices of the points on the binodal
+curve within the discretized composition space.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class" id="module-picmol.models.cem.lle">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityGapSimplex">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.cem.lle.</span></span><span class="sig-name descname"><span class="pre">MiscibilityGapSimplex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_coords_cart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points_mfr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_inv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityGapSimplex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityGapSimplex" title="Link to this definition">¶</a></dt>
+<dd><p>Stores a simplex containing points that split into multiple liquid phases.</p>
+<p>This class represents a simplex in the composition space where liquid-liquid
+phase separation occurs. It stores the geometric and compositional
+information of the simplex, along with data about the phase split. This allows
+the class to be used to define a unit operation.</p>
+<p>A simplex of dimension n has <span class="math notranslate nohighlight">\(N = n + 1\)</span> vertices. Edges are classified as
+homogeneous (between neighboring points) or heterogeneous (between
+non-neighboring points, indicating a phase split). “Neighboring points”
+are defined as two points contained within the same subsimplex from the
+discretization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points_coords_cart</strong> (<em>numpy.ndarray</em>) – A numpy array containing the Cartesian coordinates of the simplex vertices.
+Shape: (N, n), where N is the number of vertices (n+1) and n is the
+dimension of the simplex.</p></li>
+<li><p><strong>points_mfr</strong> (<em>numpy.ndarray</em>) – A numpy array containing the molar fractions (barycentric coordinates) of
+the simplex vertices. Shape: (N, n+1).</p></li>
+<li><p><strong>points_ind</strong> (<em>numpy.ndarray</em>) – A numpy array containing the indices of the simplex vertices within the
+original discretization. Shape: (N,).</p></li>
+<li><p><strong>matrix</strong> (<em>numpy.ndarray</em>) – A matrix used to transform molar fractions (barycentric coordinates) to
+a combined vector of ones and cartesian coordinates.  Shape: (n+1, n+1).</p></li>
+<li><p><strong>matrix_inv</strong> (<em>numpy.ndarray</em>) – The inverse of the <cite>matrix</cite>.  Shape: (n+1, n+1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – An optional index for this simplex. Defaults to None.</p></li>
+<li><p><strong>points_coordinates_cart</strong> (<em>numpy.ndarray</em>) – The Cartesian coordinates of the simplex vertices.</p></li>
+<li><p><strong>points_molar_fractions</strong> (<em>numpy.ndarray</em>) – The molar fractions of the simplex vertices.</p></li>
+<li><p><strong>points_indices</strong> (<em>numpy.ndarray</em>) – The indices of the simplex vertices in the original discretization.</p></li>
+<li><p><strong>matrix</strong> (<em>numpy.ndarray</em>) – The transformation matrix from molar fractions to Cartesian coordinates.</p></li>
+<li><p><strong>matrix_inv</strong> (<em>numpy.ndarray</em>) – The inverse of the transformation matrix.</p></li>
+<li><p><strong>edge_classification</strong> (<em>numpy.ndarray</em>) – A symmetric N x N matrix.  <cite>edge_classification[i][j] == 1</cite> indicates
+that the edge between vertex i and vertex j is heterogeneous
+(i.e., the points are in different phases).  Initialized to a matrix of
+zeros (all edges homogeneous).</p></li>
+<li><p><strong>phase_blocks</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em><em>]</em>) – A list of lists.  Each inner list contains the indices (0 to N-1) of
+the vertices that form the basis of a single liquid phase.  The order
+of phases in this list is fixed.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityGapSimplex.get_middle">
+<span class="sig-name descname"><span class="pre">get_middle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityGapSimplex.get_middle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityGapSimplex.get_middle" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the composition at the center of the simplex.</p>
+<p>This method computes the average composition (in molar fractions) of the
+simplex by averaging the molar fractions of its vertices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array representing the composition at the center of the
+simplex in molar fractions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.cem.lle.</span></span><span class="sig-name descname"><span class="pre">MiscibilityAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">discretized_system</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_mix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_coefs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_comp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis" title="Link to this definition">¶</a></dt>
+<dd><p>Analyzes the miscibility of a multi-component system using a point discretization.</p>
+<p>This class performs liquid-liquid equilibrium (LLE) calculations to determine
+the binodal curve and identify phase separation regions. It uses a
+discretized representation of the composition space generated by the
+PointDisc class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>point_discretization</strong> (<a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc" title="picmol.models.cem.point_discretization.PointDisc"><em>PointDisc</em></a>) – A PointDisc object representing the discretization of the
+composition space.</p></li>
+<li><p><strong>g_mix</strong> (<em>numpy.ndarray</em>) – An array of the Gibbs free energy of mixing
+as a function of composition.</p></li>
+<li><p><strong>activity_coefs</strong> (<em>numpy.ndarray</em>) – An array of activity coefficients of
+each component as a function of composition.</p></li>
+<li><p><strong>num_comp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of components in the system.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.compare_simplices">
+<span class="sig-name descname"><span class="pre">compare_simplices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.compare_simplices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.compare_simplices" title="Link to this definition">¶</a></dt>
+<dd><p>Identifies simplices that model phase splits within the convex hull.</p>
+<p>This method iterates through the simplices in the convex hull of the
+calculated graph (which includes the Gibbs free energy difference
+<span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> as the last coordinate). It determines if each
+simplex connects neighboring points in the original composition space
+(i.e., before the addition of <span class="math notranslate nohighlight">\(\Delta g_{mix}\)</span>). Simplices that do
+<em>not</em> connect neighboring points model a phase split.</p>
+<p>The method calculates the volume of each simplex and compares it to the
+expected volume of a simplex in the discretized space. It also uses
+the <code class="xref py py-func docutils literal notranslate"><span class="pre">_check_simplex()</span></code> method to perform
+the detailed analysis of each simplex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of <a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex" title="picmol.models.cem.lle.MiscibilityGapSimplex"><code class="xref py py-class docutils literal notranslate"><span class="pre">MiscibilityGapSimplex</span></code></a> objects, where each object
+represents a simplex that models a phase split.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex" title="picmol.models.cem.lle.MiscibilityGapSimplex">MiscibilityGapSimplex</a>]</p>
+</dd>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_phase_stats</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – A list of integers, where each integer represents the count of
+simplices with a specific number of phases.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.get_hull">
+<span class="sig-name descname"><span class="pre">get_hull</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.get_hull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.get_hull" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the convex hull of the composition space, incorporating the Gibbs free energy of mixing.</p>
+<p>This method calculates the convex hull of the input data points, where each point
+represents a composition in the multi-component system. The input points
+are augmented with the Gibbs free energy of mixing (<span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span>)
+as an additional coordinate. This convex hull is used to identify regions of
+phase separation.</p>
+<p>The method performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Calculates <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> for each point in the discretized
+composition space. Positive values of <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> are
+clamped to zero, as they do not contribute to phase instability.</p></li>
+<li><p>Constructs a graph where each node represents a composition, and the
+coordinates are the original Cartesian coordinates augmented with
+<span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span>.</p></li>
+<li><p>Computes the convex hull of this graph.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array representing the simplices of the convex hull. Each
+simplex is defined by a set of indices into the input point set.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>graph</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list (which is used like a deque) of numpy arrays.  Each array
+represents a point in the composition space, with the last element
+being the <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> value.  This is constructed by
+this method.</p></li>
+<li><p><strong>graph_points_real_indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – A list of integers.  Each integer maps a point in the <cite>graph</cite> to its
+index in the original discretized composition space
+(<cite>self.discretized_system.points_mfr</cite> or
+<cite>self.discretized_system.points_cart</cite>).  This is constructed by
+this method.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac">
+<span class="sig-name descname"><span class="pre">compute_phase_eq_molfrac</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.compute_phase_eq_molfrac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the phase equilibrium compositions in mole fractions.</p>
+<p>This method calculates the compositions of the two phases at equilibrium
+by finding points on the binodal curve. It uses the discretized
+composition space from the PointDisc object and the Gibbs free energy
+of mixing and activity coefficient arrays. The results are returned
+as a matrix of mol fractions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array where each row represents a pair of equilibrium
+compositions (two phases) in mole fractions, and each column
+represents a component. The shape of the array is (n, 2 * num_comp),
+where n is the number of equilibrium pairs. If no equilibrium
+is found, return an empty array of shape (0, 2 * num_comp).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_cartcoord">
+<span class="sig-name descname"><span class="pre">compute_phase_eq_cartcoord</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.compute_phase_eq_cartcoord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_cartcoord" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the phase equilibrium compositions in Cartesian coordinates.</p>
+<p>This method calculates the compositions of the two phases at equilibrium
+in Cartesian coordinates, corresponding to the mol fraction
+compositions calculated by <a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac" title="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_phase_eq_molfrac()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array where each row represents a pair of equilibrium
+compositions (two phases) in Cartesian coordinates,
+and each column represents a component. The shape of the array is
+(n, 2 * (num_comp -1)), where n is the number of equilibrium pairs.
+If no equilibrium is found, return an empty array of shape
+(0, 2 * (num_comp -1)).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_indices">
+<span class="sig-name descname"><span class="pre">compute_phase_eq_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.compute_phase_eq_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_indices" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the indices of the phase equilibrium points.</p>
+<p>This method calculates the indices of the points in the discretized
+composition space that correspond to the equilibrium phase
+compositions. These indices can be used to retrieve the corresponding
+compositions from the PointDisc object’s point arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A numpy array where each row represents a pair of indices
+corresponding to the equilibrium phase compositions.  The shape
+of the array is (n, 2), where n is the number of equilibrium pairs.
+If no equilibrium is found, return an empty array of shape (0, 2).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.get_split_flowrates">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_split_flowrates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molar_flowrates_feed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases_mfr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_ratio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.get_split_flowrates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.get_split_flowrates" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the molar flow rates of individual phases from a feed stream.</p>
+<p>This static method determines the molar flow rates of each phase resulting
+from a split of the feed stream, given the molar fractions of each phase
+and the split ratios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>molar_flowrates_feed</strong> (<em>numpy.ndarray</em>) – A numpy array representing the molar flow rates of the feed stream.</p></li>
+<li><p><strong>phases_mfr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list of numpy arrays, where each array represents the molar
+fractions of a phase. The order of phases in this list corresponds
+to the order of split ratios.</p></li>
+<li><p><strong>split_ratio</strong> (<em>numpy.ndarray</em>) – A numpy array representing the split ratios for each phase. The
+split ratio of a phase is the fraction of the total feed flow rate
+that goes into that phase. The elements of split_ratio should be
+non-negative and sum to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of numpy arrays, where each array represents the molar flow
+rates of a single phase.  The order of phases in this list
+corresponds to the order in <cite>phases_mfr</cite> and <cite>split_ratio</cite>.
+Returns None if the calculated flow rates for the last phase
+are negative.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[numpy.ndarray] or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.point_in_simplex_via_bary">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">point_in_simplex_via_bary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simplex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_cartesian</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.point_in_simplex_via_bary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.point_in_simplex_via_bary" title="Link to this definition">¶</a></dt>
+<dd><p>Determines if a point is within a simplex using barycentric coordinates.</p>
+<p>This static method calculates the barycentric coordinates of a given point
+with respect to a simplex.  It then checks if the barycentric coordinates
+are within the valid range (0 to 1) to determine if the point lies within
+the simplex.  It assumes that the simplex object already contains the
+necessary transformation matrices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>simplex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">Simplex</span></code> object (or an object with similar attributes)
+containing the inverse of the matrix that transforms Cartesian
+coordinates to barycentric coordinates.  This object is assumed to
+have an attribute <cite>matrix_inv</cite>.</p></li>
+<li><p><strong>point_cartesian</strong> (<em>numpy.ndarray</em>) – A numpy array representing the Cartesian coordinates of the point
+to be checked.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the point is within the simplex, False if the point is
+outside the simplex, and None if the sum of the barycentric
+coordinates is not approximately 1 (which should not occur in a
+correctly formed simplex).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-picmol.models.cem.point_discretization">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.cem.point_discretization.</span></span><span class="sig-name descname"><span class="pre">PointDisc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursion_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc" title="Link to this definition">¶</a></dt>
+<dd><p>Discretizes the composition space of a multi-component system using a simplex.</p>
+<p>This class generates a set of points within the composition space of a
+multi-component system by recursively subdividing a simplex. The points
+can be used to represent the possible compositions of mixtures in the system,
+for example, in phase equilibrium calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_comp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of components in the system. Must be greater than or equal to 2.</p></li>
+<li><p><strong>recursion_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of recursion steps used to generate the discretization.
+This determines the density of points. Must be greater than 1.</p></li>
+<li><p><strong>load</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, loads a previously stored discretization from a file.</p></li>
+<li><p><strong>store</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, stores the generated discretization to a file. This is only
+relevant if <cite>load</cite> is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>num_comp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of components in the system.</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The dimension of the simplex (number of components minus 1).</p></li>
+<li><p><strong>recursion_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The number of recursion steps.</p></li>
+<li><p><strong>epsilon</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – A small tolerance value used for numerical comparisons.</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The path to the file where the discretization is stored (if <cite>store</cite> is True).</p></li>
+<li><p><strong>vertices_outer_simplex</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list of numpy arrays representing the vertices of the outer simplex
+in Cartesian coordinates.</p></li>
+<li><p><strong>matrix_mfr_to_cart</strong> (<em>numpy.ndarray</em>) – A matrix used to transform molar fractions (barycentric coordinates)
+to Cartesian coordinates.</p></li>
+<li><p><strong>matrix_cart_to_mfr</strong> (<em>numpy.ndarray</em>) – A matrix used to transform Cartesian coordinates to molar fractions.</p></li>
+<li><p><strong>points_mfr</strong> (<em>numpy.ndarray</em>) – A numpy array containing the discretized points in molar fraction
+(barycentric) coordinates.</p></li>
+<li><p><strong>points_cart</strong> (<em>numpy.ndarray</em>) – A numpy array containing the discretized points in Cartesian coordinates.</p></li>
+<li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The step size used in the discretization, determined by the
+<cite>recursion_steps</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.get_points">
+<span class="sig-name descname"><span class="pre">get_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.get_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.get_points" title="Link to this definition">¶</a></dt>
+<dd><p>Generates the discretized points within the simplex.</p>
+<p>This method recursively generates points within the simplex based on the
+number of recursion steps. The points are generated in both molar fraction
+and Cartesian coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>base</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – The base value used for generating the combinations, which is
+2 raised to the power of the number of recursion steps.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.construct_outer_simplex">
+<span class="sig-name descname"><span class="pre">construct_outer_simplex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.construct_outer_simplex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.construct_outer_simplex" title="Link to this definition">¶</a></dt>
+<dd><p>Constructs the outer simplex in Cartesian coordinates.</p>
+<p>This method generates the vertices of a regular n-simplex in R<sup>n</sup>, where
+n is the number of components minus 1. For the case of a 3-component
+system, the simplex is rotated by 285 degrees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of numpy arrays, where each array represents the Cartesian
+coordinates of a vertex of the simplex.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[numpy.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.transform_molar_fr_to_cartesian">
+<span class="sig-name descname"><span class="pre">transform_molar_fr_to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molar_fractions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.transform_molar_fr_to_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.transform_molar_fr_to_cartesian" title="Link to this definition">¶</a></dt>
+<dd><p>Transforms molar fractions to Cartesian coordinates.</p>
+<p>This method converts a composition represented as molar fractions
+(barycentric coordinates) to Cartesian coordinates using the
+precomputed transformation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>molar_fractions</strong> (<em>numpy.ndarray</em>) – A numpy array representing the composition in molar fractions.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array representing the composition in Cartesian coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.transform_cartesian_to_molar_fr">
+<span class="sig-name descname"><span class="pre">transform_cartesian_to_molar_fr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cartesian_point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.transform_cartesian_to_molar_fr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.transform_cartesian_to_molar_fr" title="Link to this definition">¶</a></dt>
+<dd><p>Transforms Cartesian coordinates to molar fractions.</p>
+<p>This method converts a composition represented as Cartesian coordinates
+to molar fractions (barycentric coordinates) using the precomputed
+transformation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cartesian_point</strong> (<em>numpy.ndarray</em>) – A numpy array representing the composition in Cartesian coordinates.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array representing the composition in molar fractions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.euclidean_distance">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">euclidean_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.euclidean_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.euclidean_distance" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the Euclidean distance between two points.</p>
+<p>This static method computes the Euclidean distance between two points
+in Cartesian coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p1</strong> (<em>numpy.ndarray</em>) – A numpy array representing the coordinates of the first point.</p></li>
+<li><p><strong>p2</strong> (<em>numpy.ndarray</em>) – A numpy array representing the coordinates of the second point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Euclidean distance between the two points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.get_basis_change">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_basis_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices_cartesian</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.get_basis_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.get_basis_change" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the basis change matrices between molar fractions and Cartesian coordinates.</p>
+<p>This static method computes the matrices A and A_inv, which are used to
+transform between molar fractions (barycentric coordinates) and Cartesian
+coordinates. The matrix A is constructed from the vertices of the simplex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vertices_cartesian</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list of numpy arrays, where each array represents the Cartesian
+coordinates of a vertex of the simplex.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the matrix A and its inverse A_inv.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[numpy.ndarray, numpy.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.volume_simplex">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">volume_simplex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.volume_simplex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.volume_simplex" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the volume of an n-simplex in R<sup>n</sup>.</p>
+<p>This static method computes the volume of a simplex given its vertices
+using the determinant of a matrix formed from the vertex coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>vertices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list of numpy arrays, where each array represents the Cartesian coordinates of a vertex of the simplex.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The volume of the simplex.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="picmol.plotter.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Plotting Functions (picmol.plotter)</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="picmol.models.unifac_subgroups.fragmentation.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Allison A. Peroutka
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/aperoutka/picmol/" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Convex Envelope Method (picmol.models.cem)</a><ul>
+<li><a class="reference internal" href="#picmol.models.cem.cem_analysis.CEM"><code class="docutils literal notranslate"><span class="pre">CEM</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex"><code class="docutils literal notranslate"><span class="pre">MiscibilityGapSimplex</span></code></a><ul>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex.get_middle"><code class="docutils literal notranslate"><span class="pre">MiscibilityGapSimplex.get_middle()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis</span></code></a><ul>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compare_simplices"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compare_simplices()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.get_hull"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.get_hull()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compute_phase_eq_molfrac()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_cartcoord"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compute_phase_eq_cartcoord()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_indices"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compute_phase_eq_indices()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.get_split_flowrates"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.get_split_flowrates()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.point_in_simplex_via_bary"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.point_in_simplex_via_bary()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc"><code class="docutils literal notranslate"><span class="pre">PointDisc</span></code></a><ul>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc.get_points"><code class="docutils literal notranslate"><span class="pre">PointDisc.get_points()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc.construct_outer_simplex"><code class="docutils literal notranslate"><span class="pre">PointDisc.construct_outer_simplex()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc.transform_molar_fr_to_cartesian"><code class="docutils literal notranslate"><span class="pre">PointDisc.transform_molar_fr_to_cartesian()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc.transform_cartesian_to_molar_fr"><code class="docutils literal notranslate"><span class="pre">PointDisc.transform_cartesian_to_molar_fr()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc.euclidean_distance"><code class="docutils literal notranslate"><span class="pre">PointDisc.euclidean_distance()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc.get_basis_change"><code class="docutils literal notranslate"><span class="pre">PointDisc.get_basis_change()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc.volume_simplex"><code class="docutils literal notranslate"><span class="pre">PointDisc.volume_simplex()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
-            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="picmol.models.unifac_subgroups.fragmentation.html"
-                          title="previous chapter">Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)</a></p>
+      
+      
+    </aside>
   </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="picmol.plotter.html"
-                          title="next chapter">Plotting Functions (picmol.plotter)</a></p>
-  </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/picmol.models.cem.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<search id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="picmol.plotter.html" title="Plotting Functions (picmol.plotter)"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.unifac_subgroups.fragmentation.html" title="Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">picmol 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="picmol.models.html" >Thermodynamic Models (picmol.models)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Convex Envelope Method (picmol.models.cem)</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-    &#169; Copyright 2025, Allison A. Peroutka.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
-    </div>
-  </body>
+</div><script src="_static/documentation_options.js?v=f539c95a"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
 </html>

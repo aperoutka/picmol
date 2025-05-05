@@ -1,112 +1,1588 @@
-<!DOCTYPE html>
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)" href="picmol.models.unifac_subgroups.fragmentation.html" /><link rel="prev" title="UNIQUAC (picmol.models.uniquac)" href="picmol.models.uniquac.html" />
 
-<html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>UNIFAC (picmol.models.unifac) - picmol 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
 
-    <title>UNIFAC (picmol.models.unifac) &#8212; picmol 0.0.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=279e0f84" />
-    <script src="_static/documentation_options.js?v=d45e8c67"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="UNIFAC Subgroups (picmol.models.unifac_subgroups)" href="picmol.models.unifac_subgroups.html" />
-    <link rel="prev" title="Numerical (picmol.models.numerical)" href="picmol.models.numerical.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.unifac_subgroups.html" title="UNIFAC Subgroups (picmol.models.unifac_subgroups)"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.numerical.html" title="Numerical (picmol.models.numerical)"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">picmol 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="picmol.models.html" accesskey="U">Thermodynamic Models (picmol.models)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">UNIFAC (picmol.models.unifac)</a></li> 
-      </ul>
-    </div>  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <section id="module-picmol.models.unifac">
-<span id="unifac-picmol-models-unifac"></span><h1>UNIFAC (picmol.models.unifac)<a class="headerlink" href="#module-picmol.models.unifac" title="Link to this heading">¶</a></h1>
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #6851ff;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #a08cff;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #a08cff;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+<div class="announcement">
+  <aside class="announcement-content">
+     Check out our latest release! 
+  </aside>
+</div>
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">picmol 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">picmol 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="picmol.models.html">Thermodynamic Models (picmol.models)</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Thermodynamic Models (picmol.models)</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.numerical.html">Numerical (picmol.models.numerical)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.fh.html">Flory-Huggins (picmol.models.fh)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.nrtl.html">NRTL (picmol.models.nrtl)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.uniquac.html">UNIQUAC (picmol.models.uniquac)</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">UNIFAC (picmol.models.unifac)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.unifac_subgroups.fragmentation.html">Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="picmol.models.cem.html">Convex Envelope Method (picmol.models.cem)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/01_kbi_analysis.html">01_comparing_KBI_correction_methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/02_thermo_models.html">02_themodynamic_model_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/blob/main/docs/picmol.models.unifac.rst?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/edit/main/docs/picmol.models.unifac.rst" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-picmol.models.unifac_subgroups.unifac_subgroup_parameters">
+<span id="unifac-picmol-models-unifac"></span><h1>UNIFAC (picmol.models.unifac)<a class="headerlink" href="#module-picmol.models.unifac_subgroups.unifac_subgroup_parameters" title="Link to this heading">¶</a></h1>
+<dl class="py function" id="module-picmol.models.unifac">
+<dt class="sig sig-object py" id="picmol.models.unifac.unifac_version_mapping">
+<span class="sig-prename descclassname"><span class="pre">picmol.models.unifac.</span></span><span class="sig-name descname"><span class="pre">unifac_version_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#unifac_version_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.unifac_version_mapping" title="Link to this definition">¶</a></dt>
+<dd><p>Map UNIFAC version parameters to their corresponding ID.</p>
+<p>This function retrieves a dictionary that maps UNIFAC version parameters
+to their corresponding IDs or data structures.  The specific mapping
+depends on the provided <code class="docutils literal notranslate"><span class="pre">map_type</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>map_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – <p>identifier to retrieve the desired mapping dictionary. Valid options are:</p>
+<ul class="simple">
+<li><p>’version’:  dictionary with UNIFAC version strings as keys and version IDs as values.</p></li>
+<li><p>’subgroup’: dictionary with version IDs as keys and subgroup parameter objects as values.</p></li>
+<li><p>’interaction’: dictionary with version IDs as keys and interaction parameter objects as values.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing the mapped UNIFAC version parameters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="picmol.models.unifac.get_unifac_version">
+<span class="sig-prename descclassname"><span class="pre">picmol.models.unifac.</span></span><span class="sig-name descname"><span class="pre">get_unifac_version</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">version_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#get_unifac_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.get_unifac_version" title="Link to this definition">¶</a></dt>
+<dd><p>Determine the UNIFAC version from a string and optionally SMILES strings.</p>
+<p>This function determines the UNIFAC version based on a provided string
+and optionally a list of SMILES strings.  It prioritizes detecting
+“unifac-il” if any of the SMILES strings contain a ‘.’ (indicating an
+ionic liquid).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>version_str</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – a string indicating the UNIFAC version (e.g.,
+“unifac”, “unifac-il”, “unifac-kbi”).  Case-insensitive.</p></li>
+<li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – an optional list of SMILES strings. If provided, the
+function checks for ‘.’ in any of the SMILES strings to
+identify ionic liquids and force the version to “unifac-il”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string representing the determined UNIFAC version
+(“unifac”, “unifac-il”, or “unifac-kbi”).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.unifac.</span></span><span class="sig-name descname"><span class="pre">UNIFAC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unifac'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC" title="Link to this definition">¶</a></dt>
+<dd><p>UNIFAC (UNIversal Functional Activity Coefficient) model class.</p>
+<p>This class implements the UNIFAC activity coefficient model for calculating
+thermodynamic properties of multi-molecule mixtures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p></li>
+<li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of smiles string representing molecules in mixture.</p></li>
+<li><p><strong>z</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – composition array (mol fractions). If None, it defaults to values from PointDisc.</p></li>
+<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – UNIFAC version to use for interaction data, as well as R and Q parameters.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.unique_groups">
+<span class="sig-name descname"><span class="pre">unique_groups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.unique_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.unique_groups" title="Link to this definition">¶</a></dt>
+<dd><p>Identifies the unique subgroups present in the mixture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of unique subgroup IDs</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.M">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">M</span></span><a class="headerlink" href="#picmol.models.unifac.UNIFAC.M" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of unique subgroups in the mixture</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.N">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">N</span></span><a class="headerlink" href="#picmol.models.unifac.UNIFAC.N" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of molecules in the mixture</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.zc">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zc</span></span><a class="headerlink" href="#picmol.models.unifac.UNIFAC.zc" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>coordination number (set to 10)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.subgroups">
+<span class="sig-name descname"><span class="pre">subgroups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.subgroups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.subgroups" title="Link to this definition">¶</a></dt>
+<dd><p>Get the subgroups present in each molecule.</p>
+<p>This function determines the UNIFAC subgroups from molecule
+SMILES strings, using the <code class="xref py py-class docutils literal notranslate"><span class="pre">Groups</span></code> class to perform subgroup fragmentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of dictionaries. Each dictionary represents the subgroups
+found in the corresponding molecule, with subgroup IDs as keys
+and their occurrences as values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.r">
+<span class="sig-name descname"><span class="pre">r</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.r"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.r" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the relative size of a molecule. 
+This property is determined by summing the product of each subgroup’s r parameter (<span class="math notranslate nohighlight">\(r_k\)</span>) and its frequency (<span class="math notranslate nohighlight">\(\nu_{ki}\)</span>) within the molecule (<span class="math notranslate nohighlight">\(i\)</span>).</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[r_i = \sum_k^N \nu_{ki} r_k\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of r parameters for each molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.q">
+<span class="sig-name descname"><span class="pre">q</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.q" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the relative surface area of a molecule. 
+This property is determined by summing the product of each subgroup’s q parameter (<span class="math notranslate nohighlight">\(q_k\)</span>) and its frequency (<span class="math notranslate nohighlight">\(\nu_{ki}\)</span>) within the molecule (<span class="math notranslate nohighlight">\(i\)</span>).</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[q_i = \sum_k^N \nu_{ki} q_k\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of q parameters for each molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.occurance_matrix">
+<span class="sig-name descname"><span class="pre">occurance_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.occurance_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.occurance_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a matrix representing subgroup occurrences in each molecule.</p>
+<p>This method generates a matrix where each row represents a unique subgroup and each column corresponds to a molecule in the mixture. Each element, <span class="math notranslate nohighlight">\(\nu_{ji}\)</span>, indicates the number of times subgroup <span class="math notranslate nohighlight">\(j\)</span> appears in molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>subgroup occurrence matrix</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.subgroup_matrix">
+<span class="sig-name descname"><span class="pre">subgroup_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.subgroup_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.subgroup_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a matrix representing subgroup IDs for each molecule.</p>
+<p>This method creates a matrix where rows correspond to unique subgroups
+and columns correspond to molecules. Each element (<span class="math notranslate nohighlight">\(j\)</span>, <span class="math notranslate nohighlight">\(i\)</span>) represents the
+ID of subgroup <span class="math notranslate nohighlight">\(j\)</span> in molecule <span class="math notranslate nohighlight">\(i\)</span>. If a molecule does not contain a
+particular subgroup, the corresponding element is 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>subgroup ID matrix</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Q_matrix">
+<span class="sig-name descname"><span class="pre">Q_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Q_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Q_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a matrix of subgroup area parameters (<a class="reference internal" href="#picmol.models.unifac.UNIFAC.q" title="picmol.models.unifac.UNIFAC.q"><code class="xref py py-func docutils literal notranslate"><span class="pre">q()</span></code></a> values).</p>
+<p>This method creates a matrix with the same shape as <a class="reference internal" href="#picmol.models.unifac.UNIFAC.subgroup_matrix" title="picmol.models.unifac.UNIFAC.subgroup_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">subgroup_matrix()</span></code></a>, where
+each element (<span class="math notranslate nohighlight">\(j\)</span>, <span class="math notranslate nohighlight">\(i\)</span>) represents the ID of subgroup <span class="math notranslate nohighlight">\(j\)</span> in molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of subgroup Q values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.psis">
+<span class="sig-name descname"><span class="pre">psis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.psis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.psis" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates a <em>matrix</em> of UNIFAC interaction parameters for <em>all 
+possible pairs</em> within a given set of unique subgroups.
+This function computes the <span class="math notranslate nohighlight">\(\psi\)</span> matrix, where each element, <span class="math notranslate nohighlight">\(\psi_{ij}\)</span>, represents the
+interaction parameter between two subgroups.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\psi_{ij} = \exp \left( \frac{-a_{ij}}{T} \right)\]</div>
+</div>
+<p>where:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(a_{ij}\)</span> is the interaction energy parameter between subgroups <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\psi_{ij}\)</span> is the corresponding interaction parameter</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of interaction parameters between unique subgroups present</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.group_counts">
+<span class="sig-name descname"><span class="pre">group_counts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.group_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.group_counts" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the total occurrences of each unique subgroup
+across all molecules in the mixture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of counts for each unique subgroup</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.weighted_number">
+<span class="sig-name descname"><span class="pre">weighted_number</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.weighted_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.weighted_number" title="Link to this definition">¶</a></dt>
+<dd><p>Weighted mol fraction matrix.</p>
+<p>This method calculates a matrix, with elements <span class="math notranslate nohighlight">\(W_{ijk}\)</span>, 
+where each element represents the mol fraction of molecule <span class="math notranslate nohighlight">\(i\)</span>, 
+weighted by the occurrence of subgroup <span class="math notranslate nohighlight">\(j\)</span> in molecule <span class="math notranslate nohighlight">\(k\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[W_{ijk} = x_i \nu_{jk}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix of subgroup occurrence weighted mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.group_X">
+<span class="sig-name descname"><span class="pre">group_X</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.group_X"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.group_X" title="Link to this definition">¶</a></dt>
+<dd><p>Mol fraction of each subgroup in the mixture.</p>
+<p>This method calculates <span class="math notranslate nohighlight">\(X_j\)</span>, the mol fraction of subgroup <span class="math notranslate nohighlight">\(j\)</span>
+in the entire mixture considering the contributions from all
+molecules.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[X_j = \frac{\sum_i^N x_i \nu_{ji}}{\sum_i^N \sum_k^M x_i \nu_{ki}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix of subgroup mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.X_pure">
+<span class="sig-name descname"><span class="pre">X_pure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.X_pure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.X_pure" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the fraction of subgroup <span class="math notranslate nohighlight">\(j\)</span> for molecule <span class="math notranslate nohighlight">\(i\)</span> in the entire mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[X_{ji} = \frac{\nu_{ji}}{\sum_i^N \sum_k^M \nu_{ki}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix of subgroup fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.group_Q">
+<span class="sig-name descname"><span class="pre">group_Q</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.group_Q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.group_Q" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves <span class="math notranslate nohighlight">\(Q_i\)</span>, the <a class="reference internal" href="#picmol.models.unifac.UNIFAC.q" title="picmol.models.unifac.UNIFAC.q"><code class="xref py py-func docutils literal notranslate"><span class="pre">q()</span></code></a> parameter for each
+unique subgroup from <code class="docutils literal notranslate"><span class="pre">subgroup_data</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of <span class="math notranslate nohighlight">\(Q_i\)</span> values for each unique subgroup</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Thetas">
+<span class="sig-name descname"><span class="pre">Thetas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Thetas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Thetas" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the area fraction, <span class="math notranslate nohighlight">\(\Theta_i\)</span>, for subgroup <span class="math notranslate nohighlight">\(i\)</span> in the entire mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\Theta_i = \frac{X_i Q_i}{\sum_j^N X_j Q_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix of area terms for each group in each composition</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Thetas_pure">
+<span class="sig-name descname"><span class="pre">Thetas_pure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Thetas_pure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Thetas_pure" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the subgroup area fraction, <span class="math notranslate nohighlight">\(\Theta_{ji}\)</span>, for subgroup <span class="math notranslate nohighlight">\(j\)</span> in molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\Theta_{ji} = \frac{X_{ji} Q_j}{\sum_k^M X_{ki} Q_l}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>matrix of subgroup fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.rbar">
+<span class="sig-name descname"><span class="pre">rbar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.rbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.rbar" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the linear combination of the <a class="reference internal" href="#picmol.models.unifac.UNIFAC.r" title="picmol.models.unifac.UNIFAC.r"><code class="xref py py-func docutils literal notranslate"><span class="pre">r()</span></code></a> parameters for each molecule, <span class="math notranslate nohighlight">\(\overline{r}\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\overline{r} = \sum_j^N x_i r_i\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>linear combination of <a class="reference internal" href="#picmol.models.unifac.UNIFAC.r" title="picmol.models.unifac.UNIFAC.r"><code class="xref py py-func docutils literal notranslate"><span class="pre">r()</span></code></a></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Vis">
+<span class="sig-name descname"><span class="pre">Vis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Vis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Vis" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the volume term, <span class="math notranslate nohighlight">\(V_i\)</span>, for molecule <span class="math notranslate nohighlight">\(i\)</span> in the mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[V_i = \frac{r_i}{\sum_j^N x_j r_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of volume terms for each molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.phis">
+<span class="sig-name descname"><span class="pre">phis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.phis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.phis" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates <span class="math notranslate nohighlight">\(\phi_i\)</span>, the volume term (<a class="reference internal" href="#picmol.models.unifac.UNIFAC.Vis" title="picmol.models.unifac.UNIFAC.Vis"><code class="xref py py-func docutils literal notranslate"><span class="pre">Vis()</span></code></a>) weighted by mol fraction of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\phi_i = \frac{x_i r_i}{\sum_j^N x_j r_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of weighted volume terms for each molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.qbar">
+<span class="sig-name descname"><span class="pre">qbar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.qbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.qbar" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the linear combination of the <a class="reference internal" href="#picmol.models.unifac.UNIFAC.q" title="picmol.models.unifac.UNIFAC.q"><code class="xref py py-func docutils literal notranslate"><span class="pre">q()</span></code></a> parameters for each molecule, <span class="math notranslate nohighlight">\(\overline{q}\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\overline{q} = \sum_j^N x_i q_i\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>linear combination of <a class="reference internal" href="#picmol.models.unifac.UNIFAC.q" title="picmol.models.unifac.UNIFAC.q"><code class="xref py py-func docutils literal notranslate"><span class="pre">q()</span></code></a></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Ais">
+<span class="sig-name descname"><span class="pre">Ais</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Ais"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Ais" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the area term, <span class="math notranslate nohighlight">\(A_i\)</span>, for molecule <span class="math notranslate nohighlight">\(i\)</span> in the mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[A_i = \frac{q_i}{\sum_j^N x_j q_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of area terms for each molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.thetas">
+<span class="sig-name descname"><span class="pre">thetas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.thetas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.thetas" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates <span class="math notranslate nohighlight">\(\theta_i\)</span>, the area term (<a class="reference internal" href="#picmol.models.unifac.UNIFAC.Ais" title="picmol.models.unifac.UNIFAC.Ais"><code class="xref py py-func docutils literal notranslate"><span class="pre">Ais()</span></code></a>) weighted by mol fraction of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\theta_i = \frac{x_i q_i}{\sum_j^N x_j q_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of weighted area terms for each molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.gammas">
+<span class="sig-name descname"><span class="pre">gammas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.gammas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.gammas" title="Link to this definition">¶</a></dt>
+<dd><p>Total activity coefficients of molecule <span class="math notranslate nohighlight">\(i\)</span> in a mixture. These coefficients are the sum of combinatorial (<span class="math notranslate nohighlight">\(\gamma_i^c\)</span>) and residual (<span class="math notranslate nohighlight">\(\gamma_i^r\)</span>) contributions, as shown below:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\gamma_i = \gamma_i^c + \gamma_i^r\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of activity coefficients</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.lngammas_c">
+<span class="sig-name descname"><span class="pre">lngammas_c</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.lngammas_c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.lngammas_c" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the combinatorial contribution (<span class="math notranslate nohighlight">\(\gamma_i^c\)</span>) to the activity coefficient of molecule <span class="math notranslate nohighlight">\(i\)</span> in a mixture. The combinatorial contribution accounts for differences in molecular size and shape and is calculated using the following equation:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\ln \gamma_i^c = 1 - V_i + \ln V_i - 5 q_i \left( 1 - \frac{V_i}{A_i} + \ln \frac{V_i}{A_i} \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of combinatorial activity coefficients</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.lngammas_r">
+<span class="sig-name descname"><span class="pre">lngammas_r</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.lngammas_r"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.lngammas_r" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates residual (<span class="math notranslate nohighlight">\(\gamma_i^r\)</span>) contribution to activity coefficients of molecule <span class="math notranslate nohighlight">\(i\)</span> in mixture. The residual contribution accounts for the difference compared to the residual activity coefficient of subgroup <span class="math notranslate nohighlight">\(k\)</span> in the pure component reference state of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\ln \gamma_i^r = \sum_k^M \nu_{ki} \left( \ln \Gamma_k - \ln \Gamma_{ki}  \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of residual activity coefficients</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.lnGammas_subgroups_pure">
+<span class="sig-name descname"><span class="pre">lnGammas_subgroups_pure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.lnGammas_subgroups_pure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.lnGammas_subgroups_pure" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the residual activity coefficient (<span class="math notranslate nohighlight">\(\Gamma_{ki}\)</span>) of subgroup <span class="math notranslate nohighlight">\(k\)</span> in a reference solution consisting solely of molecules of type <span class="math notranslate nohighlight">\(i\)</span>. In this method, <span class="math notranslate nohighlight">\(\Theta\)</span> values come from <a class="reference internal" href="#picmol.models.unifac.UNIFAC.Thetas_pure" title="picmol.models.unifac.UNIFAC.Thetas_pure"><code class="xref py py-func docutils literal notranslate"><span class="pre">Thetas_pure()</span></code></a> method, where each molecule is assumed to be a pure component.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\ln \Gamma_{ki} = Q_k \left( 1 - \ln \sum_i^N \Theta_i \psi_{ik} - \sum_i^N \frac{\Theta_i \psi_{ki}}{\sum_j^N \Theta_j \psi_{ji}}  \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of residual contributions for the subgroup reference state</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.lnGammas_subgroups">
+<span class="sig-name descname"><span class="pre">lnGammas_subgroups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.lnGammas_subgroups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.lnGammas_subgroups" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the residual activity coefficient (<span class="math notranslate nohighlight">\(\Gamma_{k}\)</span>) of subgroup <span class="math notranslate nohighlight">\(k\)</span> in a mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\ln \Gamma_{k} = Q_k \left( 1 - \ln \sum_i^N \Theta_i \psi_{ik} - \sum_i^N \frac{\Theta_i \psi_{ki}}{\sum_j^N \Theta_j \psi_{ji}}  \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of residual contributions for each subgroup</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.GE">
+<span class="sig-name descname"><span class="pre">GE</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.GE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.GE" title="Link to this definition">¶</a></dt>
+<dd><p>Gibbs excess energy of the mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{G^E}{RT} = \sum_{i}^N x_i \ln \gamma_i\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of Gibbs excess energy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.GM">
+<span class="sig-name descname"><span class="pre">GM</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.GM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.GM" title="Link to this definition">¶</a></dt>
+<dd><p>Gibbs mixing free energy of the mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\Delta G_{mix}}{RT} = \sum_{i}^N x_i \ln \left( x_i \gamma_i \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of Gibbs mixing free energy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dlngammas_c_dxs">
+<span class="sig-name descname"><span class="pre">dlngammas_c_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dlngammas_c_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dlngammas_c_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the derivative of the combinatorial contribution to the activity coefficients with respect to the mol fractions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \ln \gamma_i^c}{\partial x_j} = -5 q_i \left( \frac{\frac{\partial V_i}{\partial x_j}}{V_i} - \frac{V_i \frac{\partial A_i}{\partial x_j}}{A_i^2} \frac{A_i}{V_i} - \frac{\frac{\partial V_i}{\partial x_j}}{A_i} + \frac{V_i \frac{\partial A_i}{\partial x_j}}{A_i^2} \right) - \frac{\partial V_i}{\partial x_j} + \frac{\frac{\partial V_i}{\partial x_j}}{V_i}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Array of the derivatives of the combinatorial activity coefficients with respect to mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dlngammas_r_dxs">
+<span class="sig-name descname"><span class="pre">dlngammas_r_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dlngammas_r_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dlngammas_r_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the derivative of the residual contribution to the activity coefficients with respect to the mol fractions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \ln \gamma_i^r}{\partial x_j} = \sum_k \nu_{ki} \frac{\partial \ln \Gamma_k}{\partial x_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of the derivatives of the residual activity coefficients with respect to mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dAis_dxs">
+<span class="sig-name descname"><span class="pre">dAis_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dAis_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dAis_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the derivative of the surface area fractions with respect to the mol fractions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial A_i}{\partial x_j} = -\frac{q_i q_j}{\overline{q}^2}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of the derivatives of the surface area term with respect to mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dVis_dxs">
+<span class="sig-name descname"><span class="pre">dVis_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dVis_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dVis_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the derivative of the volume fractions with respect to the mol fractions.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial V_i}{\partial x_j} = -\frac{r_i r_j}{\overline{r}^2}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of the derivatives of the volume term with respect to mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.F">
+<span class="sig-name descname"><span class="pre">F</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.F"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.F" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the inverse of a weighted sum of molecule <span class="math notranslate nohighlight">\(i\)</span>, where the sum is over the occurance of subgroups <span class="math notranslate nohighlight">\(j\)</span> in molecules <span class="math notranslate nohighlight">\(k\)</span> within the mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[F = \frac{1}{\sum_i^N \sum_j^M x_i \nu_{ji}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="math notranslate nohighlight">\(F\)</span> parameter of the mixture</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.G">
+<span class="sig-name descname"><span class="pre">G</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.G"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.G" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates a parameter, <span class="math notranslate nohighlight">\(G\)</span>, related to the group contributions in the mixture.
+This method computes <span class="math notranslate nohighlight">\(G\)</span> as the inverse of the sum of the products of <span class="math notranslate nohighlight">\(X_k\)</span> and <span class="math notranslate nohighlight">\(Q_k\)</span> for all subgroups in the mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[G = \frac{1}{\sum_j^M X_j Q_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The calculated parameter <span class="math notranslate nohighlight">\(G\)</span>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.sum_occurance_matrix">
+<span class="sig-name descname"><span class="pre">sum_occurance_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.sum_occurance_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.sum_occurance_matrix" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the total number of subgroups in molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\left( \nu \right)_{sum,i} = \sum_j^M \nu_{ji}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of number of subgroups in a molecule</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.sum_weighted_number">
+<span class="sig-name descname"><span class="pre">sum_weighted_number</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.sum_weighted_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.sum_weighted_number" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the total weighted number of molecule <span class="math notranslate nohighlight">\(i\)</span> with occurance of subgroup <span class="math notranslate nohighlight">\(j\)</span> for all molecules in mixture.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[(\nu x)_{sum,k} = \sum_k^N W_{ijk}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of weighted sums of molecule <span class="math notranslate nohighlight">\(i\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dThetas_dxs">
+<span class="sig-name descname"><span class="pre">dThetas_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dThetas_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dThetas_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the derivative of the surface area term (<span class="math notranslate nohighlight">\(\Theta_i\)</span>) with respect to the mol fractions (<span class="math notranslate nohighlight">\(x_j\)</span>).</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \Theta_i}{\partial x_j} = F G Q_i \left( F G (\nu x)_{sum,i} \left( \sum_k^M F Q_k \left( \nu \right)_{sum,j} - \sum_k^M Q_k \nu_{jk} \right) - F \left( \nu \right)_{sum,j} (\nu x)_{sum,i} + \nu_{ji} \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of the derivatives of the surface area fractions with respect to mole fractions.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Ws">
+<span class="sig-name descname"><span class="pre">Ws</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Ws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Ws" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the weights of <span class="math notranslate nohighlight">\(\psi\)</span> interaction parameters by derivative of area terms for molecule <span class="math notranslate nohighlight">\(i\)</span> over occurance of subgroups <span class="math notranslate nohighlight">\(j\)</span> in molecule <span class="math notranslate nohighlight">\(k\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[W_{ki} = \sum_j^M \psi_{jk} \frac{\partial \Theta_j}{\partial x_i}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of weighted <span class="math notranslate nohighlight">\(\psi\)</span> values by first derivative of area term</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Theta_Psi_sum_invs">
+<span class="sig-name descname"><span class="pre">Theta_Psi_sum_invs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Theta_Psi_sum_invs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Theta_Psi_sum_invs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates sum area terms for subgroup <span class="math notranslate nohighlight">\(m\)</span> and the corresponding interaction parameter for molecule <span class="math notranslate nohighlight">\(k\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[Z_k = \frac{1}{\sum_m^M \Theta_m \psi_{mk}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>inverse sum of area term and interaction paramter for molecule <span class="math notranslate nohighlight">\(k\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dlnGammas_subgroups_dxs">
+<span class="sig-name descname"><span class="pre">dlnGammas_subgroups_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dlnGammas_subgroups_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dlnGammas_subgroups_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the first derivative of residual activity coefficient (<span class="math notranslate nohighlight">\(\Gamma_{k}\)</span>) of subgroup <span class="math notranslate nohighlight">\(k\)</span> in a mixture with respect to mol fraction of molecule <span class="math notranslate nohighlight">\(j\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \ln \Gamma_k}{\partial x_j} = Q_k 
+  \left( 
+    - \frac{\sum_l^M \psi_{lk} \frac{\partial \Theta_l}{\partial x_j}}{\sum_l^M \Theta_l \psi_{lk}}
+    - \sum_l^M \frac{\psi_{kl} \frac{\partial \Theta_l}{\partial x_j}}{\sum_m^M \Theta_m \psi_{ml}}
+    + \sum_l^M \frac{\left( \sum_m^M \psi_{ml} \frac{\partial \Theta_m}{\partial x_j} \right) \Theta_l \psi_{kl}}{\left( \sum_m^M \Theta_m \psi_{ml} \right)^2} 
+  \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mol fraction derivatives of <span class="math notranslate nohighlight">\(\Gamma_{k}\)</span> for each subgroup</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dGE_dxs">
+<span class="sig-name descname"><span class="pre">dGE_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dGE_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dGE_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the first derivative of Gibbs excess energy with respect to mol fraction of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{1}{RT}\frac{\partial G^E}{\partial x_i} = \ln \gamma_i^c + \ln \gamma_i^r + \sum_j^N x_j \left( \frac{\partial \ln \gamma_j^c}{\partial x_i} + \frac{\partial \ln \gamma_j^r}{\partial x_i} \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>first component derivative of excess Gibbs energy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.mu">
+<span class="sig-name descname"><span class="pre">mu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.mu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.mu" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the chemical potential of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\mu_i}{RT} = 
+  1 + \ln x_i 
+  + \ln \gamma_i^c + \ln \gamma_i^r + 
+  \sum_j^N x_j \left( \frac{\partial \ln \gamma_j^c}{\partial x_i} + \frac{\partial \ln \gamma_j^r}{\partial x_i} \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>chemical potential of molecule <span class="math notranslate nohighlight">\(i\)</span></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dGM_dxs">
+<span class="sig-name descname"><span class="pre">dGM_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dGM_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dGM_dxs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates first derivative of Gibbs mixing free energy with respect to mol fraction of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \Delta G_{mix}}{\partial x_i} = \mu_i - \mu_N\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>first component derivative of Gibbs mixing free energy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.d2lngammas_c_dxixjs">
+<span class="sig-name descname"><span class="pre">d2lngammas_c_dxixjs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.d2lngammas_c_dxixjs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.d2lngammas_c_dxixjs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the second mol fraction derivative with respect to molecule <span class="math notranslate nohighlight">\(j\)</span> and molecule <span class="math notranslate nohighlight">\(k\)</span> of combinatorial contribution to activity coefficients of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \ln \gamma^c_i}{\partial x_j \partial x_k} =
+5 q_{i} \left(\frac{- \frac{\partial^{2}V_{i}}{\partial x_{k}\partial x_{j}} + \frac{V_{i}
+\frac{\partial^{2}A_{i}}{\partial x_{k}\partial x_{j}}}{A_{i}} + \frac{\frac{\partial A_{i}}{\partial x_{j}} 
+\frac{\partial V_{i}}{\partial x_{k}}}{A_{i}} + \frac{\frac{\partial A_{i}}{\partial x_{k}} 
+\frac{\partial V_{i}}{\partial x_{j}}}{A_{i}} - \frac{2 V_{i} \frac{\partial A_{i}}{\partial x_{j}}
+ \frac{\partial A_{i}}{\partial x_{k}}}{A_{i}^{2}}}{V_{i}} + \frac{\left(
+\frac{\partial V_{i}}{\partial x_{j}} - \frac{V_{i} \frac{\partial A_{i}}{\partial x_{j}}}
+{A_{i}}\right) \frac{\partial V_{i}}{\partial x_{k}}}{V_{i}^{2}}
++ \frac{\frac{\partial^{2} V_{i}}{\partial x_{k}\partial x_{j}}}{A_{i}} - \frac{\left(
+\frac{\partial V_{i}}{\partial x_{j}} - \frac{V_{i} \frac{\partial A_{i}}{\partial x_{j}}}{
+A_{i}}\right) \frac{\partial A_{i}}{\partial x_{k}}}{A_{i} V_{i}} - \frac{V_{i}
+\frac{\partial^{2} A_{i}}{\partial x_{k}\partial x_{j}}}{A_{i}^{2}} - \frac{\frac{\partial A_{i}}
+{\partial x_{j}} \frac{\partial V_{i}}{\partial x_{k}}}{A_{i}^{2}}
+- \frac{\frac{\partial A_{i}}{\partial x_{k}} \frac{\partial V_{i}}{\partial x_{j}}}{A_{i}^{2}}
++ \frac{2 V_{i} \frac{\partial A_{i}}{\partial x_{j}} \frac{\partial A_{i}}{\partial x_{k}}}
+{A_{i}^{3}}\right) - \frac{\partial^{2} V_i}{\partial x_{k}\partial x_{j}}
++ \frac{\frac{\partial^{2} V_i}{\partial x_{k}\partial x_{j}}}{V_i} - \frac{\frac{\partial  V_i}
+{\partial x_{j}} \frac{\partial  V_i}{\partial x_{k}}}{V_i^{2}}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of second derivative of combinatorial activity coefficient with respect to mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.d2lngammas_r_dxixjs">
+<span class="sig-name descname"><span class="pre">d2lngammas_r_dxixjs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.d2lngammas_r_dxixjs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.d2lngammas_r_dxixjs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the second mol fraction derivative with respect to molecule <span class="math notranslate nohighlight">\(j\)</span> and molecule <span class="math notranslate nohighlight">\(k\)</span> of residual contribution to activity coefficients of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial^2 \ln \gamma_i^r}{\partial x_j \partial x_k} = \sum_{m}^{M}
+\nu_m^{mi} \frac{\partial^2 \ln \Gamma_m}{\partial x_j^2}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of second derivative of combinatorial activity coefficient with respect to mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.d2Vis_dxixjs">
+<span class="sig-name descname"><span class="pre">d2Vis_dxixjs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.d2Vis_dxixjs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.d2Vis_dxixjs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the second mol fraction derivatives of volume term with respect to molecule <span class="math notranslate nohighlight">\(i\)</span> and molecule <span class="math notranslate nohighlight">\(j\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial^2 V_i}{\partial x_j \partial x_k} = \frac{2 r_i r_j r_k}{\left( \sum_l r_l x_l \right)^3}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>second derivative of volume terms</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.d2Ais_dxixjs">
+<span class="sig-name descname"><span class="pre">d2Ais_dxixjs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.d2Ais_dxixjs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.d2Ais_dxixjs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the second mol fraction derivatives of surface area term with respect to molecule <span class="math notranslate nohighlight">\(i\)</span> and molecule <span class="math notranslate nohighlight">\(j\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial^2 A_i}{\partial x_j \partial x_k} = \frac{2 q_i q_j q_k}{ \left( \sum_l q_l x_l \right)^3}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>second derivative of surface area terms</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.d2lnGammas_subgroups_dxixjs">
+<span class="sig-name descname"><span class="pre">d2lnGammas_subgroups_dxixjs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.d2lnGammas_subgroups_dxixjs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.d2lnGammas_subgroups_dxixjs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the second mol fraction derivatives of the <span class="math notranslate nohighlight">\(\ln \Gamma_k\)</span> parameters for the phase with respect to molecule <span class="math notranslate nohighlight">\(i\)</span> and molecule <span class="math notranslate nohighlight">\(j\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial^2 \ln \Gamma_k}{\partial x_i \partial x_j} = -Q_k\left(
+-Z_k K_{kij} - \sum_m^M Z_m^2 K_{mij}\Theta_m \psi_{km}
+-W_{ki} W_{kj}) Z_k^2
++ \sum_m^M Z_m \psi_{km} \frac{\partial^2 \Theta_m}{\partial x_i \partial x_j}
+- \sum_m \left(W_{mj} Z_m^2 \psi_{km} \frac{\partial \Theta_m}{\partial x_i}
++ W_{mi} Z_m^2 \psi_{km} \frac{\partial \Theta_m}{\partial x_j}\right)
++ \sum_m^M 2 W_{mi} W_{mj} Z_m^3 \Theta_m \psi_{km}\right)  \]</div>
+</div>
+<p>where:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[K_{kij} = \sum_m^M \psi_{mk} \frac{\partial^2 \Theta_m}{\partial x_i \partial x_j}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of second mol fraction derivatives of Gamma parameters for each subgroup</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.d2Thetas_dxixjs">
+<span class="sig-name descname"><span class="pre">d2Thetas_dxixjs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.d2Thetas_dxixjs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.d2Thetas_dxixjs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the second derivative of the area term of subgroup <span class="math notranslate nohighlight">\(i\)</span> with respect to mol fractions of molecule <span class="math notranslate nohighlight">\(j\)</span> and molecule <span class="math notranslate nohighlight">\(k\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial^2 \Theta_i}{\partial x_j \partial x_k} =
+\frac{Q_i}{\sum_n^N Q_n (\nu x)_{sum,n}}\left(
+-F(\nu)_{sum,j} \nu_{ik} - F (\nu)_{sum,k}\nu_{ij}
++ 2F^2(\nu)_{sum,j} (\nu)_{sum,k} (\nu x)_{sum,i}
++ \frac{F (\nu x)_{sum,i}\left[
+\sum_n^M(-2 F Q_n (\nu)_{sum,j} (\nu)_{sum,k}
+(\nu x)_{sum,n} + Q_n (\nu)_{sum,j} \nu_{nk} + Q_n (\nu)_{sum,k}\nu_{nj}
+)\right] }
+{\sum_n^M Q_n (\nu x)_{sum,n} }
++ \frac{2(\nu x)_{sum,i}(\sum_n^M[-FQ_n (\nu)_{sum,j} (\nu x)_{sum,n} + Q_n \nu_{nj}])
+(\sum_n^M[-FQ_n (\nu)_{sum,k} (\nu x)_{sum,n} + Q_n \nu_{nk}])  }
+{\left( \sum_n^M Q_n (\nu x)_{sum,n} \right)^2}
+- \frac{\nu_{ij}(\sum_n^M -FQ_n (\nu)_{sum,k} (\nu x)_{sum,n} + Q_n \nu_{nk} )}
+{\left( \sum_n^M Q_n (\nu x)_{sum,n} \right)}
+- \frac{\nu_{ik}(\sum_n^M -FQ_n (\nu)_{sum,j} (\nu x)_{sum,n} + Q_n \nu_{nj} )}
+{\left( \sum_n^M Q_n (\nu x)_{sum,n} \right)}
++ \frac{F(\nu)_{sum,j} (\nu x)_{sum,i} (\sum_n^M -FQ_n (\nu)_{sum,k}
+(\nu x)_{sum,n} + Q_n \nu_{nk})}
+{\left(\sum_n^M Q_n (\nu x)_{sum,n} \right)}
++ \frac{F(\nu)_{sum,k} (\nu x)_{sum,i} (\sum_n^M -FQ_n (\nu)_{sum,j}
+(\nu x)_{sum,n} + Q_n \nu_{nj})}
+{\left(\sum_n^M Q_n (\nu x)_{sum,n} \right)}
+\right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array of second mol fraction derivative of area fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.d2GE_dxixjs">
+<span class="sig-name descname"><span class="pre">d2GE_dxixjs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.d2GE_dxixjs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.d2GE_dxixjs" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the second composition derivative of excess Gibbs energy with respect to mol fractions of molecule <span class="math notranslate nohighlight">\(j\)</span> and molecule <span class="math notranslate nohighlight">\(k\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{1}{RT}\frac{\partial^2 G^E}{\partial x_i \partial x_j} = 
+  \frac{\partial \ln \gamma_i^c}{\partial x_j}
++ \frac{\partial \ln \gamma_i^r}{\partial x_j}
++ \frac{\partial \ln \gamma_j^c}{\partial x_i}
++ \frac{\partial \ln \gamma_j^r}{\partial x_i}
++\sum_k \left(
+  \frac{\partial^2 \ln \gamma_k^c}{\partial x_i \partial x_j}
+  + \frac{\partial^2 \ln \gamma_k^r}{\partial x_i \partial x_j}
+\right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>second composition derivative of excess Gibbs energy</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.dmu_dz">
+<span class="sig-name descname"><span class="pre">dmu_dz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.dmu_dz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.dmu_dz" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the derivative of the chemical potential (<span class="math notranslate nohighlight">\(\mu_i\)</span>) with respect to the composition (<span class="math notranslate nohighlight">\(j\)</span>).</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{1}{RT}\frac{\partial \mu_i}{\partial x_j} = 
+  \frac{1}{x_i}
+  + \frac{\partial \ln \gamma_i^c}{\partial x_j}
+  + \frac{\partial \ln \gamma_i^r}{\partial x_j}
+  + \frac{\partial \ln \gamma_j^c}{\partial x_i}
+  + \frac{\partial \ln \gamma_j^r}{\partial x_i}
+  +\sum_k \left(
+    \frac{\partial^2 \ln \gamma_k^c}{\partial x_i \partial x_j}
+    + \frac{\partial^2 \ln \gamma_k^r}{\partial x_i \partial x_j}
+  \right)\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>derivative of chemical potential with respect to composition</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Mij">
+<span class="sig-name descname"><span class="pre">Mij</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Mij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Mij" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the <span class="math notranslate nohighlight">\(M\)</span> matrix with elements <span class="math notranslate nohighlight">\(M_{i,j}\)</span> from <a class="reference internal" href="#picmol.models.unifac.UNIFAC.dmu_dz" title="picmol.models.unifac.UNIFAC.dmu_dz"><code class="xref py py-func docutils literal notranslate"><span class="pre">dmu_dz()</span></code></a>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}M_{i,j} = 
+\begin{align}
+\begin{cases}
+  &amp; \frac{\partial \mu_i}{\partial x_j}, &amp; \text{if } i = j \\
+  &amp; \frac{\partial \mu_i}{\partial x_j} - \frac{\partial \mu_i}{\partial x_{N-1}} - \frac{\partial \mu_{N-1}}{\partial x_j} + \frac{\partial \mu_{N-1}}{\partial x_{N-1}}, &amp; \text{if } i \neq j \\
+\end{cases}
+\end{align}\end{split}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="math notranslate nohighlight">\(M\)</span> matrix from second derivative of Gibbs mixing free energy with respect to mol fractions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.Hij">
+<span class="sig-name descname"><span class="pre">Hij</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.Hij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.Hij" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the Hessian (<span class="math notranslate nohighlight">\(H\)</span>) of Gibbs mixing free energy, with elements <span class="math notranslate nohighlight">\(H_{ij}\)</span>.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[H_{i,j} = M_{i,j} - M_{i,N-1} - M_{N-1,j} + M_{N-1,N-1}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Hessian matrix</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.unifac.UNIFAC.det_Hij">
+<span class="sig-name descname"><span class="pre">det_Hij</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac.html#UNIFAC.det_Hij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac.UNIFAC.det_Hij" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the determinant (<span class="math notranslate nohighlight">\(|H|\)</span>) of Hessian matrix of Gibbs mixing free energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Hessian determinant</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="picmol.models.unifac_subgroups.fragmentation.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="picmol.models.uniquac.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">UNIQUAC (picmol.models.uniquac)</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Allison A. Peroutka
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/aperoutka/picmol/" aria-label="GitHub"></a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">UNIFAC (picmol.models.unifac)</a><ul>
+<li><a class="reference internal" href="#picmol.models.unifac.unifac_version_mapping"><code class="docutils literal notranslate"><span class="pre">unifac_version_mapping()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.get_unifac_version"><code class="docutils literal notranslate"><span class="pre">get_unifac_version()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC"><code class="docutils literal notranslate"><span class="pre">UNIFAC</span></code></a><ul>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.unique_groups"><code class="docutils literal notranslate"><span class="pre">UNIFAC.unique_groups()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.M"><code class="docutils literal notranslate"><span class="pre">UNIFAC.M</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.N"><code class="docutils literal notranslate"><span class="pre">UNIFAC.N</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.zc"><code class="docutils literal notranslate"><span class="pre">UNIFAC.zc</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.subgroups"><code class="docutils literal notranslate"><span class="pre">UNIFAC.subgroups()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.r"><code class="docutils literal notranslate"><span class="pre">UNIFAC.r()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.q"><code class="docutils literal notranslate"><span class="pre">UNIFAC.q()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.occurance_matrix"><code class="docutils literal notranslate"><span class="pre">UNIFAC.occurance_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.subgroup_matrix"><code class="docutils literal notranslate"><span class="pre">UNIFAC.subgroup_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Q_matrix"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Q_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.psis"><code class="docutils literal notranslate"><span class="pre">UNIFAC.psis()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.group_counts"><code class="docutils literal notranslate"><span class="pre">UNIFAC.group_counts()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.weighted_number"><code class="docutils literal notranslate"><span class="pre">UNIFAC.weighted_number()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.group_X"><code class="docutils literal notranslate"><span class="pre">UNIFAC.group_X()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.X_pure"><code class="docutils literal notranslate"><span class="pre">UNIFAC.X_pure()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.group_Q"><code class="docutils literal notranslate"><span class="pre">UNIFAC.group_Q()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Thetas"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Thetas()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Thetas_pure"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Thetas_pure()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.rbar"><code class="docutils literal notranslate"><span class="pre">UNIFAC.rbar()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Vis"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Vis()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.phis"><code class="docutils literal notranslate"><span class="pre">UNIFAC.phis()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.qbar"><code class="docutils literal notranslate"><span class="pre">UNIFAC.qbar()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Ais"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Ais()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.thetas"><code class="docutils literal notranslate"><span class="pre">UNIFAC.thetas()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.gammas"><code class="docutils literal notranslate"><span class="pre">UNIFAC.gammas()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.lngammas_c"><code class="docutils literal notranslate"><span class="pre">UNIFAC.lngammas_c()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.lngammas_r"><code class="docutils literal notranslate"><span class="pre">UNIFAC.lngammas_r()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.lnGammas_subgroups_pure"><code class="docutils literal notranslate"><span class="pre">UNIFAC.lnGammas_subgroups_pure()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.lnGammas_subgroups"><code class="docutils literal notranslate"><span class="pre">UNIFAC.lnGammas_subgroups()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.GE"><code class="docutils literal notranslate"><span class="pre">UNIFAC.GE()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.GM"><code class="docutils literal notranslate"><span class="pre">UNIFAC.GM()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dlngammas_c_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dlngammas_c_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dlngammas_r_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dlngammas_r_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dAis_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dAis_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dVis_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dVis_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.F"><code class="docutils literal notranslate"><span class="pre">UNIFAC.F()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.G"><code class="docutils literal notranslate"><span class="pre">UNIFAC.G()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.sum_occurance_matrix"><code class="docutils literal notranslate"><span class="pre">UNIFAC.sum_occurance_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.sum_weighted_number"><code class="docutils literal notranslate"><span class="pre">UNIFAC.sum_weighted_number()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dThetas_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dThetas_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Ws"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Ws()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Theta_Psi_sum_invs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Theta_Psi_sum_invs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dlnGammas_subgroups_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dlnGammas_subgroups_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dGE_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dGE_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.mu"><code class="docutils literal notranslate"><span class="pre">UNIFAC.mu()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dGM_dxs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dGM_dxs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.d2lngammas_c_dxixjs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.d2lngammas_c_dxixjs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.d2lngammas_r_dxixjs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.d2lngammas_r_dxixjs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.d2Vis_dxixjs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.d2Vis_dxixjs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.d2Ais_dxixjs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.d2Ais_dxixjs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.d2lnGammas_subgroups_dxixjs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.d2lnGammas_subgroups_dxixjs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.d2Thetas_dxixjs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.d2Thetas_dxixjs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.d2GE_dxixjs"><code class="docutils literal notranslate"><span class="pre">UNIFAC.d2GE_dxixjs()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.dmu_dz"><code class="docutils literal notranslate"><span class="pre">UNIFAC.dmu_dz()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Mij"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Mij()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.Hij"><code class="docutils literal notranslate"><span class="pre">UNIFAC.Hij()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.unifac.UNIFAC.det_Hij"><code class="docutils literal notranslate"><span class="pre">UNIFAC.det_Hij()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
-            <div class="clearer"></div>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="picmol.models.numerical.html"
-                          title="previous chapter">Numerical (picmol.models.numerical)</a></p>
+      
+      
+    </aside>
   </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="picmol.models.unifac_subgroups.html"
-                          title="next chapter">UNIFAC Subgroups (picmol.models.unifac_subgroups)</a></p>
-  </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/picmol.models.unifac.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<search id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.unifac_subgroups.html" title="UNIFAC Subgroups (picmol.models.unifac_subgroups)"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="picmol.models.numerical.html" title="Numerical (picmol.models.numerical)"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">picmol 0.0.1 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="picmol.models.html" >Thermodynamic Models (picmol.models)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">UNIFAC (picmol.models.unifac)</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-    &#169; Copyright 2025, Allison A. Peroutka.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
-    </div>
-  </body>
+</div><script src="_static/documentation_options.js?v=f539c95a"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
 </html>

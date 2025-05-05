@@ -1,0 +1,100 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "21bdf431",
+   "metadata": {},
+   "source": [
+    "### 02_themodynamic_model_analysis\n",
+    "\n",
+    "comparing critical temperatures determined from various thermodynamic models"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "76db2ae5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "run_example = False  # Set to True to run the example in Jupyter\n",
+    "\n",
+    "\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "from picmol import KBI, ThermoModel, KBIPlotter, PhaseDiagramPlotter\n",
+    "\n",
+    "prj_dir = '/path/to/mixture/directory/'\n",
+    "pure_component_dir = '/path/to/pure/component/directory/'\n",
+    "\n",
+    "# Conditional block to prevent KBI initialization during nbsphinx processing\n",
+    "if run_example:\n",
+    "    # initialize kbi class\n",
+    "    kbi_obj = KBI(\n",
+    "      prj_path = prj_dir, # location for project to analyze\n",
+    "      pure_component_path = pure_component_dir, # location of pure component directory\n",
+    "      rdf_dir = 'rdf_files', # name for rdf file directory, must be same for all systems\n",
+    "      kbi_method = 'adj', # which kbi correction method to use\n",
+    "      rkbi_min = 0.75, # fraction of rdf to start at for thermo limit extrapolation\n",
+    "      avg_start_time = 100, # when to start averaging properties in .edr file\n",
+    "      solute_mol = '/enter/solute/mol_id/here/', # should be same name as in .top file\n",
+    "      geom_mean_pairs = [], # if desired, enter list of list of molecule pair to use as geom means\n",
+    "    )\n",
+    "\n",
+    "    # run kbi analysis\n",
+    "    kbi_obj.run()\n",
+    "\n",
+    "    # create figures\n",
+    "    kbi_plotter = KBIPlotter(kbi_obj)\n",
+    "    kbi_plotter.make_figures()\n",
+    "\n",
+    "    # to evaluate their differences in LLE calculation, use the following (again for just the binary case)\n",
+    "    model_dict = {}\n",
+    "    models = ['quartic', 'unifac', 'uniquac', 'nrtl', 'fh']\n",
+    "\n",
+    "    for m, model in enumerate(models):\n",
+    "      tmodel = ThermoModel(\n",
+    "        model_name=model, # name of thermo model to use\n",
+    "        KBIModel=kbi_obj, # kbi object\n",
+    "        Tmin=100, # min temp, for temperature scaling\n",
+    "        Tmax=400, # max temp, for temperature scaling\n",
+    "        dT=5 # temp step, for temperature scaling\n",
+    "        )\n",
+    "\n",
+    "      tmodel.run()\n",
+    "\n",
+    "      t_plotter = PhaseDiagramPlotter(tmodel)\n",
+    "      t_plotter.make_figures()\n",
+    "\n",
+    "      model_dict[model] = tmodel\n",
+    "\n",
+    "    # print out their critical point differences\n",
+    "    print('Critical point comparisons: ')\n",
+    "    for m, model in enumerate(models):\n",
+    "      print(f'{model.upper()}: Tc = { model_dict[model].Tc:0f} K, xc = {model_dict[model].xc:.3f} {kbi_obj.solute_name.lower()}')"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "picmol",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.16"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

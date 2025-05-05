@@ -1,10 +1,11 @@
 Examples
-=========
+===========
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
-  examples/kbi_analysis.ipynb
-  examples/thermo_models.ipynb
-  examples/unifac_lle.ipynb
-  examples/unifac_Tc_search.ipynb
+  examples/01_kbi_analysis.ipynb
+  examples/02_thermo_models.ipynb
+  examples/03_combined_kbi_thermo_analysis.ipynb
+  examples/04_unifac_lle.ipynb
+  examples/05_unifac_Tc_search.ipynb
