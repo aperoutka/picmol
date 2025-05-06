@@ -221,14 +221,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/01_kbi_analysis.html">Comparing KBI Correction Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/02_thermo_models.html">Thermodynamic Model Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/03_combined_kbi_thermo_analysis.html">Combined KBI-Thermo Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/04_unifac_lle.html">UNIFAC Phase Diagram LLE Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/05_unifac_Tc_search.html">UNIFAC Tc Search</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/01_kbi_analysis.html">01_comparing_KBI_correction_methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/02_thermo_models.html">02_themodynamic_model_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
+</li>
 </ul>
 
 </div>
@@ -272,7 +272,7 @@
 
 <div class="viewcode-block" id="add_molecule">
 <a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.get_molecular_properties.add_molecule">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_molecule</span><span class="p">(</span><span class="n">mol_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_molecule</span><span class="p">(</span><span class="n">mol_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Adds a molecule to ``molecular_properties.csv`` file, using user specified information and rdkit properties</span>
 
@@ -280,13 +280,6 @@
 <span class="sd">  :type mol_name: str</span>
 <span class="sd">  :param mol_id: molecule name in .top file</span>
 <span class="sd">  :type mol_id: str</span>
-<span class="sd">  :param mol_class: molecule type. Available options include:</span>
-
-<span class="sd">      * &#39;solute&#39;</span>
-<span class="sd">      * &#39;solvent&#39;</span>
-<span class="sd">      * &#39;extractant&#39;</span>
-
-<span class="sd">  :type mol_class: str</span>
 <span class="sd">  :param smiles: SMILES string representation of the molecule</span>
 <span class="sd">  :type smiles: str</span>
 <span class="sd">  :param density: mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit</span>
@@ -323,7 +316,6 @@
     <span class="s1">&#39;molar_vol&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molar_vol</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="s1">&#39;n_electrons&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_electrons</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
     <span class="s1">&#39;mol_charge&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mol_charge</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;mol_class&#39;</span><span class="p">:</span> <span class="n">mol_class</span><span class="p">,</span>
     <span class="s1">&#39;smiles&#39;</span><span class="p">:</span> <span class="n">smiles</span><span class="p">,</span>
   <span class="p">}</span>
 

@@ -5,7 +5,7 @@
    "id": "9860123f",
    "metadata": {},
    "source": [
-    "### 05_UNIFAC_Tc_search\n",
+    "### UNIFAC Tc Search\n",
     "\n",
     "searching for critical temperature (K) with UNIFAC only based on molecule SMILES for binary system"
    ]

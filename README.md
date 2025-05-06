@@ -96,14 +96,14 @@ picmol-rdf -h
 picmol-kbi -h
 ```
 
-Alternatively, this could be run from inside a python script.
+Alternatively, this could be run with `Python`.
 
 ```python
 from picmol import KBI, KBIPlotter, ThermoModel, PhaseDiagramPlotter
 
 # performs the kbi analysis, including calculating activity coefficients, excess thermodynamic properties, and fitting thermodyanmic model interaction parameters.
 # kbi_method, options: "adj", "kgv", "raw"
-kbi_obj = KBI(prj_path, pure_component_path, rdf_dir, kbi_method, avg_start_time, avg_end_time, kbi_fig_dirname)
+kbi_obj = KBI(prj_path, pure_component_path, solute_mol, rdf_dir, kbi_method, avg_start_time, avg_end_time, kbi_fig_dirname)
 kbi_obj.kbi_analysis()
 
 # make figures
@@ -163,19 +163,11 @@ from picmol import add_molecule
 mol_name: molecule name
 mol_id: molecule id in simulation .top file
 density: liquid density (g/mL) at 298.15 K
-mol_class: "extractant", "modifier", "solute", or "solvent"
 smiles: SMILES string for RDkit interfacing and UNIFAC modeling
 
 Default is to calculate molar volume from experimental mass density
 If density is not entered, molar volume will be calculated from RDkit and the mass density will be calculated from molar volume
 """
 
-add_molecule(mol_name, mol_id, mol_class, smiles, density)
+add_molecule(mol_name, mol_id, smiles, density)
 ```
-
-
-
-
-
-
-

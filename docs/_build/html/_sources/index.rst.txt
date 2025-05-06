@@ -11,16 +11,7 @@ picmol: Phase Instability Calculator for MOLecular design
   picmol.thermo_model
   picmol.models
   picmol.plotter
-
-.. toctree::
-  :maxdepth: 2
-  :caption: Examples:
-
-  examples/01_kbi_analysis.ipynb
-  examples/02_thermo_models.ipynb
-  examples/03_combined_kbi_thermo_analysis.ipynb
-  examples/04_unifac_lle.ipynb
-  examples/05_unifac_Tc_search.ipynb
+  examples
 
 
 Installation

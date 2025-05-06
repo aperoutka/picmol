@@ -221,14 +221,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/01_kbi_analysis.html">Comparing KBI Correction Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/02_thermo_models.html">Thermodynamic Model Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/03_combined_kbi_thermo_analysis.html">Combined KBI-Thermo Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/04_unifac_lle.html">UNIFAC Phase Diagram LLE Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/05_unifac_Tc_search.html">UNIFAC Tc Search</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/01_kbi_analysis.html">01_comparing_KBI_correction_methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/02_thermo_models.html">02_themodynamic_model_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
+</li>
 </ul>
 
 </div>
@@ -280,7 +280,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.get_molecular_properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_molecular_properties</span><span class="p">,</span> <span class="n">search_molecule</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models.cem</span><span class="w"> </span><span class="kn">import</span> <span class="n">CEM</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.kbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">mkdr</span><span class="p">,</span> <span class="n">KBI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_solute_molid</span><span class="p">,</span> <span class="n">mol2vol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
 
 <div class="viewcode-block" id="spinodal_fn">
 <a class="viewcode-back" href="../../picmol.thermo_model.html#picmol.thermo_model.spinodal_fn">[docs]</a>
@@ -603,10 +603,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">identifier_type</span> <span class="o">=</span> <span class="s2">&quot;mol_id&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="n">model_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">save_dir</span> <span class="o">=</span> <span class="n">mkdr</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">kbi_method_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s2">/&quot;</span><span class="p">)</span>
-
-    <span class="c1"># grab solute from KBIModel</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">solute_mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">solute</span>
-    
+   
     <span class="c1"># get interaction parameters</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">IP</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nrtl&quot;</span><span class="p">,</span> <span class="s2">&quot;uniquac&quot;</span><span class="p">]:</span>

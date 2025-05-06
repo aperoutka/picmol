@@ -221,14 +221,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/01_kbi_analysis.html">Comparing KBI Correction Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/02_thermo_models.html">Thermodynamic Model Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/03_combined_kbi_thermo_analysis.html">Combined KBI-Thermo Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/04_unifac_lle.html">UNIFAC Phase Diagram LLE Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/05_unifac_Tc_search.html">UNIFAC Tc Search</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/01_kbi_analysis.html">01_comparing_KBI_correction_methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/02_thermo_models.html">02_themodynamic_model_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples/05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
+</li>
 </ul>
 
 </div>
@@ -283,7 +283,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models.uniquac</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNIQUAC_R</span><span class="p">,</span> <span class="n">UNIQUAC_Q</span><span class="p">,</span> <span class="n">fit_du_to_Hmix</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNIQUAC</span><span class="p">,</span> <span class="n">UNIFAC</span><span class="p">,</span> <span class="n">QuarticModel</span><span class="p">,</span> <span class="n">FH</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models.cem</span><span class="w"> </span><span class="kn">import</span> <span class="n">PointDisc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_solute_molid</span><span class="p">,</span> <span class="n">mol2vol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">mkdr</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
@@ -335,13 +335,13 @@
       <span class="bp">self</span><span class="p">,</span> 
       <span class="n">prj_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
       <span class="n">pure_component_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+      <span class="n">solute_mol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
       <span class="n">rdf_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rdf_files&quot;</span><span class="p">,</span> 
       <span class="n">kbi_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;adj&quot;</span><span class="p">,</span>
       <span class="n">rkbi_min</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
       <span class="n">kbi_fig_dirname</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;kbi_analysis&quot;</span><span class="p">,</span>
       <span class="n">avg_start_time</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> 
       <span class="n">avg_end_time</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-      <span class="n">solute_mol</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
       <span class="n">geom_mean_pairs</span> <span class="o">=</span> <span class="p">[],</span>
     <span class="p">):</span>
 
@@ -391,10 +391,8 @@
     <span class="c1"># initialize properties for KBI analysis</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_unique_mols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_unique_mols</span>
 
-    <span class="c1"># specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant &gt; modifier &gt; solute (ie., water) &gt; solvent</span>
+    <span class="c1"># specifiy solute molecule; molecules used to sort systems &amp; as x-axis in figures</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_solute</span> <span class="o">=</span> <span class="n">solute_mol</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solute</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_solute</span> <span class="o">=</span> <span class="n">get_solute_molid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_top_unique_mols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mol_class_dict</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_top_solute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solute</span> <span class="c1"># get initial solute</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_top_solute_loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solute_loc</span> <span class="c1"># get idx of initial solute</span>
 
@@ -638,13 +636,6 @@
     <span class="k">if</span> <span class="n">mol_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mol_name_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_mol_name_dict</span><span class="p">[</span><span class="n">mol_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">mol_name</span></div>
 
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">mol_class_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: dictionary mapping molecule IDs to their class</span>
-<span class="sd">    :rtype: dict[str, str]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">mol</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties_by_molid</span><span class="p">[</span><span class="s2">&quot;mol_class&quot;</span><span class="p">][</span><span class="n">mol</span><span class="p">]</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">}</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mol_smiles_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

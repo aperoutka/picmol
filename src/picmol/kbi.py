@@ -36,32 +36,41 @@ class KBI:
   r"""
   Class for calculating Kirkwood-Buff Integrals from radial distribution functions in a GROMACS project.
 
-  :param prj_path: absolute path to project directory; contains subdirectories containing systems as a function of composition
+  :param prj_path: absolute path to project directory; contains system subdirectories with different compositions
   :type prj_path: str
-  :param pure_component_path: absolute path to pure component directory; contains subdirectories of molecules at a given temperature
+  :param pure_component_path: absolute path to pure component directory; contains subdirectories of pure component systems at a given temperature
   :type pure_component_path: str
+  :param solute_mol: molecule name in .top file corresponding to molecule used to sort systems and used as x-axis in figures
+  :type solute_mol: str
   :param rdf_dir: directory name where RDF files are located in each system directory, default is ``rdf_files``
   :type rdf_dir: str, optional
   :param kbi_method: correction method to apply to correlation function, default is ``adj``
 
-      * ``'raw'``: no correction
-      * ``'adj'``: correcting for tail of RDF :math:`\neq` 1 at large r
-      * ``'gv'``: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt
-      * ``'kgv'``: applying a damping function introduced by Kruger to the correction function by Ganguly and Van der Vegt
+      * ``raw``: no correction
+      * ``adj``: correcting for tail of RDF :math:`\neq` 1 at large r
+      * ``gv``: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt
+      * ``kgv``: applying a damping function introduced by Kruger to ``gv`` correction
 
   :type kbi_method: str, optional
-  :param rkbi_min: fraction of r; lower bound for extrapolation to the thermodynamic limit, default is ``0.75``. float will be applied to all systems and dict uses systems as keys with corresponding float values.
-  :type rkbi_min: float or dict, optional
+  :param rkbi_min: fraction of r; lower bound for extrapolation to the thermodynamic limit, default is ``0.75``. Options: 
+  
+      * float: used for all systems 
+      * dict[str, float]: keys: systems, values: rkbi_min for each system
+
+  :type rkbi_min: float or dict[str, float], optional
   :param kbi_fig_dirname: directory name for results from KBI analysis, default is ``kbi_analysis``
   :type kbi_fig_dirname: str, optional
   :param avg_start_time: start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is ``100``
   :type avg_start_time: float, optional
   :param avg_end_time: end time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is end of trajectory
   :type avg_start_time: float, optional
-  :param solute_mol: molecule name in .top file corresponding to molecule used to sort systems
-  :type solute_mol: str
   :param geom_mean_pairs: pairs of molecules for taking the geometric mean of, default is empty list
   :type geom_mean_pairs: list[list[str]], optional
+
+  :ivar systems: list of system names in project directory
+  :vartype systems: list[str]
+  :ivar n_sys: number of systems in project directory
+  :vartype n_sys: int
   """
   def __init__(
       self, 
@@ -215,7 +224,7 @@ class KBI:
   @property
   def T_sim(self):
     r"""
-    :return: average simulation temperature (K)
+    :return: average simulation temperature (K) across all systems
     :rtype: float
     """
     return round(np.mean(self._simulation_temps))
@@ -347,7 +356,8 @@ class KBI:
   
   @property
   def mol_name_dict(self):
-    r""":return: dictionary mapping molecule IDs to their names
+    r"""
+    :return: dictionary mapping molecule IDs to their names
     :rtype: dict[str, str]
     """
     return self._mol_name_dict
@@ -365,14 +375,16 @@ class KBI:
 
   @property
   def mol_smiles_dict(self):
-    r""":return: dictionary mapping molecule IDs to their SMILES string
+    r"""
+    :return: dictionary mapping molecule IDs to their SMILES string
     :rtype: dict[str, str]
     """
     return {mol: self.properties_by_molid["smiles"][mol] for mol in self.unique_mols}
 
   @property
   def molar_vol(self):
-    r""":return: array of pure component molar volumes (cm\ :sup:`3`/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from ``molecular_properties.csv``
+    r"""
+    :return: array of pure component molar volumes (cm\ :sup:`3`/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from ``molecular_properties.csv``
     :rtype: numpy.ndarray
     """
     V0 = np.zeros(len(self.unique_mols)) # initialize array for molar volumes
@@ -391,35 +403,40 @@ class KBI:
   
   @property
   def n_electrons(self):
-    r""":return: array of the number of electrons for each molecule
+    r"""
+    :return: array of the number of electrons for each molecule
     :rtype: numpy.ndarray
     """
     return self.properties_by_molid["n_electrons"].to_numpy()
   
   @property
   def mol_charge(self):
-    r""":return: array of the charge of each molecule
+    r"""
+    :return: array of the formal charge on each molecule
     :rtype: numpy.ndarray
     """
     return self.properties_by_molid["mol_charge"].to_numpy()
 
   @property
   def mol_wt(self):
-    r""":return: array of the molecular weight of each molecule
+    r"""
+    :return: array of the molar mass (g/mol) of each molecule
     :rtype: numpy.ndarray
     """
     return self.properties_by_molid["mol_wt"].to_numpy()
   
   @property
   def smiles(self):
-    r""":return: array of SMILES strings for each molecule
+    r"""
+    :return: array of SMILES strings for each molecule
     :rtype: numpy.ndarray
     """
     return self.properties_by_molid["smiles"].values
   
   @property
   def solute(self):
-    r""":return: molecule ID of the solute
+    r"""
+    :return: molecule ID of the solute
     :rtype: str
     """
     return self._solute
@@ -430,14 +447,16 @@ class KBI:
   
   @property
   def solute_loc(self):
-    r""":return: index of the solute molecule in the unique molecules list
+    r"""
+    :return: index of the solute molecule in ``unique_mols``
     :rtype: int
     """
     return self._mol_idx(mol=self.solute)
   
   @property
   def solute_name(self):
-    r""":return: name of the solute molecule
+    r"""
+    :return: name of the solute molecule
     :rtype: str
     """
     return self._mol_name_dict[self.solute]
@@ -507,14 +526,14 @@ class KBI:
   def _top_z(self):
     r"""Get mol fraction matrix from system compositions.
 
-    :return: array of mole fractions, shape ``(len(systems), n)``
+    :return: array of mol fractions, shape ``(len(systems), n)``
     :rtype: numpy.ndarray
     """
     return self._n_mol / self._n_mol.sum(axis=1)[:,np.newaxis]
 
   @property
   def _top_v(self):
-    r"""Convert mole fraction matrix to volume fraction matrix.
+    r"""Convert mol fraction matrix to volume fraction matrix.
 
     :return: array of volume fractions, shape ``(len(systems), n)``
     :rtype: numpy.ndarray
@@ -547,7 +566,7 @@ class KBI:
       df_comp.loc[s, "systems"] = sys # system name
       df_comp.loc[s, "T_sim"] = round(self._simulation_temps[s], 4) # actual simulation temperature for the system
       for i, mol in enumerate(self.unique_mols):
-        df_comp.loc[s, f"x_{mol}"] = self._top_z[s,i] # mole fracation of mol i
+        df_comp.loc[s, f"x_{mol}"] = self._top_z[s,i] # mol fracation of mol i
         df_comp.loc[s, f"phi_{mol}"] = self._top_v[s,i] # volume fraction of mol i
         df_comp.loc[s, f"c_{mol}_M"] = self._top_c[s,i] # molarity of mol i (mol/L)
         df_comp.loc[s, f'rho_{mol}'] = self._top_rho[s,i] # number density of mol i (nm^-3)
@@ -575,7 +594,7 @@ class KBI:
     .. math::
       h_{ij}^{adj}(r) = g_{ij}^{NpT}(r) - \text{avg}
 
-    `Ganguly and Van der Vegt (2013) <https://doi.org/10.1021/ct301017q>`_ introduced a correction to the radial distribution function (``kbi_method`` = 'gv') to correct the number of molecules of type j around molecules of type i, where :math:`N_j` is the number of molecules of type j, :math:`\Delta N_{ij}` is the number of molecules of type j around molecule i in radius of shell dr, and :math:`V` is the volume of simulation box.
+    `Ganguly and Van der Vegt (2013) <https://doi.org/10.1021/ct301017q>`_ introduced a correction to the radial distribution function (``kbi_method`` = 'gv') to correct the number of molecule :math:`j` around molecule :math:`i`, where :math:`N_j` is the number of molecules :math:`j`, :math:`\Delta N_{ij}` is the number of molecules :math:`j` around molecule i in radius of shell dr, and :math:`V` is the volume of simulation box.
 
     .. math::
       h_{ij}^{gv}(r) = g_{ij}^{NpT}(r) \left(\frac{N_j\left(1 - \frac{4/3 \pi r^3}{V} \right)}{N_j \left(1 - \frac{4/3 \pi r^3}{V} \right) - \Delta N_{ij}  - \delta_{ij}} \right) - 1
@@ -589,7 +608,7 @@ class KBI:
       h_{ij}^{kgv}(r) = h_{ij}^{gv} \left(1 - \frac{3r}{2R} + \frac{r^3}{2r^3} \right)
 
 
-    KBI calculations for finite size R (:math:`G_{ij}^R`), from correlation functions.
+    KBI calculations for finite size R (:math:`G_{ij}^R`), are calculated from correlation functions.
 
     .. math::
       G_{ij}^R =  \int_0^R 4 \pi r^2 h_{ij}(r) dr
@@ -671,7 +690,7 @@ class KBI:
     :type rkbi: numpy.ndarray
     :param min_L_idx: lower bound index of L for extrapolation
     :type min_L_idx: int
-    :return: list containing :math:`G_{ij}^{\infty}` and :math:`F_{ij}^{\infty}`
+    :return: list containing :math:`G_{ij}^{\infty}` and :math:`F_{ij}^{\infty}` from least squares fit
     :rtype: list[float, float]
     """
     '''extrapolate kbi values to the thermodynamic limit'''
@@ -795,7 +814,7 @@ class KBI:
     .. math::
       x_i = \frac{N_i}{\sum_j N_j}
 
-    :return: mole fraction array, with shape ``(len(systems), n)``
+    :return: mol fraction array, with shape ``(len(systems), n)``
     :rtype: numpy.ndarray
     """
     return self._z
@@ -807,7 +826,7 @@ class KBI:
   @property
   def v(self):
     r"""
-    Volume fraction array (:math:`\mathbf{v}`) with elements, :math:`\phi_i` where :math:`V_i` is the molar volume of molecule of type i.
+    Volume fraction array (:math:`\mathbf{v}`) with elements, :math:`\phi_i` where :math:`V_i` is the molar volume of molecule :math:`i`.
 
     .. math::
       \phi_i = \frac{x_i V_i}{\sum_j x_j V_j}
@@ -823,7 +842,7 @@ class KBI:
 
   def G_matrix(self):
     r"""
-    Construct a symmetric matrix (:math:`\mathbf{G}`) of KBI values in the thermodynamic limit (nm\ :sup:`3`) between molecules of type i and j with elements, :math:`\mathbf{G}_{ij} = \mathbf{G}_{ji}`.
+    Construct a symmetric matrix (:math:`\mathbf{G}`) of KBI values in the thermodynamic limit (nm\ :sup:`3`) between molecules :math:`i` and :math:`j` with elements, :math:`\mathbf{G}_{ij} = \mathbf{G}_{ji}`.
 
     .. math::
       \mathbf{G} = \begin{bmatrix}
@@ -884,18 +903,16 @@ class KBI:
 
   @property
   def _B_inv(self):
-    r"""Get the inverse of matrix B.
-
-    :return: inverse of the B matrix
+    r"""
+    :return: inverse of the :math:`\mathbf{B}` matrix
     :rtype: numpy.ndarray
     """
     return np.linalg.inv(self.B_matrix())
 
   @property 
   def _B_det(self):
-    r"""Get the determinant of matrix B.
-
-    :return: determinant of the B matrix
+    r"""
+    :return: determinant of the :math:`\mathbf{B}` matrix
     :rtype: numpy.ndarray
     """
     return np.linalg.det(self.B_matrix())
@@ -933,7 +950,7 @@ class KBI:
 
   def dmu_dN(self):
     r"""
-    Calculate the derivative of the chemical potential of component i with respect to the number of molecules of component j in the NpT ensemble.
+    Calculate the derivative of the chemical potential of component :math:`i` with respect to the number of molecules of component :math:`j` in the NpT ensemble.
 
     .. math::
       \left(\frac{\partial \mu_i}{\partial N_j}\right)_{N, p, T} = \frac{k_bT}{\left<V\right> |\mathbf{B}|}\left(\frac{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b\left|\mathbf{B}^{ij}\mathbf{B}^{ab}-\mathbf{B}^{ai}\mathbf{B}^{bj}\right|}{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b \mathbf{B}^{ab}}\right)
@@ -965,7 +982,7 @@ class KBI:
     
   def dmu_dxs(self):
     r"""
-    Convert the chemical potential derivative with respect to molecule number to the mole fraction basis.
+    Convert the chemical potential derivative with respect to molecule number to the mol fraction basis.
 
     .. math::
       \left(\frac{\partial \mu_i}{\partial x_j}\right) = N \left(\frac{\partial \mu_i}{\partial N_j} - \frac{\partial \mu_i}{\partial N_n}\right)
@@ -999,7 +1016,7 @@ class KBI:
     
   def dlngamma_dxs(self):
     r"""
-    Calculate the derivative of the natural logarithm of the activity coefficient of component i with respect to its mole fraction.
+    Calculate the derivative of the natural logarithm of the activity coefficient of component :math:`i` with respect to its mol fraction.
 
     .. math::
       \frac{\partial \ln{\gamma_i}}{\partial x_i} = \frac{1}{k_BT} \frac{\partial \mu_i}{\partial x_i} - \frac{1}{x_i}
@@ -1038,7 +1055,7 @@ class KBI:
 
     The integral is approximated by a summation using the trapezoidal rule, where the upper limit of summation is :math:`x_i` and the initial condition (or reference state) is :math:`a_0`. Note that the term :math:`a \pm \Delta x` behaves differently based on the value of :math:`a_0`: if :math:`a_0 = 1` (pure component reference state), it becomes :math:`a - \Delta x`, and if :math:`a_0 = 0` (infinite dilution reference state), it becomes :math:`a + \Delta x`.
 
-    :return: array of activity coefficients as a function of composition for each component
+    :return: array of activity coefficients for molecule :math:`i` as a function of composition
     :rtype: numpy.ndarray
     """
     try:
@@ -1172,7 +1189,7 @@ class KBI:
     Excess Gibbs energy.
 
     .. math::
-      G^E = RT\sum_{i=1}^{n} x_i \ln{\gamma_i}
+      \frac{G^E}{RT} = \sum_{i=1}^{n} x_i \ln{\gamma_i}
 
     :return: array for excess Gibbs energy as a function of composition
     :rtype: numpy.ndarray
@@ -1204,7 +1221,7 @@ class KBI:
     Gibbs mixing free energy.
 
     .. math::
-      \Delta G_{mix} = RT\sum_{i=1}^{n} x_i \ln{\left(\gamma_i x_i\right)}
+      \frac{\Delta G_{mix}}{RT} = \sum_{i=1}^{n} x_i \ln{\left(\gamma_i x_i\right)}
 
     :return: array for Gibbs mixing free energy as a function of composition
     :rtype: numpy.ndarray
@@ -1274,7 +1291,7 @@ class KBI:
 
     where:
       
-      * :math:`H` is the enthalpy for a simulation at a given composition and :math:`H_i^{pc}` is the pure component enthalpy for molecule of type i.
+      * :math:`H` is the enthalpy for a simulation at a given composition and :math:`H_i^{pc}` is the pure component enthalpy for molecule :math:`i`.
 
     :return: array for enthalpy of mixing as a function of composition
     :rtype: numpy.ndarray
