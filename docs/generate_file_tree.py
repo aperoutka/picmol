@@ -31,4 +31,30 @@ pc_tree = (
   ]
 )
 
-print_tree(pc_tree)
+parent_tree = (
+  'kbi_dir/', [
+    ('project/', [
+        ('system/', [
+          ('rdf_dir/', [
+              ('mol1_mol1.xvg', []),
+              ('mol1_mol2.xvg', []),
+              ('mol1_mol2.xvg', []),
+            ]),
+          ('system_npt.edr', []),
+          ('system.top', []),
+          ],
+        )
+    ]),
+    ('pure_components/', [
+      ('molecule_temp/', [
+        ('molecule_temp_npt.edr', []),
+        ('molecule_temp.top', []),
+        ],
+      )
+    ]
+    )
+  ]
+  
+  )
+
+print_tree(parent_tree)

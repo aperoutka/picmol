@@ -46,14 +46,13 @@
 ```python
 git clone https://github.com/aperoutka/picmol.git
 ```
-Creating an anaconda environment with `picmol` dependencies.
+
+Creating an anaconda environment with dependencies and installation.
 
 ```python
+cd picmol
 conda env create -f environment.yml
-```
-Installing picmol package.
-
-```python
+conda activate picmol
 pip install .
 ```
 
