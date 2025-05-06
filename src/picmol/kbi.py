@@ -17,7 +17,7 @@ from .get_molecular_properties import load_molecular_properties
 from .models.uniquac import UNIQUAC_R, UNIQUAC_Q, fit_du_to_Hmix
 from .models import UNIQUAC, UNIFAC, QuarticModel, FH
 from .models.cem import PointDisc
-from .functions import get_solute_molid, mol2vol
+from .functions import mol2vol
 
 
 def mkdr(dir_path):
@@ -67,13 +67,13 @@ class KBI:
       self, 
       prj_path: str, 
       pure_component_path: str,
+      solute_mol: str,
       rdf_dir: str = "rdf_files", 
       kbi_method: str = "adj",
       rkbi_min = 0.75,
       kbi_fig_dirname: str = "kbi_analysis",
       avg_start_time = 100, 
       avg_end_time = None,
-      solute_mol = None,
       geom_mean_pairs = [],
     ):
 
@@ -123,10 +123,8 @@ class KBI:
     # initialize properties for KBI analysis
     self._unique_mols = self._top_unique_mols
 
-    # specifiy solute mol if desired, otherwise preference will be given to order of separation systems, i.e., extractant > modifier > solute (ie., water) > solvent
+    # specifiy solute molecule; molecules used to sort systems & as x-axis in figures
     self._solute = solute_mol
-    if self._solute is None:
-      self._solute = get_solute_molid(self._top_unique_mols, self.mol_class_dict)
     self._top_solute = self._solute # get initial solute
     self._top_solute_loc = self.solute_loc # get idx of initial solute
 
@@ -364,13 +362,6 @@ class KBI:
     """
     if mol_id not in self._mol_name_dict.keys():
       self._mol_name_dict[mol_id] = mol_name
-
-  @property
-  def mol_class_dict(self):
-    r""":return: dictionary mapping molecule IDs to their class
-    :rtype: dict[str, str]
-    """
-    return {mol: self.properties_by_molid["mol_class"][mol] for mol in self.unique_mols}
 
   @property
   def mol_smiles_dict(self):

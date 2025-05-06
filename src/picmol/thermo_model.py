@@ -14,7 +14,7 @@ from .models.unifac import get_unifac_version
 from .get_molecular_properties import load_molecular_properties, search_molecule
 from .models.cem import CEM
 from .kbi import mkdr, KBI
-from .functions import get_solute_molid, mol2vol
+from .functions import mol2vol
 
 def spinodal_fn(z, Hij):
   r"""
@@ -323,10 +323,7 @@ class ThermoModel:
     self.identifier_type = "mol_id"
     self.model_name = model_name.lower()
     self.save_dir = mkdr(f"{self.kbi_model.kbi_method_dir}/{self.model_name}/")
-
-    # grab solute from KBIModel
-    self.kbi_model.solute_mol = self.kbi_model.solute
-    
+   
     # get interaction parameters
     self.IP = None
     if self.model_name in ["nrtl", "uniquac"]:

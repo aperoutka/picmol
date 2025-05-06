@@ -12,7 +12,7 @@
 * **Kirkwood-Buff Integration:**
     * Calculates activity coefficients and excess thermodynamic properties from molecular dynamics simulations using Kirkwood-Buff theory.
     * Fits interaction parameters to various thermodynamic models, including:
-        * Numerical models (e.g., quartic)
+        * Numerical (4th order Taylor series expansion)
         * UNIQUAC
         * NRTL
         * Flory-Huggins
@@ -28,16 +28,6 @@
       
 * **Visualization Tools:**
     * Offers comprehensive visualization capabilities for both Kirkwood-Buff analysis results and LLE phase diagrams, aiding in data interpretation.
-
-## Workflow
-
-`picmol` provides a cohesive workflow that bridges the gap between molecular dynamics simulations and phase equilibria calculations. It enables users to:
-
-1.  **Analyze MD simulations:** Use Kirkwood-Buff theory to derive excess thermodynamic properties.
-2.  **Fit thermodynamic models:** Fit interaction parameters to suitable thermodynamic models.
-3.  **Calculate LLE:** Predict liquid-liquid equilibria and generate phase diagrams.
-4.  **Analyze SAXS data:** Derive SAXS Io values from free energy curvature.
-5.  **Visualize results:** Generate informative plots for analysis and presentation.
 
 ## Installation
 
@@ -58,15 +48,32 @@ pip install .
 
 ## File Structure Requirements
 
-To use the Picmol package, your project directory should be structured as follows:
+To use the Picmol package, your project and pure component directories should be structured as follows:
+
+```markdown
+kbi_dir/
+├── project/
+│   └── system/
+│       ├── rdf_dir/
+│       │   ├── mol1_mol1.xvg
+│       │   ├── mol1_mol2.xvg
+│       │   └── mol1_mol2.xvg
+│       ├── system_npt.edr
+│       └── system.top
+└── pure_components/
+    └── molecule_temp/
+        ├── molecule_temp_npt.edr
+        └── molecule_temp.top
+```
 
 **Explanation:**
 
-* **`project_directory/`**: This is the root directory for your `picmol` project.
-* **`system1/`, `system2/`, etc.:** Each subdirectory within the `project_directory` represents a separate simulation system you want to analyze.
-* **`rdf/`**: Inside each system directory, you must have an `rdf` subdirectory. This directory should contain all the radial distribution function (RDF) `.xvg` files that you want to analyze with `picmol`.
-* **`.edr` file**: Each system directory must also contain the `.edr` file from the NPT production run of your simulation.
-* **`.top` file**: Similarly, each system directory must contain the `.top` topology file corresponding to the system.
+* **`kbi_dir/`**: Parent directory for KBI analysis that contains subdirectories of projects and pure components.
+* **`project_directory/`**: This is the root directory for your `picmol` project and contains system subdirectories (**`system1/`, `system2/`, etc.:**) with various compositions.
+* **`rdf_dir/`**: Inside each system directory, you must have an `rdf_dir` subdirectory. This directory should contain all the radial distribution function `.xvg` files that you want to analyze.
+* **`.edr` file**: Each system directory must also contain the `.edr` file from the NPT production run of your simulation, should have `npt` in its name.
+* **`.top` file**: Each system directory must contain the `.top` topology file with system information.
+* **`pure_components`**: directory containing all the pure components, where the system names should be [molecule_name]_[temp].
 
 **Important Notes:**
 
@@ -77,9 +84,9 @@ To use the Picmol package, your project directory should be structured as follow
 
 ## Examples
 
-`picmol` includes support for a command line interface, for rdf generation and kbi analysis.
+Detailed Juptyer notebook examples are provided in the [docs](https://picmol.readthedocs.io/), with select examples of code cells and command line tools provided below.
 
-To print a list of all arguments and their default values for RDF and KBI analysis.
+`picmol` includes support for a command line interface, for rdf generation and kbi analysis. To print a list of all arguments and their default values for RDF and KBI analysis.
 
 ```python
 picmol-rdf -h
@@ -87,12 +94,6 @@ picmol-rdf -h
 
 ```python
 picmol-kbi -h
-```
-
-For KBI analysis where the only argument different from default values is the name for rdf file directory.
-
-```python
-picmol-kbi --rdf_dir rdf_files_npt
 ```
 
 Alternatively, this could be run from inside a python script.

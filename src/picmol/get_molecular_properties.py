@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 import sys, os
 
-def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, density: float = None):
+def add_molecule(mol_name: str, mol_id: str, smiles: str, density: float = None):
   """
   Adds a molecule to ``molecular_properties.csv`` file, using user specified information and rdkit properties
 
@@ -12,13 +12,6 @@ def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, densit
   :type mol_name: str
   :param mol_id: molecule name in .top file
   :type mol_id: str
-  :param mol_class: molecule type. Available options include:
-
-      * 'solute'
-      * 'solvent'
-      * 'extractant'
-
-  :type mol_class: str
   :param smiles: SMILES string representation of the molecule
   :type smiles: str
   :param density: mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit
@@ -55,7 +48,6 @@ def add_molecule(mol_name: str, mol_id: str, mol_class: str, smiles: str, densit
     'molar_vol': f"{molar_vol:.3f}",
     'n_electrons': f"{n_electrons:.0f}",
     'mol_charge': f"{mol_charge:.0f}",
-    'mol_class': mol_class,
     'smiles': smiles,
   }
 
