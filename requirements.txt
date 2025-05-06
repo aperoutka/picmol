@@ -4,6 +4,7 @@ nbsphinx
 Pandoc
 sphinx_copybutton
 tree_format
+ipykernel
 contourpy==1.3.1
 cycler==0.12.1
 et-xmlfile==2.0.0
