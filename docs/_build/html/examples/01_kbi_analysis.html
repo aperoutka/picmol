@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="02_themodynamic_model_analysis" href="02_thermo_models.html" /><link rel="prev" title="Plotting Functions (picmol.plotter)" href="../picmol.plotter.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>01_comparing_KBI_correction_methods - picmol 0.0.1 documentation</title>
@@ -224,14 +224,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
-<ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">01_comparing_KBI_correction_methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="02_thermo_models.html">02_themodynamic_model_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
-</ul>
 
 </div>
 </div>
@@ -279,19 +271,17 @@
 <h1>01_comparing_KBI_correction_methods<a class="headerlink" href="#01_comparing_KBI_correction_methods" title="Link to this heading">¶</a></h1>
 <p>comparing various kbi correction methods and their resulting KBI values in the thermodynamic limit</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">run_example</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Set to True to run the example in Jupyter</span>
 
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">picmol</span><span class="w"> </span><span class="kn">import</span> <span class="n">KBI</span><span class="p">,</span> <span class="n">KBIPlotter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">picmol</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_molecular_properties</span><span class="p">,</span> <span class="n">add_molecule</span>
-
 <span class="k">if</span> <span class="n">run_example</span><span class="p">:</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">picmol</span><span class="w"> </span><span class="kn">import</span> <span class="n">KBI</span><span class="p">,</span> <span class="n">KBIPlotter</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">picmol</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_molecular_properties</span><span class="p">,</span> <span class="n">add_molecule</span>
+
   <span class="n">prj_dir</span> <span class="o">=</span> <span class="s1">&#39;/path/to/mixture/directory/&#39;</span>
   <span class="n">pure_component_dir</span> <span class="o">=</span> <span class="s1">&#39;/path/to/pure/component/directory/&#39;</span>
 
@@ -400,26 +390,8 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="02_thermo_models.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">02_themodynamic_model_analysis</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="../picmol.plotter.html">
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title">Plotting Functions (picmol.plotter)</div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
