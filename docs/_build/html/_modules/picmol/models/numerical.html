@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -269,7 +270,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">sympify</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">preorder_traversal</span><span class="p">,</span> <span class="n">lambdify</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.cem</span><span class="w"> </span><span class="kn">import</span> <span class="n">PointDisc</span>
 
 
@@ -351,10 +352,10 @@
 <span class="sd">  :type SE_data: numpy.ndarray</span>
 <span class="sd">  :param molar_vol: list of molar volumes</span>
 <span class="sd">  :type molar_vol: list</span>
-<span class="sd">  :param z: mol fraction data. Defaults to None.</span>
+<span class="sd">  :param z: mol fraction data. Defaults to `None`.</span>
 <span class="sd">  :type z: numpy.ndarray, optional</span>
 <span class="sd">  :param gid_type: type of excess Gibbs energy calculation.</span>
-<span class="sd">                  Defaults to &#39;vol&#39;.</span>
+<span class="sd">                  Defaults to `vol`.</span>
 <span class="sd">  :type gid_type: str, optional</span>
 <span class="sd">   &quot;&quot;&quot;</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_data</span><span class="p">,</span> <span class="n">Hmix_data</span><span class="p">,</span> <span class="n">SE_data</span><span class="p">,</span> <span class="n">molar_vol</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gid_type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">):</span>
@@ -497,8 +498,8 @@
 <span class="sd">    Fits the Taylor series expansion, :math:`A^E`, to ``Hmix_data``.</span>
 
 <span class="sd">    This method uses the `curve_fit` function from SciPy to determine the</span>
-<span class="sd">    optimal parameters for the quartic polynomial that best fits the</span>
-<span class="sd">    provided ``Hmix_data``.  The fitted parameters are stored in the</span>
+<span class="sd">    optimal parameters for the quartic function that best fits the</span>
+<span class="sd">    provided ``Hmix_data``. The fitted parameters are stored in the</span>
 <span class="sd">    ``Hmix_params`` attribute.</span>
 
 <span class="sd">    :return: mixing enthalpy parameters for :math:`A^E`</span>
@@ -516,7 +517,7 @@
 <span class="sd">    Fits the Taylor series expansion, :math:`A^E`, to ``SE_data``.</span>
 
 <span class="sd">    This method uses the `curve_fit` function from SciPy to determine the</span>
-<span class="sd">    optimal parameters for the quartic polynomial that best fits the</span>
+<span class="sd">    optimal parameters for the quartic function that best fits the</span>
 <span class="sd">    provided ``SE_data``. The fitted parameters are stored in the ``SE_params``</span>
 <span class="sd">    attribute.</span>
 
@@ -568,7 +569,7 @@
     <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">fit_SE</span><span class="p">()</span>
     <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_polynomial_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">SE_params</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_SE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_SE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_SE</span></div>
 
 
@@ -625,7 +626,7 @@
 
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">_Gid_sympy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_dGid_sympy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;sympy expression for the first derivative of Gid&quot;&quot;&quot;</span>
     <span class="n">df_dx</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
@@ -651,7 +652,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">df_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-      <span class="n">df_dx_py</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Gid_symbols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Gid_sympy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+      <span class="n">df_dx_py</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Gid_symbols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dGid_sympy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gid_type</span> <span class="o">==</span> <span class="s1">&#39;vol&#39;</span><span class="p">:</span>
         <span class="n">df_dx</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="n">df_dx_py</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_values</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
@@ -664,7 +665,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;sympy expression for the second derivative of Gid&quot;&quot;&quot;</span>
     <span class="n">d2f_dx2</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="p">{</span><span class="n">j</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-      <span class="n">df_dx_sympy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Gid_sympy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">df_dx_sympy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dGid_sympy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
       <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">d2f_dx2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">df_dx_sympy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Gid_symbols</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">d2f_dx2</span>

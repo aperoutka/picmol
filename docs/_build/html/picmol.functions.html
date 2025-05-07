@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Kirkwood-Buff Integral Analysis (picmol.kbi)" href="picmol.kbi.html" /><link rel="prev" title="Conversions (picmol.conversions)" href="picmol.conversions.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Molecular Properties (picmol.get_molecular_properties)" href="picmol.get_molecular_properties.html" /><link rel="prev" title="picmol: Phase Instability Calculator for MOLecular design" href="index.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Molecular Properties (picmol.get_molecular_properties) - picmol 0.0.1 documentation</title>
+        <title>Conversions (picmol.functions) - picmol 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
@@ -208,8 +208,8 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="picmol.conversions.html">Conversions (picmol.conversions)</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Molecular Properties (picmol.get_molecular_properties)</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Conversions (picmol.functions)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="picmol.models.html">Thermodynamic Models (picmol.models)</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Thermodynamic Models (picmol.models)</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -251,12 +251,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/aperoutka/picmol/blob/main/docs/picmol.get_molecular_properties.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/blob/main/docs/picmol.functions.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/aperoutka/picmol/edit/main/docs/picmol.get_molecular_properties.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/aperoutka/picmol/edit/main/docs/picmol.functions.rst" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -275,66 +275,68 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-picmol.get_molecular_properties">
-<span id="molecular-properties-picmol-get-molecular-properties"></span><h1>Molecular Properties (picmol.get_molecular_properties)<a class="headerlink" href="#module-picmol.get_molecular_properties" title="Link to this heading">¶</a></h1>
+          <section id="module-picmol.functions">
+<span id="conversions-picmol-functions"></span><h1>Conversions (picmol.functions)<a class="headerlink" href="#module-picmol.functions" title="Link to this heading">¶</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="picmol.get_molecular_properties.add_molecule">
-<span class="sig-prename descclassname"><span class="pre">picmol.get_molecular_properties.</span></span><span class="sig-name descname"><span class="pre">add_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/get_molecular_properties.html#add_molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.get_molecular_properties.add_molecule" title="Link to this definition">¶</a></dt>
-<dd><p>Adds a molecule to <code class="docutils literal notranslate"><span class="pre">molecular_properties.csv</span></code> file, using user specified information and rdkit properties</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mol_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule name identifier</p></li>
-<li><p><strong>mol_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule name in .top file</p></li>
-<li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – SMILES string representation of the molecule</p></li>
-<li><p><strong>density</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit</p></li>
+<dt class="sig sig-object py" id="picmol.functions.mol2vol">
+<span class="sig-prename descclassname"><span class="pre">picmol.functions.</span></span><span class="sig-name descname"><span class="pre">mol2vol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/functions.html#mol2vol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.functions.mol2vol" title="Link to this definition">¶</a></dt>
+<dd><p>Convert mol frac to vol frac.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\phi_i = \frac{x_i V_i}{\sum_j x_j V_j}\]</div>
+</div>
+<dl class="simple">
+<dt>where:</dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\phi_i\)</span> is the volume fraction of component <span class="math notranslate nohighlight">\(i\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x_i\)</span> is the mole fraction of component <span class="math notranslate nohighlight">\(i\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(V_i\)</span> is the molar volume of component <span class="math notranslate nohighlight">\(i\)</span></p></li>
 </ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="picmol.get_molecular_properties.search_molecule">
-<span class="sig-prename descclassname"><span class="pre">picmol.get_molecular_properties.</span></span><span class="sig-name descname"><span class="pre">search_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/get_molecular_properties.html#search_molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.get_molecular_properties.search_molecule" title="Link to this definition">¶</a></dt>
-<dd><p>Uses molecule name to search <code class="docutils literal notranslate"><span class="pre">molecular_properties.csv</span></code> to determine if molecule is present</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mol</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule to look up using identifer <code class="docutils literal notranslate"><span class="pre">index</span></code></p></li>
-<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – <p>molecule identifier type. Available options include:</p>
-<ul>
-<li><p>’mol_name’: molecule name identifier</p></li>
-<li><p>’mol_id’: molecule name in .top file</p></li>
-<li><p>’smiles’: SMILES string representation of the molecule</p></li>
+<li><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>numpy.ndarray</em>) – mol fraction</p></li>
+<li><p><strong>V0</strong> (<em>numpy.ndarray</em>) – molar volume</p></li>
 </ul>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemExit" title="(in Python v3.13)"><strong>SystemExit</strong></a> – if <code class="docutils literal notranslate"><span class="pre">mol</span></code> is not found in <code class="docutils literal notranslate"><span class="pre">index</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="picmol.get_molecular_properties.load_molecular_properties">
-<span class="sig-prename descclassname"><span class="pre">picmol.get_molecular_properties.</span></span><span class="sig-name descname"><span class="pre">load_molecular_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/get_molecular_properties.html#load_molecular_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.get_molecular_properties.load_molecular_properties" title="Link to this definition">¶</a></dt>
-<dd><p>Loads <code class="docutils literal notranslate"><span class="pre">molecular_properties.csv</span></code> with pandas setting index to specified column</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – <p>column to set as <cite>index</cite> in pandas DataFrame. Available options include:</p>
-<ul class="simple">
-<li><p>’mol_name’: molecule name identifier</p></li>
-<li><p>’mol_id’: molecule name in .top file</p></li>
-<li><p>’smiles’: SMILES string representation of the molecule</p></li>
-</ul>
-</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>pandas DataFrame of <code class="docutils literal notranslate"><span class="pre">molecular_properties.csv</span></code> with specified index</p>
+<dd class="field-even"><p>volume fraction</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pandas.DataFrame</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> or numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="picmol.functions.vol2mol">
+<span class="sig-prename descclassname"><span class="pre">picmol.functions.</span></span><span class="sig-name descname"><span class="pre">vol2mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/functions.html#vol2mol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.functions.vol2mol" title="Link to this definition">¶</a></dt>
+<dd><p>Convert vol frac to mol frac.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[x_i = \frac{\frac{\phi_i}{V_i}}{\sum_j \frac{\phi_j}{V_j}}\]</div>
+</div>
+<p>where:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x_i\)</span> is the mole fraction of component <span class="math notranslate nohighlight">\(i\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\phi_i\)</span> is the volume fraction of component <span class="math notranslate nohighlight">\(i\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(V_i\)</span> is the molar volume of component <span class="math notranslate nohighlight">\(i\)</span></p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><em>numpy.ndarray</em>) – volume fraction</p></li>
+<li><p><strong>V0</strong> (<em>numpy.ndarray</em>) – molar volume</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>mol fraction</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> or numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,23 +348,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="picmol.kbi.html">
+          <a class="next-page" href="picmol.get_molecular_properties.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Kirkwood-Buff Integral Analysis (picmol.kbi)</div>
+                <div class="title">Molecular Properties (picmol.get_molecular_properties)</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="picmol.conversions.html">
+          <a class="prev-page" href="index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Conversions (picmol.conversions)</div>
+                <div class="title">Home</div>
                 
               </div>
             </a>
@@ -399,10 +401,9 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Molecular Properties (picmol.get_molecular_properties)</a><ul>
-<li><a class="reference internal" href="#picmol.get_molecular_properties.add_molecule"><code class="docutils literal notranslate"><span class="pre">add_molecule()</span></code></a></li>
-<li><a class="reference internal" href="#picmol.get_molecular_properties.search_molecule"><code class="docutils literal notranslate"><span class="pre">search_molecule()</span></code></a></li>
-<li><a class="reference internal" href="#picmol.get_molecular_properties.load_molecular_properties"><code class="docutils literal notranslate"><span class="pre">load_molecular_properties()</span></code></a></li>
+<li><a class="reference internal" href="#">Conversions (picmol.functions)</a><ul>
+<li><a class="reference internal" href="#picmol.functions.mol2vol"><code class="docutils literal notranslate"><span class="pre">mol2vol()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.functions.vol2mol"><code class="docutils literal notranslate"><span class="pre">vol2mol()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -421,5 +422,7 @@
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

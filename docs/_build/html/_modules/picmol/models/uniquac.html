@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -329,260 +330,6 @@
   <span class="k">return</span> <span class="n">q</span></div>
 
 
-<div class="viewcode-block" id="fit_du_to_Hmix">
-<a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.fit_du_to_Hmix">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fit_du_to_Hmix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">Hmix</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental heat of mixing (``Hmix``) data.</span>
-
-<span class="sd">  This function uses the scipy.optimize.curve_fit function to determine the UNIQUAC</span>
-<span class="sd">  interaction parameters (:math:`\Delta u_{ij}`) that best fit the experimental heat of mixing data. </span>
-
-<span class="sd">  :param T: temperature (K)</span>
-<span class="sd">  :type T: float</span>
-<span class="sd">  :param Hmix: array of experimental enthalpy of mixing values</span>
-<span class="sd">  :type Hmix: numpy.ndarray</span>
-<span class="sd">  :param z: array of mole fractions</span>
-<span class="sd">  :type z: numpy.ndarray</span>
-<span class="sd">  :param smiles: list of SMILES strings representing the molecules</span>
-<span class="sd">  :type smiles: list</span>
-<span class="sd">  :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`)</span>
-<span class="sd">  :rtype: numpy.ndarray</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-
-
-  <span class="n">N_mols</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-  <span class="n">r</span> <span class="o">=</span> <span class="n">UNIQUAC_R</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
-  <span class="n">q</span> <span class="o">=</span> <span class="n">UNIQUAC_Q</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
-
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;Rc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">8.314E-3</span>
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">create_du_function</span><span class="p">(</span><span class="n">ij</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Dynamically creates a function to calculate Hmix for curve fitting.</span>
-
-<span class="sd">    This inner function generates a function `UNIQUAC_Hmix_fit_func` with a variable</span>
-<span class="sd">    number of &#39;du&#39; parameters, which are the interaction parameters to be fitted.</span>
-<span class="sd">    This generated function calculates the heat of mixing based on these &#39;du&#39;</span>
-<span class="sd">    parameters, mole fractions &#39;z&#39;, and temperature &#39;T&#39;.</span>
-
-<span class="sd">    :param ij: The number of interaction parameters (du) to fit.</span>
-<span class="sd">    :type ij: int</span>
-<span class="sd">    :return: The dynamically created function `UNIQUAC_Hmix_fit_func`.</span>
-<span class="sd">    :rtype: function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Validate inputs</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ij</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ij must be integer.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Generate argument names</span>
-    <span class="n">du_arg_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;du</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ij</span><span class="p">)]</span>
-    <span class="c1"># Include &#39;z&#39; at the beginning of the argument list</span>
-    <span class="n">arg_list</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">du_arg_names</span><span class="p">)</span>  <span class="c1"># e.g., &#39;z, du0, du1, du2&#39;</span>
-
-    <span class="c1"># Build the function code as a string</span>
-    <span class="n">func_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">def UNIQUAC_Hmix_fit_func(</span><span class="si">{</span><span class="n">arg_list</span><span class="si">}</span><span class="s2">):</span>
-<span class="s2">    </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;</span>
-<span class="s2">    Calculates the heat of mixing (Hmix) using UNIQUAC model.</span>
-
-<span class="s2">    Parameters:</span>
-<span class="s2">    z : numpy.ndarray</span>
-<span class="s2">        Mole fractions.</span>
-<span class="si">{</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;    </span><span class="si">{}</span><span class="s1"> : float&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">du_arg_names</span><span class="p">])</span><span class="si">}</span>
-<span class="s2">    </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;</span>
-
-<span class="s2">    # Collect &#39;du&#39; arguments into a list</span>
-<span class="s2">    du_list = [</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">du_arg_names</span><span class="p">)</span><span class="si">}</span><span class="s2">]</span>
-<span class="s2">    N_mols = z.shape[1]</span>
-
-<span class="s2">    du = np.zeros((N_mols, N_mols))</span>
-
-<span class="s2">    ij = 0</span>
-<span class="s2">    for i in range(N_mols):</span>
-<span class="s2">      for j in range(N_mols):</span>
-<span class="s2">        if i &lt; j:</span>
-<span class="s2">          du[i,j] = du_list[ij]</span>
-<span class="s2">          du[j,i] = du_list[ij]</span>
-<span class="s2">          ij += 1</span>
-<span class="s2">    </span>
-<span class="s2">    r = globals()[&#39;r&#39;]</span>
-<span class="s2">    q = globals()[&#39;q&#39;]</span>
-<span class="s2">    Rc = globals()[&#39;Rc&#39;]</span>
-<span class="s2">    T = globals()[&#39;T&#39;]</span>
-
-<span class="s2">    zc = 10</span>
-<span class="s2">    l = (zc / 2) * (r - q) - (r - 1)</span>
-<span class="s2">    tau = np.exp(-du / (Rc * T))</span>
-<span class="s2">    rbar = z @ r</span>
-<span class="s2">    qbar = z @ q</span>
-<span class="s2">    # Calculate phi and theta (segment and area fractions)</span>
-<span class="s2">    phi = z * (1 / rbar[:, None]) * r</span>
-<span class="s2">    theta = z * (1 / qbar[:, None]) * q</span>
-<span class="s2">    # Solve for free energy of mixing GM </span>
-<span class="s2">    GM_res = -Rc * T * (z * np.log(np.dot(theta , tau))) @ q</span>
-<span class="s2">    return GM_res</span>
-<span class="s2">&quot;&quot;&quot;</span>
-    <span class="c1"># Create a local namespace for the function definition</span>
-    <span class="n">func_namespace</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># Include &#39;__name__&#39; in the globals dictionary</span>
-    <span class="n">exec</span><span class="p">(</span><span class="n">func_code</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">func_namespace</span><span class="p">)</span>
-    <span class="c1"># Retrieve the dynamically created function</span>
-    <span class="n">du_function</span> <span class="o">=</span> <span class="n">func_namespace</span><span class="p">[</span><span class="s1">&#39;UNIQUAC_Hmix_fit_func&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">du_function</span>
-  
-  <span class="n">ij_combo</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
-        <span class="n">ij_combo</span> <span class="o">+=</span> <span class="mi">1</span>
-
-  <span class="n">UNIQUAC_Hmix_fit</span> <span class="o">=</span> <span class="n">create_du_function</span><span class="p">(</span><span class="n">ij_combo</span><span class="p">)</span>
-
-  <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">UNIQUAC_Hmix_fit</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">Hmix</span><span class="p">)</span>
-
-  <span class="n">du</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">N_mols</span><span class="p">))</span>
-  <span class="n">ij</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
-        <span class="n">du</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
-        <span class="n">du</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
-        <span class="n">ij</span> <span class="o">+=</span> <span class="mi">1</span>
-    
-  <span class="k">return</span> <span class="n">du</span></div>
-
-
-
-<div class="viewcode-block" id="fit_du_to_GM">
-<a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.fit_du_to_GM">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fit_du_to_GM</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">GM</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental Gibbs free energy of mixing (``GM``) data.</span>
-
-<span class="sd">  This function uses the scipy.optimize.curve_fit function to determine the UNIQUAC</span>
-<span class="sd">  interaction parameters (:math:`\Delta u_{ij}`) that best fit the experimental Gibbs free energy of</span>
-<span class="sd">  mixing data.</span>
-
-<span class="sd">  :param T: temperature (K)</span>
-<span class="sd">  :type T: float</span>
-<span class="sd">  :param GM: array of experimental Gibbs free energy of mixing values.</span>
-<span class="sd">  :type GM: numpy.ndarray</span>
-<span class="sd">  :param z: array of mole fractions.</span>
-<span class="sd">  :type z: numpy.ndarray</span>
-<span class="sd">  :param smiles: list of SMILES strings representing the molecules.</span>
-<span class="sd">  :type smiles: list</span>
-<span class="sd">  :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`).</span>
-<span class="sd">  :rtype: numpy.ndarray</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-
-  <span class="n">N_mols</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-  <span class="n">r</span> <span class="o">=</span> <span class="n">UNIQUAC_R</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
-  <span class="n">q</span> <span class="o">=</span> <span class="n">UNIQUAC_Q</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>  
-
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span>
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;Rc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">8.314E-3</span>
-  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;T&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">T</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">create_du_function</span><span class="p">(</span><span class="n">ij</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Dynamically creates a function to calculate GM for curve fitting.</span>
-
-<span class="sd">    This inner function generates a function `UNIQUAC_GM_fit_func` with a variable</span>
-<span class="sd">    number of &#39;du&#39; parameters, which are the interaction parameters to be fitted.</span>
-<span class="sd">    This generated function calculates the Gibbs free energy of mixing based on</span>
-<span class="sd">    these &#39;du&#39; parameters, mole fractions &#39;z&#39;, and temperature &#39;T&#39;.</span>
-
-<span class="sd">    :param ij: The number of interaction parameters (du) to fit.</span>
-<span class="sd">    :type ij: int</span>
-<span class="sd">    :return: The dynamically created function `UNIQUAC_GM_fit_func`.</span>
-<span class="sd">    :rtype: function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Validate inputs</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ij</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ij must be integer.&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Generate argument names</span>
-    <span class="n">du_arg_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;du</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ij</span><span class="p">)]</span>
-    <span class="c1"># Include &#39;z&#39; at the beginning of the argument list</span>
-    <span class="n">arg_list</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">du_arg_names</span><span class="p">)</span>  <span class="c1"># e.g., &#39;z, du0, du1, du2&#39;</span>
-
-    <span class="c1"># Build the function code as a string</span>
-    <span class="n">func_code</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">def UNIQUAC_GM_fit_func(</span><span class="si">{</span><span class="n">arg_list</span><span class="si">}</span><span class="s2">):</span>
-<span class="s2">    </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;</span>
-<span class="s2">    Calculates the Gibbs free energy of mixing (GM) using UNIQUAC.</span>
-
-<span class="s2">    Parameters:</span>
-<span class="s2">    z : numpy.ndarray</span>
-<span class="s2">        Mole fractions.</span>
-<span class="si">{</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;    </span><span class="si">{}</span><span class="s1"> : float&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">du_arg_names</span><span class="p">])</span><span class="si">}</span>
-<span class="s2">    </span><span class="se">\&quot;</span><span class="s2">&quot;&quot;</span>
-
-<span class="s2">    # Collect &#39;du&#39; arguments into a list</span>
-<span class="s2">    du_list = [</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">du_arg_names</span><span class="p">)</span><span class="si">}</span><span class="s2">]</span>
-<span class="s2">    N_mols = z.shape[1]</span>
-
-<span class="s2">    du = np.zeros((N_mols, N_mols))</span>
-
-<span class="s2">    ij = 0</span>
-<span class="s2">    for i in range(N_mols):</span>
-<span class="s2">      for j in range(N_mols):</span>
-<span class="s2">        if i &lt; j:</span>
-<span class="s2">          du[i,j] = du_list[ij]</span>
-<span class="s2">          du[j,i] = du_list[ij]</span>
-<span class="s2">          ij += 1</span>
-<span class="s2">    </span>
-<span class="s2">    r = globals()[&#39;r&#39;]</span>
-<span class="s2">    q = globals()[&#39;q&#39;]</span>
-<span class="s2">    Rc = globals()[&#39;Rc&#39;]</span>
-<span class="s2">    T = globals()[&#39;T&#39;]</span>
-
-<span class="s2">    zc = 10</span>
-<span class="s2">    l = (zc / 2) * (r - q) - (r - 1)</span>
-<span class="s2">    tau = np.exp(-du / (Rc * T))</span>
-<span class="s2">    rbar = z @ r</span>
-<span class="s2">    qbar = z @ q</span>
-<span class="s2">    # Calculate phi and theta (segment and area fractions)</span>
-<span class="s2">    phi = z * (1 / rbar[:, None]) * r</span>
-<span class="s2">    theta = z * (1 / qbar[:, None]) * q</span>
-<span class="s2">    # Solve for free energy of mixing GM </span>
-<span class="s2">    GM_comb = Rc * T * (np.sum(z * np.log(phi), axis=1) + (zc / 2) * (z * (np.log(theta) - np.log(phi))) @ q)</span>
-<span class="s2">    GM_res = -Rc * T * (z * np.log(np.dot(theta , tau))) @ q</span>
-<span class="s2">    return GM_comb + GM_res</span>
-<span class="s2">&quot;&quot;&quot;</span>
-    <span class="c1"># Create a local namespace for the function definition</span>
-    <span class="n">func_namespace</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># Include &#39;__name__&#39; in the globals dictionary</span>
-    <span class="n">exec</span><span class="p">(</span><span class="n">func_code</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">func_namespace</span><span class="p">)</span>
-    <span class="c1"># Retrieve the dynamically created function</span>
-    <span class="n">du_function</span> <span class="o">=</span> <span class="n">func_namespace</span><span class="p">[</span><span class="s1">&#39;UNIQUAC_GM_fit_func&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">du_function</span>
-  
-  <span class="n">ij_combo</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
-        <span class="n">ij_combo</span> <span class="o">+=</span> <span class="mi">1</span>
-
-  <span class="n">UNIQUAC_GM_fit</span> <span class="o">=</span> <span class="n">create_du_function</span><span class="p">(</span><span class="n">ij_combo</span><span class="p">)</span>
-
-  <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">UNIQUAC_GM_fit</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">GM</span><span class="p">)</span>
-
-  <span class="n">du</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">N_mols</span><span class="p">))</span>
-  <span class="n">ij</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
-        <span class="n">du</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
-        <span class="n">du</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
-        <span class="n">ij</span> <span class="o">+=</span> <span class="mi">1</span>
-    
-  <span class="k">return</span> <span class="n">du</span></div>
 
 
 
@@ -600,7 +347,7 @@
 <span class="sd">  :type IP: numpy.ndarray</span>
 <span class="sd">  :param smiles: list of SMILES strings representing the molecules in the mixture.</span>
 <span class="sd">  :type smiles: list</span>
-<span class="sd">  :param z: composition array (mole fractions). If None, it defaults to</span>
+<span class="sd">  :param z: composition array (mol fractions). If None, it defaults to</span>
 <span class="sd">      values from PointDisc.</span>
 <span class="sd">  :type z: numpy.ndarray, optional</span>
 <span class="sd">  :param r: UNIQUAC r parameters for each component. If None, it will be</span>
@@ -673,7 +420,7 @@
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">l</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the UNIQUAC parameter l for each component from ``r`` and ``q`` parameters using the coordination number z\ :sub:`c`.</span>
+<span class="sd">    Calculates the UNIQUAC parameter l for component :math:`i` from ``r`` and ``q`` parameters using the coordination number z\ :sub:`c`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        l_i =  \frac{z_c}{2}(r_i - q_i) - (r_i - 1)    </span>
@@ -737,7 +484,7 @@
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">phi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the segment fraction :math:`\phi` for each component.</span>
+<span class="sd">    Calculates the segment fraction :math:`\phi` for component :math:`i`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        \phi_i = \frac{x_i r_i}{\bar{r}}</span>
@@ -750,7 +497,7 @@
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">theta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the area fraction :math:`\theta` for each component.</span>
+<span class="sd">    Calculates the area fraction :math:`\theta` for component :math:`i`.</span>
 <span class="sd">    </span>
 <span class="sd">    .. math::</span>
 <span class="sd">        \theta_i = \frac{x_i q_i}{\bar{q}}</span>
@@ -764,7 +511,7 @@
 <a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.tau">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the UNIQUAC interaction parameter :math:`\tau`.</span>
+<span class="sd">    Calculates the UNIQUAC interaction parameter :math:`\tau` between components :math:`i` and :math:`j`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        \tau_{ij} = \exp\left( -\frac{\Delta u_{ij}}{RT} \right)</span>
@@ -781,7 +528,7 @@
 <a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.rho">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">rho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the :math:`\rho` parameter.</span>
+<span class="sd">    Calculates the :math:`\rho` parameter for component :math:`i`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        \rho_i = \sum_j^n \theta_j \tau_{ji}</span>
@@ -856,8 +603,6 @@
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the activity coefficients of each component in the mixture.</span>
 
-<span class="sd">    The activity coefficients are calculated using the following equation:</span>
-
 <span class="sd">    .. math::</span>
 <span class="sd">        \ln \gamma_i = \ln \frac{\phi_i}{x_i} + \frac{z_c}{2} q_i \ln \frac{\theta_i}{\phi_i} + l_i - \frac{\phi_i}{x_i} \bar{l} - q_i \ln \sum_j^n \theta_j \tau_{ji} + q_i - q_i \sum_j^n \frac{\theta_j \tau_{ji}}{\sum_k^n \theta_k \tau_{kj}}</span>
 
@@ -888,7 +633,6 @@
 
 <span class="sd">    .. math::</span>
 <span class="sd">        \frac{\mu_i}{RT} = \ln \phi_i + \frac{z_c}{2} q_i \ln{\frac{\theta_i}{\phi_i}} + l_i - \overline{l}\frac{\phi_i}{x_i} - q_i \ln \sum_{j=1}^n \theta_j \tau_{ji} + q_i - q_i \sum_{j=1}^n \left(\frac{\theta_j \tau_{ij}}{\sum_{k=1}^n \theta_k \tau_{kj}}\right)</span>
-
 
 <span class="sd">    :param T: temperature (K)</span>
 <span class="sd">    :type T: float</span>
@@ -976,7 +720,7 @@
 <a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.Hij">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">Hij</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the Hessian matrix (:math:`H_{ij}`) of the Gibbs free energy of mixing</span>
+<span class="sd">    Calculates the Hessian matrix, with elements :math:`H_{ij}`, of the Gibbs free energy of mixing</span>
 <span class="sd">    with respect to the mol fractions.</span>
 
 <span class="sd">    .. math::</span>
@@ -1002,7 +746,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">det_Hij</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the determinant of the Hessian matrix of the Gibbs free energy</span>
-<span class="sd">    of mixing. This determinant is often used to assess the stability of a mixture.</span>
+<span class="sd">    of mixing.</span>
 
 <span class="sd">    :param T: temperature (K)</span>
 <span class="sd">    :type T: float or numpy.ndarray</span>
@@ -1011,6 +755,200 @@
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Hij</span><span class="p">(</span><span class="n">T</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="UNIQUAC.fHmix">
+<a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.fHmix">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fHmix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">du</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the residual contributon to Gibbs mixing free energy, i.e., enthalpy of mixing using the UNIQUAC model.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \frac{\Delta H_{mix}}{RT} = -\sum_i^n \left( x_i q_i \ln \sum_j^n \theta_j \tau_{ji} \right)</span>
+<span class="sd"> </span>
+<span class="sd">    :param T: temperature (K)</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :param z: composition array</span>
+<span class="sd">    :type z: numpy.ndarray</span>
+<span class="sd">    :param du: interaction parameters (:math:`\Delta u_{ij}`)</span>
+<span class="sd">    :type du: numpy.ndarray</span>
+<span class="sd">    :param smiles: list of SMILES strings representing the molecules</span>
+<span class="sd">    :type smiles: list</span>
+<span class="sd">    :return: Gibbs free energy of mixing</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N_mols</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">UNIQUAC_R</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">UNIQUAC_Q</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+
+    <span class="n">Rc</span> <span class="o">=</span> <span class="mf">8.314E-3</span>
+    <span class="n">zc</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">(</span><span class="n">zc</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">du</span> <span class="o">/</span> <span class="p">(</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span>
+    <span class="n">rbar</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">r</span>
+    <span class="n">qbar</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">q</span>
+    <span class="c1"># Calculate phi and theta (segment and area fractions)</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rbar</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">qbar</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">q</span>
+    <span class="c1"># Solve for free energy of mixing GM </span>
+    <span class="n">GM_res</span> <span class="o">=</span> <span class="o">-</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">theta</span> <span class="p">,</span> <span class="n">tau</span><span class="p">)))</span> <span class="o">@</span> <span class="n">q</span>
+    <span class="k">return</span> <span class="n">GM_res</span></div>
+
+
+<div class="viewcode-block" id="UNIQUAC.fSmix">
+<a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.fSmix">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fSmix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">du</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the combinatorial contribution to Gibbs mixing free energy, i.e., entropy of mixing using the UNIQUAC model.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \frac{\Delta S_{mix}}{RT} = \sum_i^n x_i \ln \phi_i + \frac{z_c}{2} \sum_i^n x_i q_i \ln \frac{\theta_i}{\phi_i} </span>
+
+<span class="sd">    :param T: temperature (K)</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :param z: composition array</span>
+<span class="sd">    :type z: numpy.ndarray</span>
+<span class="sd">    :param du: interaction parameters (:math:`\Delta u_{ij}`)</span>
+<span class="sd">    :type du: numpy.ndarray</span>
+<span class="sd">    :param smiles: list of SMILES strings representing the molecules</span>
+<span class="sd">    :type smiles: list</span>
+<span class="sd">    :return: Gibbs free energy of mixing</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N_mols</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">UNIQUAC_R</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">UNIQUAC_Q</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+    <span class="n">Rc</span> <span class="o">=</span> <span class="mf">8.314E-3</span>
+    <span class="n">zc</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">rbar</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">r</span>
+    <span class="n">qbar</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">q</span>
+    <span class="c1"># Calculate phi and theta (segment and area fractions)</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rbar</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">qbar</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">q</span>
+    <span class="c1"># Solve for free energy of mixing GM </span>
+    <span class="n">GM_comb</span> <span class="o">=</span> <span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">zc</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="n">phi</span><span class="p">)))</span> <span class="o">@</span> <span class="n">q</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">GM_comb</span></div>
+
+
+ 
+<div class="viewcode-block" id="UNIQUAC.fGM">
+<a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.fGM">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fGM</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">du</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Gibbs free energy of mixing (:func:`GM`) using the UNIQUAC model.</span>
+
+<span class="sd">    :param T: temperature (K)</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :param z: composition array</span>
+<span class="sd">    :type z: numpy.ndarray</span>
+<span class="sd">    :param du: interaction parameters (:math:`\Delta u_{ij}`)</span>
+<span class="sd">    :type du: numpy.ndarray</span>
+<span class="sd">    :return: Gibbs free energy of mixing</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N_mols</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">UNIQUAC_R</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">UNIQUAC_Q</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+    <span class="n">Rc</span> <span class="o">=</span> <span class="mf">8.314E-3</span>
+    <span class="n">zc</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">(</span><span class="n">zc</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">du</span> <span class="o">/</span> <span class="p">(</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span>
+    <span class="n">rbar</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">r</span>
+    <span class="n">qbar</span> <span class="o">=</span> <span class="n">z</span> <span class="o">@</span> <span class="n">q</span>
+    <span class="c1"># Calculate phi and theta (segment and area fractions)</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rbar</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">r</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">qbar</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">*</span> <span class="n">q</span>
+    <span class="c1"># Solve for free energy of mixing GM </span>
+    <span class="n">GM_comb</span> <span class="o">=</span> <span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">zc</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">phi</span><span class="p">)))</span> <span class="o">@</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">GM_res</span> <span class="o">=</span> <span class="o">-</span><span class="n">Rc</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">theta</span> <span class="p">,</span> <span class="n">tau</span><span class="p">)))</span> <span class="o">@</span> <span class="n">q</span>
+    <span class="k">return</span> <span class="n">GM_comb</span> <span class="o">+</span> <span class="n">GM_res</span></div>
+
+
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_create_du_matrix</span><span class="p">(</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">du_flat</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a square matrix of interaction parameters (:math:`\Delta u_{ij}`) from a flat array.</span>
+
+<span class="sd">    :param N_mols: number of components in the mixture</span>
+<span class="sd">    :type N_mols: int</span>
+<span class="sd">    :param du_flat: flat array of interaction parameters</span>
+<span class="sd">    :type du_flat: numpy.ndarray</span>
+<span class="sd">    :return: square matrix of interaction parameters</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">du</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">N_mols</span><span class="p">))</span>
+    <span class="n">ij</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_mols</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
+          <span class="n">du</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">du_flat</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
+          <span class="n">du</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">du_flat</span><span class="p">[</span><span class="n">ij</span><span class="p">]</span>
+          <span class="n">ij</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">du</span>
+
+<div class="viewcode-block" id="UNIQUAC.fit_Hmix">
+<a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.fit_Hmix">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fit_Hmix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">Hmix</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental enthalpy of mixing (``Hmix``) data using :func:`fHmix`.</span>
+
+<span class="sd">    :param T: temperature (K)</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :param Hmix: array of experimental enthalpy of mixing values</span>
+<span class="sd">    :type Hmix: numpy.ndarray</span>
+<span class="sd">    :param z: array of mol fractions</span>
+<span class="sd">    :type z: numpy.ndarray</span>
+<span class="sd">    :param smiles: list of SMILES strings representing the molecules</span>
+<span class="sd">    :type smiles: list</span>
+<span class="sd">    :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`)</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N_mols</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hmix_to_fit</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="n">du_flat</span><span class="p">):</span>
+<span class="w">      </span><span class="sd">&quot;&quot;&quot;wrapper function for curve_fit to calculate Hmix.&quot;&quot;&quot;</span>
+      <span class="n">du</span> <span class="o">=</span> <span class="n">UNIQUAC</span><span class="o">.</span><span class="n">_create_du_matrix</span><span class="p">(</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">du_flat</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">UNIQUAC</span><span class="o">.</span><span class="n">fHmix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">du</span><span class="p">,</span> <span class="n">smiles</span><span class="p">)</span>
+    <span class="c1"># fit IP to Hmix</span>
+    <span class="n">ij_combo</span> <span class="o">=</span> <span class="n">N_mols</span> <span class="o">*</span> <span class="p">(</span><span class="n">N_mols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="c1"># number of unique pairs</span>
+    <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">hmix_to_fit</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">Hmix</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ij_combo</span><span class="p">),</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+    <span class="c1"># Reshape the fitted parameters into a square matrix</span>
+    <span class="n">du_fitted</span> <span class="o">=</span> <span class="n">UNIQUAC</span><span class="o">.</span><span class="n">_create_du_matrix</span><span class="p">(</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">popt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">du_fitted</span></div>
+
+
+<div class="viewcode-block" id="UNIQUAC.fit_Gmix">
+<a class="viewcode-back" href="../../../picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.fit_Gmix">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fit_Gmix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">Gmix</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">smiles</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental Gibbs mixing (``Gmix``) data using :func:`fGM`.</span>
+
+<span class="sd">    :param T: temperature (K)</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :param Gmix: array of experimental Gibbs mixing free energy values</span>
+<span class="sd">    :type Gmix: numpy.ndarray</span>
+<span class="sd">    :param z: array of mol fractions</span>
+<span class="sd">    :type z: numpy.ndarray</span>
+<span class="sd">    :param smiles: list of SMILES strings representing the molecules</span>
+<span class="sd">    :type smiles: list</span>
+<span class="sd">    :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`)</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N_mols</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gmix_to_fit</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="n">du_flat</span><span class="p">):</span>
+<span class="w">      </span><span class="sd">&quot;&quot;&quot;wrapper function for curve_fit to calculate Hmix.&quot;&quot;&quot;</span>
+      <span class="n">du</span> <span class="o">=</span> <span class="n">UNIQUAC</span><span class="o">.</span><span class="n">_create_du_matrix</span><span class="p">(</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">du_flat</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">UNIQUAC</span><span class="o">.</span><span class="n">fGM</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">du</span><span class="p">,</span> <span class="n">smiles</span><span class="p">)</span>
+    <span class="c1"># fit IP to Hmix</span>
+    <span class="n">ij_combo</span> <span class="o">=</span> <span class="n">N_mols</span> <span class="o">*</span> <span class="p">(</span><span class="n">N_mols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="c1"># number of unique pairs</span>
+    <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">gmix_to_fit</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">Gmix</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ij_combo</span><span class="p">),</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+    <span class="c1"># Reshape the fitted parameters into a square matrix</span>
+    <span class="n">du_fitted</span> <span class="o">=</span> <span class="n">UNIQUAC</span><span class="o">.</span><span class="n">_create_du_matrix</span><span class="p">(</span><span class="n">N_mols</span><span class="p">,</span> <span class="n">popt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">du_fitted</span>    </div>
 </div>
 
 </pre></div>

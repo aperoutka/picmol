@@ -208,6 +208,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -283,23 +284,34 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prj_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – absolute path to project directory; contains subdirectories containing systems as a function of composition</p></li>
-<li><p><strong>pure_component_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – absolute path to pure component directory; contains subdirectories of molecules at a given temperature</p></li>
+<li><p><strong>prj_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – absolute path to project directory; contains system subdirectories with different compositions</p></li>
+<li><p><strong>pure_component_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – absolute path to pure component directory; contains subdirectories of pure component systems at a given temperature</p></li>
+<li><p><strong>solute_mol</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule name in .top file corresponding to molecule used to sort systems and used as x-axis in figures</p></li>
 <li><p><strong>rdf_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – directory name where RDF files are located in each system directory, default is <code class="docutils literal notranslate"><span class="pre">rdf_files</span></code></p></li>
-<li><p><strong>kbi_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>correction method to apply to correlation function, default is <code class="docutils literal notranslate"><span class="pre">adj</span></code></p>
+<li><p><strong>kbi_method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>correction method to apply to correlation function, default is <cite>adj</cite></p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">'raw'</span></code>: no correction</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'adj'</span></code>: correcting for tail of RDF <span class="math notranslate nohighlight">\(\neq\)</span> 1 at large r</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'gv'</span></code>: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'kgv'</span></code>: applying a damping function introduced by Kruger to the correction function by Ganguly and Van der Vegt</p></li>
+<li><p><cite>raw</cite>: no correction</p></li>
+<li><p><cite>adj</cite>: correcting for tail of RDF <span class="math notranslate nohighlight">\(\neq\)</span> 1 at large r</p></li>
+<li><p><cite>gv</cite>: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt</p></li>
+<li><p><cite>kgv</cite>: applying a damping function introduced by Kruger to <cite>gv</cite> correction</p></li>
 </ul>
 </p></li>
-<li><p><strong>rkbi_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – fraction of r; lower bound for extrapolation to the thermodynamic limit, default is <code class="docutils literal notranslate"><span class="pre">0.75</span></code>. float will be applied to all systems and dict uses systems as keys with corresponding float values.</p></li>
+<li><p><strong>rkbi_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – <p>fraction of r; lower bound for extrapolation to the thermodynamic limit, default is <cite>0.75</cite>. Options:</p>
+<ul>
+<li><p>float: used for all systems</p></li>
+<li><p>dict[str, float]: keys: systems, values: rkbi_min for each system</p></li>
+</ul>
+</p></li>
 <li><p><strong>kbi_fig_dirname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – directory name for results from KBI analysis, default is <code class="docutils literal notranslate"><span class="pre">kbi_analysis</span></code></p></li>
-<li><p><strong>avg_start_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is <code class="docutils literal notranslate"><span class="pre">100</span></code></p></li>
+<li><p><strong>avg_start_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is <cite>100</cite></p></li>
 <li><p><strong>avg_end_time</strong> – end time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is end of trajectory</p></li>
-<li><p><strong>solute_mol</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule name in .top file corresponding to molecule used to sort systems</p></li>
 <li><p><strong>geom_mean_pairs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>]</em><em>, </em><em>optional</em>) – pairs of molecules for taking the geometric mean of, default is empty list</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>systems</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>) – list of system names in project directory</p></li>
+<li><p><strong>n_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – number of systems in project directory</p></li>
 </ul>
 </dd>
 </dl>
@@ -314,7 +326,7 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T_sim</span></span><a class="headerlink" href="#picmol.kbi.KBI.T_sim" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>average simulation temperature (K)</p>
+<dd class="field-odd"><p>average simulation temperature (K) across all systems</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
@@ -379,7 +391,7 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">properties_by_molid</span></span><a class="headerlink" href="#picmol.kbi.KBI.properties_by_molid" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pandas DataFrame only for molecules present in project. Load <code class="docutils literal notranslate"><span class="pre">molecular_properties.csv</span></code> and set molecule name in .top file as index.</p>
+<dd class="field-odd"><p>pandas DataFrame only for molecules present in project. Load <cite>molecular_properties.csv</cite> and set molecule name in .top file as index.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>pandas.DataFrame</p>
@@ -432,7 +444,7 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">molar_vol</span></span><a class="headerlink" href="#picmol.kbi.KBI.molar_vol" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of pure component molar volumes (cm<sup>3</sup>/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from <code class="docutils literal notranslate"><span class="pre">molecular_properties.csv</span></code></p>
+<dd class="field-odd"><p>array of pure component molar volumes (cm<sup>3</sup>/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from <cite>molecular_properties.csv</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -458,7 +470,7 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mol_charge</span></span><a class="headerlink" href="#picmol.kbi.KBI.mol_charge" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of the charge of each molecule</p>
+<dd class="field-odd"><p>array of the formal charge on each molecule</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -471,7 +483,7 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mol_wt</span></span><a class="headerlink" href="#picmol.kbi.KBI.mol_wt" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of the molecular weight of each molecule</p>
+<dd class="field-odd"><p>array of the molar mass (g/mol) of each molecule</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -510,7 +522,7 @@
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">solute_loc</span></span><a class="headerlink" href="#picmol.kbi.KBI.solute_loc" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>index of the solute molecule in the unique molecules list</p>
+<dd class="field-odd"><p>index of the solute molecule in <code class="docutils literal notranslate"><span class="pre">unique_mols</span></code></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
@@ -535,17 +547,17 @@
 <dt class="sig sig-object py" id="picmol.kbi.KBI.kbi_npt">
 <span class="sig-name descname"><span class="pre">kbi_npt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_lo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_hi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_j</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.kbi_npt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.kbi_npt" title="Link to this definition">¶</a></dt>
 <dd><p>For a given radial distribution function, calculate KBI from <code class="docutils literal notranslate"><span class="pre">r_lo</span></code> to <code class="docutils literal notranslate"><span class="pre">r_hi</span></code> by applying a correction to the correlation function.</p>
-<p>The correlation function, <span class="math notranslate nohighlight">\(h_{ij}(r)\)</span>, is not corrected when <code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = ‘raw’.</p>
+<p>The correlation function, <span class="math notranslate nohighlight">\(h_{ij}(r)\)</span>, is not corrected when <code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = <cite>raw</cite>.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[h_{ij}(r) = g_{ij}^{NpT}(r) - 1\]</div>
 </div>
-<p>For the <code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = ‘adj’ correlation function correction, the excess/depletion of molecule j around molecule i in a system with fixed number of components is adjusted based on the limiting behavior of the radial distribution function tail at large r.</p>
+<p>For the <code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = <cite>adj</cite> correlation function correction, the excess/depletion of molecule <span class="math notranslate nohighlight">\(j\)</span> around molecule <span class="math notranslate nohighlight">\(i\)</span> in a system with fixed number of components is adjusted based on the limiting behavior of the radial distribution function tail at large r.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[h_{ij}^{adj}(r) = g_{ij}^{NpT}(r) - \text{avg}\]</div>
 </div>
-<p><a class="reference external" href="https://doi.org/10.1021/ct301017q">Ganguly and Van der Vegt (2013)</a> introduced a correction to the radial distribution function (<code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = ‘gv’) to correct the number of molecules of type j around molecules of type i, where <span class="math notranslate nohighlight">\(N_j\)</span> is the number of molecules of type j, <span class="math notranslate nohighlight">\(\Delta N_{ij}\)</span> is the number of molecules of type j around molecule i in radius of shell dr, and <span class="math notranslate nohighlight">\(V\)</span> is the volume of simulation box.</p>
+<p><a class="reference external" href="https://doi.org/10.1021/ct301017q">Ganguly and Van der Vegt (2013)</a> introduced a correction to the radial distribution function (<code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = <cite>gv</cite>) to correct the number of molecule <span class="math notranslate nohighlight">\(j\)</span> around molecule <span class="math notranslate nohighlight">\(i\)</span>, where <span class="math notranslate nohighlight">\(N_j\)</span> is the number of molecules <span class="math notranslate nohighlight">\(j\)</span>, <span class="math notranslate nohighlight">\(\Delta N_{ij}\)</span> is the number of molecules <span class="math notranslate nohighlight">\(j\)</span> around molecule <span class="math notranslate nohighlight">\(i\)</span> in radius of shell dr, and <span class="math notranslate nohighlight">\(V\)</span> is the volume of simulation box.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[h_{ij}^{gv}(r) = g_{ij}^{NpT}(r) \left(\frac{N_j\left(1 - \frac{4/3 \pi r^3}{V} \right)}{N_j \left(1 - \frac{4/3 \pi r^3}{V} \right) - \Delta N_{ij}  - \delta_{ij}} \right) - 1\]</div>
@@ -554,12 +566,12 @@
 <div class="math notranslate nohighlight">
 \[\Delta N_{ij} = \int_0^R 4 \pi r^2 \rho_j \left(g_{ij}^{NpT}(r) - 1\right) dr\]</div>
 </div>
-<p><a class="reference external" href="https://doi.org/10.1016/j.fluid.2018.12.027">Dawass and Krüger et al. (2019)</a> applied a damping function for hyperspheres geometry (<code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = ‘kgv’) to the Ganguly and Van der Vegt correction to force limiting behavior of correlation function at large r to be 1.</p>
+<p><a class="reference external" href="https://doi.org/10.1016/j.fluid.2018.12.027">Dawass and Krüger et al. (2019)</a> applied a damping function for hyperspheres geometry (<code class="docutils literal notranslate"><span class="pre">kbi_method</span></code> = <cite>kgv</cite>) to the Ganguly and Van der Vegt correction to force limiting behavior of correlation function at large r to be 1.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[h_{ij}^{kgv}(r) = h_{ij}^{gv} \left(1 - \frac{3r}{2R} + \frac{r^3}{2r^3} \right)\]</div>
 </div>
-<p>KBI calculations for finite size R (<span class="math notranslate nohighlight">\(G_{ij}^R\)</span>), from correlation functions.</p>
+<p>KBI calculations for finite size R (<span class="math notranslate nohighlight">\(G_{ij}^R\)</span>), are calculated from correlation functions.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[G_{ij}^R =  \int_0^R 4 \pi r^2 h_{ij}(r) dr\]</div>
@@ -573,8 +585,8 @@
 <li><p><strong>r_hi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – maximum r (nm) to evaluate integral over</p></li>
 <li><p><strong>avg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – average value of <span class="math notranslate nohighlight">\(g_{ij}(r)\)</span> at large r, i.e., tail of radial distribution function</p></li>
 <li><p><strong>sys_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – system index</p></li>
-<li><p><strong>mol_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule id in .top file for i in <span class="math notranslate nohighlight">\(g_{ij}(r)\)</span></p></li>
-<li><p><strong>mol_j</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule id in .top file for j in <span class="math notranslate nohighlight">\(g_{ij}(r)\)</span></p></li>
+<li><p><strong>mol_i</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule id in .top file for <span class="math notranslate nohighlight">\(i\)</span> in <span class="math notranslate nohighlight">\(g_{ij}(r)\)</span></p></li>
+<li><p><strong>mol_j</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – molecule id in .top file for <span class="math notranslate nohighlight">\(j\)</span> in <span class="math notranslate nohighlight">\(g_{ij}(r)\)</span></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -603,7 +615,7 @@
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>list containing <span class="math notranslate nohighlight">\(G_{ij}^{\infty}\)</span> and <span class="math notranslate nohighlight">\(F_{ij}^{\infty}\)</span></p>
+<dd class="field-even"><p>list containing <span class="math notranslate nohighlight">\(G_{ij}^{\infty}\)</span> and <span class="math notranslate nohighlight">\(F_{ij}^{\infty}\)</span> from least squares fit</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>]</p>
@@ -621,7 +633,7 @@
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>mole fraction array, with shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n)</span></code></p>
+<dd class="field-odd"><p>mol fraction array, with shape <cite>(len(systems), n)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -632,14 +644,14 @@
 <dl class="py property">
 <dt class="sig sig-object py" id="picmol.kbi.KBI.v">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">v</span></span><a class="headerlink" href="#picmol.kbi.KBI.v" title="Link to this definition">¶</a></dt>
-<dd><p>Volume fraction array (<span class="math notranslate nohighlight">\(\mathbf{v}\)</span>) with elements, <span class="math notranslate nohighlight">\(\phi_i\)</span> where <span class="math notranslate nohighlight">\(V_i\)</span> is the molar volume of molecule of type i.</p>
+<dd><p>Volume fraction array (<span class="math notranslate nohighlight">\(\mathbf{v}\)</span>) with elements, <span class="math notranslate nohighlight">\(\phi_i\)</span> where <span class="math notranslate nohighlight">\(V_i\)</span> is the molar volume of molecule <span class="math notranslate nohighlight">\(i\)</span>.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\phi_i = \frac{x_i V_i}{\sum_j x_j V_j}\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>volume fraction array, with shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n)</span></code></p>
+<dd class="field-odd"><p>volume fraction array, with shape <cite>(len(systems), n)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -650,7 +662,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.kbi.KBI.G_matrix">
 <span class="sig-name descname"><span class="pre">G_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.G_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.G_matrix" title="Link to this definition">¶</a></dt>
-<dd><p>Construct a symmetric matrix (<span class="math notranslate nohighlight">\(\mathbf{G}\)</span>) of KBI values in the thermodynamic limit (nm<sup>3</sup>) between molecules of type i and j with elements, <span class="math notranslate nohighlight">\(\mathbf{G}_{ij} = \mathbf{G}_{ji}\)</span>.</p>
+<dd><p>Construct a symmetric matrix (<span class="math notranslate nohighlight">\(\mathbf{G}\)</span>) of KBI values in the thermodynamic limit (nm<sup>3</sup>) between molecules <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> with elements, <span class="math notranslate nohighlight">\(\mathbf{G}_{ij} = \mathbf{G}_{ji}\)</span>.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\begin{split}\mathbf{G} = \begin{bmatrix}
@@ -662,7 +674,7 @@
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of KBI values for each pairwise interaction, with shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n,</span> <span class="pre">n)</span></code></p>
+<dd class="field-odd"><p>array of KBI values for each pairwise interaction, with shape <cite>(len(systems), n, n)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -689,7 +701,7 @@
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array with shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n,</span> <span class="pre">n)</span></code></p>
+<dd class="field-odd"><p>array with shape <cite>(len(systems), n, n)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -707,7 +719,7 @@
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>cofactor matrix with shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n,</span> <span class="pre">n)</span></code></p>
+<dd class="field-odd"><p>cofactor matrix with shape <cite>(len(systems), n, n)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -718,14 +730,14 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.kbi.KBI.dmu_dN">
 <span class="sig-name descname"><span class="pre">dmu_dN</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.dmu_dN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.dmu_dN" title="Link to this definition">¶</a></dt>
-<dd><p>Calculate the derivative of the chemical potential of component i with respect to the number of molecules of component j in the NpT ensemble.</p>
+<dd><p>Calculate the derivative of the chemical potential of component <span class="math notranslate nohighlight">\(i\)</span> with respect to the number of molecules of component <span class="math notranslate nohighlight">\(j\)</span> in the NpT ensemble.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\left(\frac{\partial \mu_i}{\partial N_j}\right)_{N, p, T} = \frac{k_bT}{\left&lt;V\right&gt; |\mathbf{B}|}\left(\frac{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b\left|\mathbf{B}^{ij}\mathbf{B}^{ab}-\mathbf{B}^{ai}\mathbf{B}^{bj}\right|}{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b \mathbf{B}^{ab}}\right)\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n,</span> <span class="pre">n)</span></code></p>
+<dd class="field-odd"><p>array of shape <cite>(len(systems), n, n)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -736,14 +748,14 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.kbi.KBI.dmu_dxs">
 <span class="sig-name descname"><span class="pre">dmu_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.dmu_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.dmu_dxs" title="Link to this definition">¶</a></dt>
-<dd><p>Convert the chemical potential derivative with respect to molecule number to the mole fraction basis.</p>
+<dd><p>Convert the chemical potential derivative with respect to molecule number to the mol fraction basis.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\left(\frac{\partial \mu_i}{\partial x_j}\right) = N \left(\frac{\partial \mu_i}{\partial N_j} - \frac{\partial \mu_i}{\partial N_n}\right)\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n-1,</span> <span class="pre">n-1)</span></code></p>
+<dd class="field-odd"><p>array of shape <cite>(len(systems), n-1, n-1)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -754,14 +766,14 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.kbi.KBI.dlngamma_dxs">
 <span class="sig-name descname"><span class="pre">dlngamma_dxs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/kbi.html#KBI.dlngamma_dxs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.kbi.KBI.dlngamma_dxs" title="Link to this definition">¶</a></dt>
-<dd><p>Calculate the derivative of the natural logarithm of the activity coefficient of component i with respect to its mole fraction.</p>
+<dd><p>Calculate the derivative of the natural logarithm of the activity coefficient of component <span class="math notranslate nohighlight">\(i\)</span> with respect to its mol fraction.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\frac{\partial \ln{\gamma_i}}{\partial x_i} = \frac{1}{k_BT} \frac{\partial \mu_i}{\partial x_i} - \frac{1}{x_i}\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of shape <code class="docutils literal notranslate"><span class="pre">(len(systems),</span> <span class="pre">n)</span></code></p>
+<dd class="field-odd"><p>array of shape <cite>(len(systems), n)</cite></p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -780,7 +792,7 @@
 <p>The integral is approximated by a summation using the trapezoidal rule, where the upper limit of summation is <span class="math notranslate nohighlight">\(x_i\)</span> and the initial condition (or reference state) is <span class="math notranslate nohighlight">\(a_0\)</span>. Note that the term <span class="math notranslate nohighlight">\(a \pm \Delta x\)</span> behaves differently based on the value of <span class="math notranslate nohighlight">\(a_0\)</span>: if <span class="math notranslate nohighlight">\(a_0 = 1\)</span> (pure component reference state), it becomes <span class="math notranslate nohighlight">\(a - \Delta x\)</span>, and if <span class="math notranslate nohighlight">\(a_0 = 0\)</span> (infinite dilution reference state), it becomes <span class="math notranslate nohighlight">\(a + \Delta x\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array of activity coefficients as a function of composition for each component</p>
+<dd class="field-odd"><p>array of activity coefficients for molecule <span class="math notranslate nohighlight">\(i\)</span> as a function of composition</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -794,7 +806,7 @@
 <dd><p>Excess Gibbs energy.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[G^E = RT\sum_{i=1}^{n} x_i \ln{\gamma_i}\]</div>
+\[\frac{G^E}{RT} = \sum_{i=1}^{n} x_i \ln{\gamma_i}\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -812,7 +824,7 @@
 <dd><p>Gibbs mixing free energy.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[\Delta G_{mix} = RT\sum_{i=1}^{n} x_i \ln{\left(\gamma_i x_i\right)}\]</div>
+\[\frac{\Delta G_{mix}}{RT} = \sum_{i=1}^{n} x_i \ln{\left(\gamma_i x_i\right)}\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -835,7 +847,7 @@
 <p>where:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(H\)</span> is the enthalpy for a simulation at a given composition and <span class="math notranslate nohighlight">\(H_i^{pc}\)</span> is the pure component enthalpy for molecule of type i.</p></li>
+<li><p><span class="math notranslate nohighlight">\(H\)</span> is the enthalpy for a simulation at a given composition and <span class="math notranslate nohighlight">\(H_i^{pc}\)</span> is the pure component enthalpy for molecule <span class="math notranslate nohighlight">\(i\)</span>.</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
@@ -859,6 +871,48 @@
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array for excess entropy as a function of composition</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.nrtl_ip">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nrtl_ip</span></span><a class="headerlink" href="#picmol.kbi.KBI.nrtl_ip" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the NRTL parameters <span class="math notranslate nohighlight">\(\tau_{ij}\)</span> and <span class="math notranslate nohighlight">\(\tau_{ji}\)</span> to <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> from KBI analysis using <a class="reference internal" href="picmol.models.nrtl.html#picmol.models.nrtl.NRTL.fit_Gmix" title="picmol.models.nrtl.NRTL.fit_Gmix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">picmol.models.nrtl.NRTL.fit_Gmix()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NRTL parameters <span class="math notranslate nohighlight">\(\tau_{ij}\)</span> and <span class="math notranslate nohighlight">\(\tau_{ji}\)</span>. For a binary system.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.fh_ip">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fh_ip</span></span><a class="headerlink" href="#picmol.kbi.KBI.fh_ip" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the FH parameter <span class="math notranslate nohighlight">\(\chi\)</span> to <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> from KBI analysis using <a class="reference internal" href="picmol.models.fh.html#picmol.models.fh.FH.fit_Gmix" title="picmol.models.fh.FH.fit_Gmix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">picmol.models.fh.FH.fit_Gmix()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>FH parameter <span class="math notranslate nohighlight">\(\chi\)</span>. For a binary system.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="picmol.kbi.KBI.uniquac_ip">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniquac_ip</span></span><a class="headerlink" href="#picmol.kbi.KBI.uniquac_ip" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the UNIQUAC parameters <span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span> to <span class="math notranslate nohighlight">\(\Delta H_{mix}\)</span> from KBI analysis using <a class="reference internal" href="picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC.fit_Hmix" title="picmol.models.uniquac.UNIQUAC.fit_Hmix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">picmol.models.uniquac.UNIQUAC.fit_Hmix()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>UNIQUAC parameters <span class="math notranslate nohighlight">\(\Delta u_{ij}\)</span>. For a multicomponent system.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -963,6 +1017,9 @@
 <li><a class="reference internal" href="#picmol.kbi.KBI.GM"><code class="docutils literal notranslate"><span class="pre">KBI.GM()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.kbi.KBI.Hmix"><code class="docutils literal notranslate"><span class="pre">KBI.Hmix()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.kbi.KBI.SE"><code class="docutils literal notranslate"><span class="pre">KBI.SE()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.nrtl_ip"><code class="docutils literal notranslate"><span class="pre">KBI.nrtl_ip</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.fh_ip"><code class="docutils literal notranslate"><span class="pre">KBI.fh_ip</span></code></a></li>
+<li><a class="reference internal" href="#picmol.kbi.KBI.uniquac_ip"><code class="docutils literal notranslate"><span class="pre">KBI.uniquac_ip</span></code></a></li>
 </ul>
 </li>
 </ul>

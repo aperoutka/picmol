@@ -57,255 +57,7 @@ def UNIQUAC_Q(smiles: list):
   q = np.array([gg.unifac.q for gg in g])
   return q
 
-def fit_du_to_Hmix(T, Hmix, z, smiles):
-  r"""
-  Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental heat of mixing (``Hmix``) data.
 
-  This function uses the scipy.optimize.curve_fit function to determine the UNIQUAC
-  interaction parameters (:math:`\Delta u_{ij}`) that best fit the experimental heat of mixing data. 
-
-  :param T: temperature (K)
-  :type T: float
-  :param Hmix: array of experimental enthalpy of mixing values
-  :type Hmix: numpy.ndarray
-  :param z: array of mole fractions
-  :type z: numpy.ndarray
-  :param smiles: list of SMILES strings representing the molecules
-  :type smiles: list
-  :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`)
-  :rtype: numpy.ndarray
-  """
-
-
-  N_mols = z.shape[1]
-  r = UNIQUAC_R(smiles)
-  q = UNIQUAC_Q(smiles)
-
-  globals()['r'] = r
-  globals()['q'] = q
-  globals()['Rc'] = 8.314E-3
-  globals()['T'] = T
-
-  def create_du_function(ij):
-    r"""
-    Dynamically creates a function to calculate Hmix for curve fitting.
-
-    This inner function generates a function `UNIQUAC_Hmix_fit_func` with a variable
-    number of 'du' parameters, which are the interaction parameters to be fitted.
-    This generated function calculates the heat of mixing based on these 'du'
-    parameters, mole fractions 'z', and temperature 'T'.
-
-    :param ij: The number of interaction parameters (du) to fit.
-    :type ij: int
-    :return: The dynamically created function `UNIQUAC_Hmix_fit_func`.
-    :rtype: function
-    """
-    # Validate inputs
-    if not isinstance(ij, int):
-      raise TypeError("ij must be integer.")
-
-    # Generate argument names
-    du_arg_names = [f'du{k}' for k in range(ij)]
-    # Include 'z' at the beginning of the argument list
-    arg_list = ', '.join(['z'] + du_arg_names)  # e.g., 'z, du0, du1, du2'
-
-    # Build the function code as a string
-    func_code = f"""
-def UNIQUAC_Hmix_fit_func({arg_list}):
-    \"""
-    Calculates the heat of mixing (Hmix) using UNIQUAC model.
-
-    Parameters:
-    z : numpy.ndarray
-        Mole fractions.
-{chr(10).join(['    {} : float'.format(name) for name in du_arg_names])}
-    \"""
-
-    # Collect 'du' arguments into a list
-    du_list = [{', '.join(du_arg_names)}]
-    N_mols = z.shape[1]
-
-    du = np.zeros((N_mols, N_mols))
-
-    ij = 0
-    for i in range(N_mols):
-      for j in range(N_mols):
-        if i < j:
-          du[i,j] = du_list[ij]
-          du[j,i] = du_list[ij]
-          ij += 1
-    
-    r = globals()['r']
-    q = globals()['q']
-    Rc = globals()['Rc']
-    T = globals()['T']
-
-    zc = 10
-    l = (zc / 2) * (r - q) - (r - 1)
-    tau = np.exp(-du / (Rc * T))
-    rbar = z @ r
-    qbar = z @ q
-    # Calculate phi and theta (segment and area fractions)
-    phi = z * (1 / rbar[:, None]) * r
-    theta = z * (1 / qbar[:, None]) * q
-    # Solve for free energy of mixing GM 
-    GM_res = -Rc * T * (z * np.log(np.dot(theta , tau))) @ q
-    return GM_res
-"""
-    # Create a local namespace for the function definition
-    func_namespace = {}
-    # Include '__name__' in the globals dictionary
-    exec(func_code, globals(), func_namespace)
-    # Retrieve the dynamically created function
-    du_function = func_namespace['UNIQUAC_Hmix_fit_func']
-    return du_function
-  
-  ij_combo = 0
-  for i in range(N_mols):
-    for j in range(N_mols):
-      if i < j:
-        ij_combo += 1
-
-  UNIQUAC_Hmix_fit = create_du_function(ij_combo)
-
-  popt, pcov = curve_fit(UNIQUAC_Hmix_fit, z, Hmix)
-
-  du = np.zeros((N_mols, N_mols))
-  ij = 0
-  for i in range(N_mols):
-    for j in range(N_mols):
-      if i < j:
-        du[i,j] = popt[ij]
-        du[j,i] = popt[ij]
-        ij += 1
-    
-  return du
-
-
-def fit_du_to_GM(T, GM, z, smiles):
-  r"""
-  Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental Gibbs free energy of mixing (``GM``) data.
-
-  This function uses the scipy.optimize.curve_fit function to determine the UNIQUAC
-  interaction parameters (:math:`\Delta u_{ij}`) that best fit the experimental Gibbs free energy of
-  mixing data.
-
-  :param T: temperature (K)
-  :type T: float
-  :param GM: array of experimental Gibbs free energy of mixing values.
-  :type GM: numpy.ndarray
-  :param z: array of mole fractions.
-  :type z: numpy.ndarray
-  :param smiles: list of SMILES strings representing the molecules.
-  :type smiles: list
-  :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`).
-  :rtype: numpy.ndarray
-  """
-
-  N_mols = z.shape[1]
-  r = UNIQUAC_R(smiles)
-  q = UNIQUAC_Q(smiles)  
-
-  globals()['r'] = r
-  globals()['q'] = q
-  globals()['Rc'] = 8.314E-3
-  globals()['T'] = T
-
-  def create_du_function(ij):
-    r"""
-    Dynamically creates a function to calculate GM for curve fitting.
-
-    This inner function generates a function `UNIQUAC_GM_fit_func` with a variable
-    number of 'du' parameters, which are the interaction parameters to be fitted.
-    This generated function calculates the Gibbs free energy of mixing based on
-    these 'du' parameters, mole fractions 'z', and temperature 'T'.
-
-    :param ij: The number of interaction parameters (du) to fit.
-    :type ij: int
-    :return: The dynamically created function `UNIQUAC_GM_fit_func`.
-    :rtype: function
-    """
-    # Validate inputs
-    if not isinstance(ij, int):
-      raise TypeError("ij must be integer.")
-
-    # Generate argument names
-    du_arg_names = [f'du{k}' for k in range(ij)]
-    # Include 'z' at the beginning of the argument list
-    arg_list = ', '.join(['z'] + du_arg_names)  # e.g., 'z, du0, du1, du2'
-
-    # Build the function code as a string
-    func_code = f"""
-def UNIQUAC_GM_fit_func({arg_list}):
-    \"""
-    Calculates the Gibbs free energy of mixing (GM) using UNIQUAC.
-
-    Parameters:
-    z : numpy.ndarray
-        Mole fractions.
-{chr(10).join(['    {} : float'.format(name) for name in du_arg_names])}
-    \"""
-
-    # Collect 'du' arguments into a list
-    du_list = [{', '.join(du_arg_names)}]
-    N_mols = z.shape[1]
-
-    du = np.zeros((N_mols, N_mols))
-
-    ij = 0
-    for i in range(N_mols):
-      for j in range(N_mols):
-        if i < j:
-          du[i,j] = du_list[ij]
-          du[j,i] = du_list[ij]
-          ij += 1
-    
-    r = globals()['r']
-    q = globals()['q']
-    Rc = globals()['Rc']
-    T = globals()['T']
-
-    zc = 10
-    l = (zc / 2) * (r - q) - (r - 1)
-    tau = np.exp(-du / (Rc * T))
-    rbar = z @ r
-    qbar = z @ q
-    # Calculate phi and theta (segment and area fractions)
-    phi = z * (1 / rbar[:, None]) * r
-    theta = z * (1 / qbar[:, None]) * q
-    # Solve for free energy of mixing GM 
-    GM_comb = Rc * T * (np.sum(z * np.log(phi), axis=1) + (zc / 2) * (z * (np.log(theta) - np.log(phi))) @ q)
-    GM_res = -Rc * T * (z * np.log(np.dot(theta , tau))) @ q
-    return GM_comb + GM_res
-"""
-    # Create a local namespace for the function definition
-    func_namespace = {}
-    # Include '__name__' in the globals dictionary
-    exec(func_code, globals(), func_namespace)
-    # Retrieve the dynamically created function
-    du_function = func_namespace['UNIQUAC_GM_fit_func']
-    return du_function
-  
-  ij_combo = 0
-  for i in range(N_mols):
-    for j in range(N_mols):
-      if i < j:
-        ij_combo += 1
-
-  UNIQUAC_GM_fit = create_du_function(ij_combo)
-
-  popt, pcov = curve_fit(UNIQUAC_GM_fit, z, GM)
-
-  du = np.zeros((N_mols, N_mols))
-  ij = 0
-  for i in range(N_mols):
-    for j in range(N_mols):
-      if i < j:
-        du[i,j] = popt[ij]
-        du[j,i] = popt[ij]
-        ij += 1
-    
-  return du
 
 
 
@@ -320,7 +72,7 @@ class UNIQUAC:
   :type IP: numpy.ndarray
   :param smiles: list of SMILES strings representing the molecules in the mixture.
   :type smiles: list
-  :param z: composition array (mole fractions). If None, it defaults to
+  :param z: composition array (mol fractions). If None, it defaults to
       values from PointDisc.
   :type z: numpy.ndarray, optional
   :param r: UNIQUAC r parameters for each component. If None, it will be
@@ -393,7 +145,7 @@ class UNIQUAC:
   @property
   def l(self):
     r"""
-    Calculates the UNIQUAC parameter l for each component from ``r`` and ``q`` parameters using the coordination number z\ :sub:`c`.
+    Calculates the UNIQUAC parameter l for component :math:`i` from ``r`` and ``q`` parameters using the coordination number z\ :sub:`c`.
 
     .. math::
         l_i =  \frac{z_c}{2}(r_i - q_i) - (r_i - 1)    
@@ -457,7 +209,7 @@ class UNIQUAC:
   @property
   def phi(self):
     r"""
-    Calculates the segment fraction :math:`\phi` for each component.
+    Calculates the segment fraction :math:`\phi` for component :math:`i`.
 
     .. math::
         \phi_i = \frac{x_i r_i}{\bar{r}}
@@ -470,7 +222,7 @@ class UNIQUAC:
   @property
   def theta(self):
     r"""
-    Calculates the area fraction :math:`\theta` for each component.
+    Calculates the area fraction :math:`\theta` for component :math:`i`.
     
     .. math::
         \theta_i = \frac{x_i q_i}{\bar{q}}
@@ -482,7 +234,7 @@ class UNIQUAC:
   
   def tau(self, T):
     r"""
-    Calculates the UNIQUAC interaction parameter :math:`\tau`.
+    Calculates the UNIQUAC interaction parameter :math:`\tau` between components :math:`i` and :math:`j`.
 
     .. math::
         \tau_{ij} = \exp\left( -\frac{\Delta u_{ij}}{RT} \right)
@@ -496,7 +248,7 @@ class UNIQUAC:
 
   def rho(self, T):
     r"""
-    Calculates the :math:`\rho` parameter.
+    Calculates the :math:`\rho` parameter for component :math:`i`.
 
     .. math::
         \rho_i = \sum_j^n \theta_j \tau_{ji}
@@ -559,8 +311,6 @@ class UNIQUAC:
     r"""
     Calculates the activity coefficients of each component in the mixture.
 
-    The activity coefficients are calculated using the following equation:
-
     .. math::
         \ln \gamma_i = \ln \frac{\phi_i}{x_i} + \frac{z_c}{2} q_i \ln \frac{\theta_i}{\phi_i} + l_i - \frac{\phi_i}{x_i} \bar{l} - q_i \ln \sum_j^n \theta_j \tau_{ji} + q_i - q_i \sum_j^n \frac{\theta_j \tau_{ji}}{\sum_k^n \theta_k \tau_{kj}}
 
@@ -588,7 +338,6 @@ class UNIQUAC:
 
     .. math::
         \frac{\mu_i}{RT} = \ln \phi_i + \frac{z_c}{2} q_i \ln{\frac{\theta_i}{\phi_i}} + l_i - \overline{l}\frac{\phi_i}{x_i} - q_i \ln \sum_{j=1}^n \theta_j \tau_{ji} + q_i - q_i \sum_{j=1}^n \left(\frac{\theta_j \tau_{ij}}{\sum_{k=1}^n \theta_k \tau_{kj}}\right)
-
 
     :param T: temperature (K)
     :type T: float
@@ -667,7 +416,7 @@ class UNIQUAC:
 
   def Hij(self, T):
     r"""
-    Calculates the Hessian matrix (:math:`H_{ij}`) of the Gibbs free energy of mixing
+    Calculates the Hessian matrix, with elements :math:`H_{ij}`, of the Gibbs free energy of mixing
     with respect to the mol fractions.
 
     .. math::
@@ -690,7 +439,7 @@ class UNIQUAC:
   def det_Hij(self, T):
     r"""
     Calculates the determinant of the Hessian matrix of the Gibbs free energy
-    of mixing. This determinant is often used to assess the stability of a mixture.
+    of mixing.
 
     :param T: temperature (K)
     :type T: float or numpy.ndarray
@@ -699,3 +448,182 @@ class UNIQUAC:
     :rtype: numpy.ndarray
     """
     return np.linalg.det(self.Hij(T))
+
+  @staticmethod
+  def fHmix(T, z, du, smiles):
+    r"""
+    Calculates the residual contributon to Gibbs mixing free energy, i.e., enthalpy of mixing using the UNIQUAC model.
+
+    .. math::
+        \frac{\Delta H_{mix}}{RT} = -\sum_i^n \left( x_i q_i \ln \sum_j^n \theta_j \tau_{ji} \right)
+ 
+    :param T: temperature (K)
+    :type T: float
+    :param z: composition array
+    :type z: numpy.ndarray
+    :param du: interaction parameters (:math:`\Delta u_{ij}`)
+    :type du: numpy.ndarray
+    :param smiles: list of SMILES strings representing the molecules
+    :type smiles: list
+    :return: Gibbs free energy of mixing
+    :rtype: numpy.ndarray
+    """
+    N_mols = z.shape[1]
+    r = UNIQUAC_R(smiles)
+    q = UNIQUAC_Q(smiles)
+
+    Rc = 8.314E-3
+    zc = 10
+    l = (zc / 2) * (r - q) - (r - 1)
+    tau = np.exp(-du / (Rc * T))
+    rbar = z @ r
+    qbar = z @ q
+    # Calculate phi and theta (segment and area fractions)
+    phi = z * (1 / rbar[:, None]) * r
+    theta = z * (1 / qbar[:, None]) * q
+    # Solve for free energy of mixing GM 
+    GM_res = -Rc * T * (z * np.log(np.dot(theta , tau))) @ q
+    return GM_res
+
+  @staticmethod
+  def fSmix(T, z, du, smiles):
+    r"""
+    Calculates the combinatorial contribution to Gibbs mixing free energy, i.e., entropy of mixing using the UNIQUAC model.
+
+    .. math::
+        \frac{\Delta S_{mix}}{RT} = \sum_i^n x_i \ln \phi_i + \frac{z_c}{2} \sum_i^n x_i q_i \ln \frac{\theta_i}{\phi_i} 
+
+    :param T: temperature (K)
+    :type T: float
+    :param z: composition array
+    :type z: numpy.ndarray
+    :param du: interaction parameters (:math:`\Delta u_{ij}`)
+    :type du: numpy.ndarray
+    :param smiles: list of SMILES strings representing the molecules
+    :type smiles: list
+    :return: Gibbs free energy of mixing
+    :rtype: numpy.ndarray
+    """
+    N_mols = z.shape[1]
+    r = UNIQUAC_R(smiles)
+    q = UNIQUAC_Q(smiles)
+    Rc = 8.314E-3
+    zc = 10
+    rbar = z @ r
+    qbar = z @ q
+    # Calculate phi and theta (segment and area fractions)
+    phi = z * (1 / rbar[:, None]) * r
+    theta = z * (1 / qbar[:, None]) * q
+    # Solve for free energy of mixing GM 
+    GM_comb = Rc * T * (np.sum(z * np.log(phi), axis=1) + (zc / 2) * (z * (np.log(theta/phi))) @ q)
+    return GM_comb
+
+ 
+  @staticmethod
+  def fGM(T, z, du, smiles):
+    r"""
+    Calculates the Gibbs free energy of mixing (:func:`GM`) using the UNIQUAC model.
+
+    :param T: temperature (K)
+    :type T: float
+    :param z: composition array
+    :type z: numpy.ndarray
+    :param du: interaction parameters (:math:`\Delta u_{ij}`)
+    :type du: numpy.ndarray
+    :return: Gibbs free energy of mixing
+    :rtype: numpy.ndarray
+    """
+    N_mols = z.shape[1]
+    r = UNIQUAC_R(smiles)
+    q = UNIQUAC_Q(smiles)
+    Rc = 8.314E-3
+    zc = 10
+    l = (zc / 2) * (r - q) - (r - 1)
+    tau = np.exp(-du / (Rc * T))
+    rbar = z @ r
+    qbar = z @ q
+    # Calculate phi and theta (segment and area fractions)
+    phi = z * (1 / rbar[:, None]) * r
+    theta = z * (1 / qbar[:, None]) * q
+    # Solve for free energy of mixing GM 
+    GM_comb = Rc * T * (np.sum(z * np.log(phi), axis=1) + (zc / 2) * (z * (np.log(theta) - np.log(phi))) @ q)
+    GM_res = -Rc * T * (z * np.log(np.dot(theta , tau))) @ q
+    return GM_comb + GM_res
+
+  @staticmethod
+  def _create_du_matrix(N_mols, du_flat):
+    r"""
+    Creates a square matrix of interaction parameters (:math:`\Delta u_{ij}`) from a flat array.
+
+    :param N_mols: number of components in the mixture
+    :type N_mols: int
+    :param du_flat: flat array of interaction parameters
+    :type du_flat: numpy.ndarray
+    :return: square matrix of interaction parameters
+    :rtype: numpy.ndarray
+    """
+    du = np.zeros((N_mols, N_mols))
+    ij = 0
+    for i in range(N_mols):
+      for j in range(N_mols):
+        if i < j:
+          du[i,j] = du_flat[ij]
+          du[j,i] = du_flat[ij]
+          ij += 1
+    return du
+
+  @staticmethod
+  def fit_Hmix(T, Hmix, z, smiles):
+    r"""
+    Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental enthalpy of mixing (``Hmix``) data using :func:`fHmix`.
+
+    :param T: temperature (K)
+    :type T: float
+    :param Hmix: array of experimental enthalpy of mixing values
+    :type Hmix: numpy.ndarray
+    :param z: array of mol fractions
+    :type z: numpy.ndarray
+    :param smiles: list of SMILES strings representing the molecules
+    :type smiles: list
+    :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`)
+    :rtype: numpy.ndarray
+    """
+    N_mols = z.shape[1]
+    def hmix_to_fit(z, *du_flat):
+      """wrapper function for curve_fit to calculate Hmix."""
+      du = UNIQUAC._create_du_matrix(N_mols, du_flat)
+      return UNIQUAC.fHmix(T, z, du, smiles)
+    # fit IP to Hmix
+    ij_combo = N_mols * (N_mols - 1) // 2 # number of unique pairs
+    popt, pcov = curve_fit(hmix_to_fit, z, Hmix, p0=np.zeros(ij_combo), bounds=(-np.inf, np.inf))
+    # Reshape the fitted parameters into a square matrix
+    du_fitted = UNIQUAC._create_du_matrix(N_mols, popt)
+    return du_fitted
+
+  @staticmethod
+  def fit_Gmix(T, Gmix, z, smiles):
+    r"""
+    Fits UNIQUAC interaction parameters (:math:`\Delta u_{ij}`) to experimental Gibbs mixing (``Gmix``) data using :func:`fGM`.
+
+    :param T: temperature (K)
+    :type T: float
+    :param Gmix: array of experimental Gibbs mixing free energy values
+    :type Gmix: numpy.ndarray
+    :param z: array of mol fractions
+    :type z: numpy.ndarray
+    :param smiles: list of SMILES strings representing the molecules
+    :type smiles: list
+    :return: array of fitted UNIQUAC interaction parameters (:math:`\Delta u_{ij}`)
+    :rtype: numpy.ndarray
+    """
+    N_mols = z.shape[1]
+    def gmix_to_fit(z, *du_flat):
+      """wrapper function for curve_fit to calculate Hmix."""
+      du = UNIQUAC._create_du_matrix(N_mols, du_flat)
+      return UNIQUAC.fGM(T, z, du, smiles)
+    # fit IP to Hmix
+    ij_combo = N_mols * (N_mols - 1) // 2 # number of unique pairs
+    popt, pcov = curve_fit(gmix_to_fit, z, Gmix, p0=np.zeros(ij_combo), bounds=(-np.inf, np.inf))
+    # Reshape the fitted parameters into a square matrix
+    du_fitted = UNIQUAC._create_du_matrix(N_mols, popt)
+    return du_fitted    

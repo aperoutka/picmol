@@ -6,6 +6,7 @@ picmol: Phase Instability Calculator for MOLecular design
   :caption: API Reference:
   :titlesonly:
 
+  picmol.conversions
   picmol.get_molecular_properties
   picmol.kbi
   picmol.thermo_model

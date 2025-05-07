@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -266,6 +267,9 @@
           <h1>Source code for picmol.models.nrtl</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.cem</span><span class="w"> </span><span class="kn">import</span> <span class="n">PointDisc</span>
 
@@ -285,9 +289,8 @@
 <span class="sd">  :type z: numpy.ndarray, optional</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">IP</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="mf">8.314E-3</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tau12</span> <span class="o">=</span> <span class="n">IP</span><span class="p">[</span><span class="s2">&quot;tau12&quot;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">tau21</span> <span class="o">=</span> <span class="n">IP</span><span class="p">[</span><span class="s2">&quot;tau21&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">R</span> <span class="o">/</span> <span class="mi">1000</span>  <span class="c1"># kJ/(mol*K)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tau12</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau21</span> <span class="o">=</span> <span class="n">IP</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.2</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span> <span class="o">=</span> <span class="mi">2</span>
@@ -434,9 +437,55 @@
     <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau21</span> <span class="o">*</span> <span class="n">G21</span>
     <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau12</span> <span class="o">*</span> <span class="n">G12</span>
     <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">((</span><span class="n">n</span><span class="o">*</span><span class="n">G21</span><span class="o">/</span><span class="p">((</span><span class="n">G21</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">G21</span><span class="p">)</span><span class="o">*</span><span class="n">x1</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">G12</span><span class="o">/</span><span class="p">((</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">G12</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">x1</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">)))</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="o">*</span><span class="n">T</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">x1</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="n">x2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NRTL.fGM">
+<a class="viewcode-back" href="../../../picmol.models.nrtl.html#picmol.models.nrtl.NRTL.fGM">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fGM</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">tau12</span><span class="p">,</span> <span class="n">tau21</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Gibbs free energy of mixing for a binary mixture using the NRTL model (:func:`GM`) for any interaction parameters.</span>
+
+<span class="sd">    :param T: temperature (K)</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :param z: composition array</span>
+<span class="sd">    :type z: numpy.ndarray</span>
+<span class="sd">    :param tau12: interaction parameter between components 1 and 2</span>
+<span class="sd">    :type tau12: float</span>
+<span class="sd">    :param tau21: interaction parameter between components 2 and 1</span>
+<span class="sd">    :type tau21: float</span>
+<span class="sd">    :return: Gibbs free energy of mixing</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.2</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">R</span> <span class="o">/</span> <span class="mi">1000</span> <span class="c1"># kJ/(mol*K)</span>
+    <span class="n">G12</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">alpha</span><span class="o">*</span><span class="n">tau12</span><span class="o">/</span><span class="p">(</span><span class="n">R</span><span class="o">*</span><span class="n">T</span><span class="p">))</span>
+    <span class="n">G21</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">alpha</span><span class="o">*</span><span class="n">tau21</span><span class="o">/</span><span class="p">(</span><span class="n">R</span><span class="o">*</span><span class="n">T</span><span class="p">))</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">z</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">z</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">G_ex</span> <span class="o">=</span> <span class="o">-</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau21</span> <span class="o">*</span> <span class="n">G21</span><span class="o">/</span><span class="p">(</span><span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">G21</span><span class="p">)</span> <span class="o">+</span> <span class="n">tau12</span> <span class="o">*</span> <span class="n">G12</span> <span class="o">/</span> <span class="p">(</span><span class="n">x2</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">G12</span><span class="p">)))</span> 
+    <span class="n">G_id</span> <span class="o">=</span> <span class="n">R</span> <span class="o">*</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">G_ex</span> <span class="o">+</span> <span class="n">G_id</span></div>
+
+
+<div class="viewcode-block" id="NRTL.fit_Gmix">
+<a class="viewcode-back" href="../../../picmol.models.nrtl.html#picmol.models.nrtl.NRTL.fit_Gmix">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fit_Gmix</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">Gmix</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fits the NRTL model to the Gibbs free energy of mixing data using relationship in :func:`GM`.</span>
+
+<span class="sd">    :param T: temperature (K)</span>
+<span class="sd">    :type T: float</span>
+<span class="sd">    :param Gmix: Gibbs free energy of mixing data</span>
+<span class="sd">    :type Gmix: numpy.ndarray</span>
+<span class="sd">    :return: fitted interaction parameters :math:`\tau_{12}` and :math:`\tau_{21}`</span>
+<span class="sd">    :rtype: dict[str, float]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fGM_partial</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">NRTL</span><span class="o">.</span><span class="n">fGM</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">taus</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">fGM_partial</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">Gmix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">taus</span></div>
 </div>
-
-
 
 </pre></div>
         </article>

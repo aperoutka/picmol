@@ -1,5 +1,8 @@
 import numpy as np
 from pathlib import Path
+from scipy import constants
+from functools import partial
+from scipy.optimize import curve_fit
 
 from .cem import PointDisc
 
@@ -17,9 +20,8 @@ class NRTL:
   :type z: numpy.ndarray, optional
   """
   def __init__(self, IP, z=None):
-    self.R = 8.314E-3
-    self.tau12 = IP["tau12"]
-    self.tau21 = IP["tau21"]
+    self.R = constants.R / 1000  # kJ/(mol*K)
+    self.tau12, self.tau21 = IP
     self.alpha = 0.2
 
     self.num_comp = 2
@@ -153,4 +155,44 @@ class NRTL:
     m = self.R * T * self.tau12 * G12
     return 2 * ((n*G21/((G21 + (1-G21)*x1)**3)) + (m*G12/((1+(G12-1)*x1)**3))) + self.R*T*(1/x1 + 1/x2)
 
+  @staticmethod
+  def fGM(z, tau12, tau21, T):
+    r"""
+    Calculates the Gibbs free energy of mixing for a binary mixture using the NRTL model (:func:`GM`) for any interaction parameters.
 
+    :param T: temperature (K)
+    :type T: float
+    :param z: composition array
+    :type z: numpy.ndarray
+    :param tau12: interaction parameter between components 1 and 2
+    :type tau12: float
+    :param tau21: interaction parameter between components 2 and 1
+    :type tau21: float
+    :return: Gibbs free energy of mixing
+    :rtype: numpy.ndarray
+    """
+    alpha = 0.2
+    R = constants.R / 1000 # kJ/(mol*K)
+    G12 = np.exp(-alpha*tau12/(R*T))
+    G21 = np.exp(-alpha*tau21/(R*T))
+    x1 = z[:,0]
+    x2 = z[:,1]
+    G_ex = -R * T * (x1 * x2 * (tau21 * G21/(x1 + x2 * G21) + tau12 * G12 / (x2 + x1 * G12))) 
+    G_id = R * T * (x1 * np.log(x1) + x2 * np.log(x2))
+    return G_ex + G_id
+
+  @staticmethod
+  def fit_Gmix(T, z, Gmix):
+    r"""
+    Fits the NRTL model to the Gibbs free energy of mixing data using relationship in :func:`GM`.
+
+    :param T: temperature (K)
+    :type T: float
+    :param Gmix: Gibbs free energy of mixing data
+    :type Gmix: numpy.ndarray
+    :return: fitted interaction parameters :math:`\tau_{12}` and :math:`\tau_{21}`
+    :rtype: dict[str, float]
+    """
+    fGM_partial = partial(NRTL.fGM, T=T)
+    taus, pcov = curve_fit(fGM_partial, z, Gmix)
+    return taus

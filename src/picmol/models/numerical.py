@@ -3,7 +3,7 @@ from scipy.optimize import curve_fit
 from sympy import symbols, sympify, diff, preorder_traversal, lambdify
 from scipy import constants
 
-from ..functions import mol2vol
+from ..conversions import mol2vol
 from .cem import PointDisc
 
 
@@ -83,10 +83,10 @@ class QuarticModel:
   :type SE_data: numpy.ndarray
   :param molar_vol: list of molar volumes
   :type molar_vol: list
-  :param z: mol fraction data. Defaults to None.
+  :param z: mol fraction data. Defaults to `None`.
   :type z: numpy.ndarray, optional
   :param gid_type: type of excess Gibbs energy calculation.
-                  Defaults to 'vol'.
+                  Defaults to `vol`.
   :type gid_type: str, optional
    """
   def __init__(self, z_data, Hmix_data, SE_data, molar_vol, z=None, gid_type='vol'):
@@ -227,8 +227,8 @@ class QuarticModel:
     Fits the Taylor series expansion, :math:`A^E`, to ``Hmix_data``.
 
     This method uses the `curve_fit` function from SciPy to determine the
-    optimal parameters for the quartic polynomial that best fits the
-    provided ``Hmix_data``.  The fitted parameters are stored in the
+    optimal parameters for the quartic function that best fits the
+    provided ``Hmix_data``. The fitted parameters are stored in the
     ``Hmix_params`` attribute.
 
     :return: mixing enthalpy parameters for :math:`A^E`
@@ -243,7 +243,7 @@ class QuarticModel:
     Fits the Taylor series expansion, :math:`A^E`, to ``SE_data``.
 
     This method uses the `curve_fit` function from SciPy to determine the
-    optimal parameters for the quartic polynomial that best fits the
+    optimal parameters for the quartic function that best fits the
     provided ``SE_data``. The fitted parameters are stored in the ``SE_params``
     attribute.
 
@@ -289,7 +289,7 @@ class QuarticModel:
     except AttributeError:
       self.fit_SE()
     S = self._polynomial_func(self.z, *self.SE_params)
-    self._SE = np.nan_to_num(H, nan=0)
+    self._SE = np.nan_to_num(S, nan=0)
     return self._SE
 
   @property
@@ -342,7 +342,7 @@ class QuarticModel:
     return Gid_calc
 
   @property
-  def _Gid_sympy(self):
+  def _dGid_sympy(self):
     """sympy expression for the first derivative of Gid"""
     df_dx = {i: 0 for i in range(self.num_comp-1)}
     for i in range(self.num_comp-1):
@@ -366,7 +366,7 @@ class QuarticModel:
     """
     df_dx = np.zeros((self.z.shape[0], self.num_comp-1))
     for i in range(self.num_comp-1):
-      df_dx_py = lambdify(self._Gid_symbols, self._Gid_sympy[i], 'numpy')
+      df_dx_py = lambdify(self._Gid_symbols, self._dGid_sympy[i], 'numpy')
       if self.gid_type == 'vol':
         df_dx[:,i] = self.Rc * T * df_dx_py(*self._x_values, *self.molar_vol)
       else:
@@ -378,7 +378,7 @@ class QuarticModel:
     """sympy expression for the second derivative of Gid"""
     d2f_dx2 = {i: {j: 0 for j in range(self.num_comp-1)} for i in range(self.num_comp-1)}
     for i in range(self.num_comp-1):
-      df_dx_sympy = self._Gid_sympy[i]
+      df_dx_sympy = self._dGid_sympy[i]
       for j in range(self.num_comp-1):
         d2f_dx2[i][j] = diff(df_dx_sympy, self._Gid_symbols[j])
     return d2f_dx2

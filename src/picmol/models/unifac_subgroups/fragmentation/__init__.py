@@ -15,5 +15,4 @@ __all__ = [
 	"correct_problematics",
 	"FragmentationModel",
 	"unifac", "unifac_IL",
-	"GibbsModel",
 ]

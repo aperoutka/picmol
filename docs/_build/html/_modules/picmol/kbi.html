@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -280,10 +281,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">R</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">N_A</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.get_molecular_properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_molecular_properties</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.models.uniquac</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNIQUAC_R</span><span class="p">,</span> <span class="n">UNIQUAC_Q</span><span class="p">,</span> <span class="n">fit_du_to_Hmix</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNIQUAC</span><span class="p">,</span> <span class="n">UNIFAC</span><span class="p">,</span> <span class="n">QuarticModel</span><span class="p">,</span> <span class="n">FH</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models.uniquac</span><span class="w"> </span><span class="kn">import</span> <span class="n">UNIQUAC_R</span><span class="p">,</span> <span class="n">UNIQUAC_Q</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">NRTL</span><span class="p">,</span> <span class="n">UNIQUAC</span><span class="p">,</span> <span class="n">FH</span><span class="p">,</span> <span class="n">UNIFAC</span><span class="p">,</span> <span class="n">QuarticModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models.cem</span><span class="w"> </span><span class="kn">import</span> <span class="n">PointDisc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">mkdr</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
@@ -304,32 +305,41 @@
 <span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">  Class for calculating Kirkwood-Buff Integrals from radial distribution functions in a GROMACS project.</span>
 
-<span class="sd">  :param prj_path: absolute path to project directory; contains subdirectories containing systems as a function of composition</span>
+<span class="sd">  :param prj_path: absolute path to project directory; contains system subdirectories with different compositions</span>
 <span class="sd">  :type prj_path: str</span>
-<span class="sd">  :param pure_component_path: absolute path to pure component directory; contains subdirectories of molecules at a given temperature</span>
+<span class="sd">  :param pure_component_path: absolute path to pure component directory; contains subdirectories of pure component systems at a given temperature</span>
 <span class="sd">  :type pure_component_path: str</span>
+<span class="sd">  :param solute_mol: molecule name in .top file corresponding to molecule used to sort systems and used as x-axis in figures</span>
+<span class="sd">  :type solute_mol: str</span>
 <span class="sd">  :param rdf_dir: directory name where RDF files are located in each system directory, default is ``rdf_files``</span>
 <span class="sd">  :type rdf_dir: str, optional</span>
-<span class="sd">  :param kbi_method: correction method to apply to correlation function, default is ``adj``</span>
+<span class="sd">  :param kbi_method: correction method to apply to correlation function, default is `adj`</span>
 
-<span class="sd">      * ``&#39;raw&#39;``: no correction</span>
-<span class="sd">      * ``&#39;adj&#39;``: correcting for tail of RDF :math:`\neq` 1 at large r</span>
-<span class="sd">      * ``&#39;gv&#39;``: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt</span>
-<span class="sd">      * ``&#39;kgv&#39;``: applying a damping function introduced by Kruger to the correction function by Ganguly and Van der Vegt</span>
+<span class="sd">      * `raw`: no correction</span>
+<span class="sd">      * `adj`: correcting for tail of RDF :math:`\neq` 1 at large r</span>
+<span class="sd">      * `gv`: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt</span>
+<span class="sd">      * `kgv`: applying a damping function introduced by Kruger to `gv` correction</span>
 
 <span class="sd">  :type kbi_method: str, optional</span>
-<span class="sd">  :param rkbi_min: fraction of r; lower bound for extrapolation to the thermodynamic limit, default is ``0.75``. float will be applied to all systems and dict uses systems as keys with corresponding float values.</span>
-<span class="sd">  :type rkbi_min: float or dict, optional</span>
+<span class="sd">  :param rkbi_min: fraction of r; lower bound for extrapolation to the thermodynamic limit, default is `0.75`. Options: </span>
+<span class="sd">  </span>
+<span class="sd">      * float: used for all systems </span>
+<span class="sd">      * dict[str, float]: keys: systems, values: rkbi_min for each system</span>
+
+<span class="sd">  :type rkbi_min: float or dict[str, float], optional</span>
 <span class="sd">  :param kbi_fig_dirname: directory name for results from KBI analysis, default is ``kbi_analysis``</span>
 <span class="sd">  :type kbi_fig_dirname: str, optional</span>
-<span class="sd">  :param avg_start_time: start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is ``100``</span>
+<span class="sd">  :param avg_start_time: start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is `100`</span>
 <span class="sd">  :type avg_start_time: float, optional</span>
 <span class="sd">  :param avg_end_time: end time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is end of trajectory</span>
 <span class="sd">  :type avg_start_time: float, optional</span>
-<span class="sd">  :param solute_mol: molecule name in .top file corresponding to molecule used to sort systems</span>
-<span class="sd">  :type solute_mol: str</span>
 <span class="sd">  :param geom_mean_pairs: pairs of molecules for taking the geometric mean of, default is empty list</span>
 <span class="sd">  :type geom_mean_pairs: list[list[str]], optional</span>
+
+<span class="sd">  :ivar systems: list of system names in project directory</span>
+<span class="sd">  :vartype systems: list[str]</span>
+<span class="sd">  :ivar n_sys: number of systems in project directory</span>
+<span class="sd">  :vartype n_sys: int</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
       <span class="bp">self</span><span class="p">,</span> 
@@ -419,7 +429,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_get_edr_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the .edr file for a given system.</span>
 
-<span class="sd">    Requires that ``&#39;npt&#39;`` is in filename to distinguish from other ensembles.</span>
+<span class="sd">    Requires that `&#39;npt&#39;` is in filename to distinguish from other ensembles.</span>
 <span class="sd">    This is used to get the temperature, volume, enthalpy.</span>
 
 <span class="sd">    :param sys: system name</span>
@@ -486,7 +496,7 @@
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">T_sim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :return: average simulation temperature (K)</span>
+<span class="sd">    :return: average simulation temperature (K) across all systems</span>
 <span class="sd">    :rtype: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_simulation_temps</span><span class="p">))</span>
@@ -610,7 +620,7 @@
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">properties_by_molid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :return: pandas DataFrame only for molecules present in project. Load ``molecular_properties.csv`` and set molecule name in .top file as index. </span>
+<span class="sd">    :return: pandas DataFrame only for molecules present in project. Load `molecular_properties.csv` and set molecule name in .top file as index. </span>
 <span class="sd">    :rtype: pandas.DataFrame</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">prop_df</span> <span class="o">=</span> <span class="n">load_molecular_properties</span><span class="p">(</span><span class="s2">&quot;mol_id&quot;</span><span class="p">)</span>
@@ -618,7 +628,8 @@
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mol_name_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: dictionary mapping molecule IDs to their names</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: dictionary mapping molecule IDs to their names</span>
 <span class="sd">    :rtype: dict[str, str]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mol_name_dict</span>
@@ -639,14 +650,16 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mol_smiles_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: dictionary mapping molecule IDs to their SMILES string</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: dictionary mapping molecule IDs to their SMILES string</span>
 <span class="sd">    :rtype: dict[str, str]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">{</span><span class="n">mol</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties_by_molid</span><span class="p">[</span><span class="s2">&quot;smiles&quot;</span><span class="p">][</span><span class="n">mol</span><span class="p">]</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">}</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">molar_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: array of pure component molar volumes (cm\ :sup:`3`/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from ``molecular_properties.csv``</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: array of pure component molar volumes (cm\ :sup:`3`/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from `molecular_properties.csv`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">V0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">))</span> <span class="c1"># initialize array for molar volumes</span>
@@ -665,35 +678,40 @@
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">n_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: array of the number of electrons for each molecule</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: array of the number of electrons for each molecule</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties_by_molid</span><span class="p">[</span><span class="s2">&quot;n_electrons&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mol_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: array of the charge of each molecule</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: array of the formal charge on each molecule</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties_by_molid</span><span class="p">[</span><span class="s2">&quot;mol_charge&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mol_wt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: array of the molecular weight of each molecule</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: array of the molar mass (g/mol) of each molecule</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties_by_molid</span><span class="p">[</span><span class="s2">&quot;mol_wt&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: array of SMILES strings for each molecule</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: array of SMILES strings for each molecule</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties_by_molid</span><span class="p">[</span><span class="s2">&quot;smiles&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">solute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: molecule ID of the solute</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: molecule ID of the solute</span>
 <span class="sd">    :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solute</span>
@@ -704,14 +722,16 @@
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">solute_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: index of the solute molecule in the unique molecules list</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: index of the solute molecule in ``unique_mols``</span>
 <span class="sd">    :rtype: int</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mol_idx</span><span class="p">(</span><span class="n">mol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solute</span><span class="p">)</span>
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">solute_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: name of the solute molecule</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: name of the solute molecule</span>
 <span class="sd">    :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mol_name_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">solute</span><span class="p">]</span>
@@ -765,7 +785,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_n_mol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate molecule numbers for each component in each system.</span>
 
-<span class="sd">    :return: array of molecule numbers, shape ``(len(systems), n)``</span>
+<span class="sd">    :return: array of molecule numbers, shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">n_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sys</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_top_unique_mols</span><span class="p">)))</span> <span class="c1"># initialize array for molecule numbers</span>
@@ -781,16 +801,16 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_top_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get mol fraction matrix from system compositions.</span>
 
-<span class="sd">    :return: array of mole fractions, shape ``(len(systems), n)``</span>
+<span class="sd">    :return: array of mol fractions, shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_mol</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_mol</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">_top_v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert mole fraction matrix to volume fraction matrix.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert mol fraction matrix to volume fraction matrix.</span>
 
-<span class="sd">    :return: array of volume fractions, shape ``(len(systems), n)``</span>
+<span class="sd">    :return: array of volume fractions, shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">mol2vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_top_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
@@ -799,7 +819,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_top_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate molarity (mol/L) of each molecule in each system.</span>
 
-<span class="sd">    :return:array of molarities (mol/L), shape ``(len(systems), n)``</span>
+<span class="sd">    :return:array of molarities (mol/L), shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_rho</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">24</span><span class="p">)</span> <span class="o">/</span> <span class="n">N_A</span>
@@ -808,7 +828,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_top_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the number density (nm\ :sup:`-3`) for each molecule in each system.</span>
 
-<span class="sd">    :return: array of number densities (nm\ :sup:`-3`), shape ``(len(systems), n)``</span>
+<span class="sd">    :return: array of number densities (nm\ :sup:`-3`), shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_mol</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_box_vol_nm3</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
@@ -821,7 +841,7 @@
       <span class="n">df_comp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;systems&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sys</span> <span class="c1"># system name</span>
       <span class="n">df_comp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;T_sim&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_simulation_temps</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># actual simulation temperature for the system</span>
       <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">):</span>
-        <span class="n">df_comp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;x_</span><span class="si">{</span><span class="n">mol</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_z</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="c1"># mole fracation of mol i</span>
+        <span class="n">df_comp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;x_</span><span class="si">{</span><span class="n">mol</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_z</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="c1"># mol fracation of mol i</span>
         <span class="n">df_comp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;phi_</span><span class="si">{</span><span class="n">mol</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_v</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="c1"># volume fraction of mol i</span>
         <span class="n">df_comp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;c_</span><span class="si">{</span><span class="n">mol</span><span class="si">}</span><span class="s2">_M&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_c</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="c1"># molarity of mol i (mol/L)</span>
         <span class="n">df_comp</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;rho_</span><span class="si">{</span><span class="n">mol</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_rho</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="c1"># number density of mol i (nm^-3)</span>
@@ -841,17 +861,17 @@
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For a given radial distribution function, calculate KBI from ``r_lo`` to ``r_hi`` by applying a correction to the correlation function.</span>
 
-<span class="sd">    The correlation function, :math:`h_{ij}(r)`, is not corrected when ``kbi_method`` = &#39;raw&#39;.</span>
+<span class="sd">    The correlation function, :math:`h_{ij}(r)`, is not corrected when ``kbi_method`` = `raw`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      h_{ij}(r) = g_{ij}^{NpT}(r) - 1</span>
 
-<span class="sd">    For the ``kbi_method`` = &#39;adj&#39; correlation function correction, the excess/depletion of molecule j around molecule i in a system with fixed number of components is adjusted based on the limiting behavior of the radial distribution function tail at large r.</span>
+<span class="sd">    For the ``kbi_method`` = `adj` correlation function correction, the excess/depletion of molecule :math:`j` around molecule :math:`i` in a system with fixed number of components is adjusted based on the limiting behavior of the radial distribution function tail at large r.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      h_{ij}^{adj}(r) = g_{ij}^{NpT}(r) - \text{avg}</span>
 
-<span class="sd">    `Ganguly and Van der Vegt (2013) &lt;https://doi.org/10.1021/ct301017q&gt;`_ introduced a correction to the radial distribution function (``kbi_method`` = &#39;gv&#39;) to correct the number of molecules of type j around molecules of type i, where :math:`N_j` is the number of molecules of type j, :math:`\Delta N_{ij}` is the number of molecules of type j around molecule i in radius of shell dr, and :math:`V` is the volume of simulation box.</span>
+<span class="sd">    `Ganguly and Van der Vegt (2013) &lt;https://doi.org/10.1021/ct301017q&gt;`_ introduced a correction to the radial distribution function (``kbi_method`` = `gv`) to correct the number of molecule :math:`j` around molecule :math:`i`, where :math:`N_j` is the number of molecules :math:`j`, :math:`\Delta N_{ij}` is the number of molecules :math:`j` around molecule :math:`i` in radius of shell dr, and :math:`V` is the volume of simulation box.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      h_{ij}^{gv}(r) = g_{ij}^{NpT}(r) \left(\frac{N_j\left(1 - \frac{4/3 \pi r^3}{V} \right)}{N_j \left(1 - \frac{4/3 \pi r^3}{V} \right) - \Delta N_{ij}  - \delta_{ij}} \right) - 1</span>
@@ -859,13 +879,13 @@
 <span class="sd">    .. math::</span>
 <span class="sd">      \Delta N_{ij} = \int_0^R 4 \pi r^2 \rho_j \left(g_{ij}^{NpT}(r) - 1\right) dr</span>
 
-<span class="sd">    `Dawass and Krüger et al. (2019) &lt;https://doi.org/10.1016/j.fluid.2018.12.027&gt;`_ applied a damping function for hyperspheres geometry (``kbi_method`` = &#39;kgv&#39;) to the Ganguly and Van der Vegt correction to force limiting behavior of correlation function at large r to be 1.</span>
+<span class="sd">    `Dawass and Krüger et al. (2019) &lt;https://doi.org/10.1016/j.fluid.2018.12.027&gt;`_ applied a damping function for hyperspheres geometry (``kbi_method`` = `kgv`) to the Ganguly and Van der Vegt correction to force limiting behavior of correlation function at large r to be 1.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      h_{ij}^{kgv}(r) = h_{ij}^{gv} \left(1 - \frac{3r}{2R} + \frac{r^3}{2r^3} \right)</span>
 
 
-<span class="sd">    KBI calculations for finite size R (:math:`G_{ij}^R`), from correlation functions.</span>
+<span class="sd">    KBI calculations for finite size R (:math:`G_{ij}^R`), are calculated from correlation functions.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      G_{ij}^R =  \int_0^R 4 \pi r^2 h_{ij}(r) dr</span>
@@ -882,9 +902,9 @@
 <span class="sd">    :type avg: float</span>
 <span class="sd">    :param sys_num: system index</span>
 <span class="sd">    :type sys_num: int</span>
-<span class="sd">    :param mol_i: molecule id in .top file for i in :math:`g_{ij}(r)`</span>
+<span class="sd">    :param mol_i: molecule id in .top file for :math:`i` in :math:`g_{ij}(r)`</span>
 <span class="sd">    :type mol_i: str</span>
-<span class="sd">    :param mol_j: molecule id in .top file for j in :math:`g_{ij}(r)`</span>
+<span class="sd">    :param mol_j: molecule id in .top file for :math:`j` in :math:`g_{ij}(r)`</span>
 <span class="sd">    :type mol_j: str</span>
 <span class="sd">    :return: KBI in units of nm\ :sup:`3` and cm\ :sup:`3`/mol.</span>
 <span class="sd">    :rtype: tuple[float, float]</span>
@@ -950,7 +970,7 @@
 <span class="sd">    :type rkbi: numpy.ndarray</span>
 <span class="sd">    :param min_L_idx: lower bound index of L for extrapolation</span>
 <span class="sd">    :type min_L_idx: int</span>
-<span class="sd">    :return: list containing :math:`G_{ij}^{\infty}` and :math:`F_{ij}^{\infty}`</span>
+<span class="sd">    :return: list containing :math:`G_{ij}^{\infty}` and :math:`F_{ij}^{\infty}` from least squares fit</span>
 <span class="sd">    :rtype: list[float, float]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;extrapolate kbi values to the thermodynamic limit&#39;&#39;&#39;</span>
@@ -1075,7 +1095,7 @@
 <span class="sd">    .. math::</span>
 <span class="sd">      x_i = \frac{N_i}{\sum_j N_j}</span>
 
-<span class="sd">    :return: mole fraction array, with shape ``(len(systems), n)``</span>
+<span class="sd">    :return: mol fraction array, with shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span>
@@ -1087,12 +1107,12 @@
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Volume fraction array (:math:`\mathbf{v}`) with elements, :math:`\phi_i` where :math:`V_i` is the molar volume of molecule of type i.</span>
+<span class="sd">    Volume fraction array (:math:`\mathbf{v}`) with elements, :math:`\phi_i` where :math:`V_i` is the molar volume of molecule :math:`i`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \phi_i = \frac{x_i V_i}{\sum_j x_j V_j}</span>
 
-<span class="sd">    :return: volume fraction array, with shape ``(len(systems), n)``</span>
+<span class="sd">    :return: volume fraction array, with shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_v</span>
@@ -1105,7 +1125,7 @@
 <a class="viewcode-back" href="../../picmol.kbi.html#picmol.kbi.KBI.G_matrix">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">G_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Construct a symmetric matrix (:math:`\mathbf{G}`) of KBI values in the thermodynamic limit (nm\ :sup:`3`) between molecules of type i and j with elements, :math:`\mathbf{G}_{ij} = \mathbf{G}_{ji}`.</span>
+<span class="sd">    Construct a symmetric matrix (:math:`\mathbf{G}`) of KBI values in the thermodynamic limit (nm\ :sup:`3`) between molecules :math:`i` and :math:`j` with elements, :math:`\mathbf{G}_{ij} = \mathbf{G}_{ji}`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \mathbf{G} = \begin{bmatrix}</span>
@@ -1115,7 +1135,7 @@
 <span class="sd">        G_{n1}^\infty &amp; G_{n2}^\infty &amp; \cdots &amp; G_{nn}^\infty \\</span>
 <span class="sd">      \end{bmatrix}</span>
 
-<span class="sd">    :return: array of KBI values for each pairwise interaction, with shape ``(len(systems), n, n)``</span>
+<span class="sd">    :return: array of KBI values for each pairwise interaction, with shape `(len(systems), n, n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1155,7 +1175,7 @@
 <span class="sd">        \rho_1 \rho_n \mathbf{G}_{n1} &amp; \rho_2 \rho_n \mathbf{G}_{n2} &amp; \cdots &amp; \rho_n^2 \mathbf{G}_{nn} + \rho_n \\</span>
 <span class="sd">      \end{bmatrix}</span>
 
-<span class="sd">    :return: array with shape ``(len(systems), n, n)``</span>
+<span class="sd">    :return: array with shape `(len(systems), n, n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">)),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
@@ -1170,18 +1190,16 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">_B_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the inverse of matrix B.</span>
-
-<span class="sd">    :return: inverse of the B matrix</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: inverse of the :math:`\mathbf{B}` matrix</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_matrix</span><span class="p">())</span>
 
   <span class="nd">@property</span> 
   <span class="k">def</span><span class="w"> </span><span class="nf">_B_det</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Get the determinant of matrix B.</span>
-
-<span class="sd">    :return: determinant of the B matrix</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: determinant of the :math:`\mathbf{B}` matrix</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">B_matrix</span><span class="p">())</span>
@@ -1195,7 +1213,7 @@
 <span class="sd">    .. math::</span>
 <span class="sd">      \mathbf{B}^{ij} = \left(|\mathbf{B}| \mathbf{B}^{-1}\right)_{ij}</span>
 
-<span class="sd">    :return: cofactor matrix with shape ``(len(systems), n, n)``</span>
+<span class="sd">    :return: cofactor matrix with shape `(len(systems), n, n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">B_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">)))</span>
@@ -1209,7 +1227,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_rho_ij</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Product of number densities between two components.</span>
 
-<span class="sd">    :return: array with shape ``(len(systems), n, n)``</span>
+<span class="sd">    :return: array with shape `(len(systems), n, n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_top_rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">)))</span>
@@ -1224,12 +1242,12 @@
 <a class="viewcode-back" href="../../picmol.kbi.html#picmol.kbi.KBI.dmu_dN">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">dmu_dN</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the derivative of the chemical potential of component i with respect to the number of molecules of component j in the NpT ensemble.</span>
+<span class="sd">    Calculate the derivative of the chemical potential of component :math:`i` with respect to the number of molecules of component :math:`j` in the NpT ensemble.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \left(\frac{\partial \mu_i}{\partial N_j}\right)_{N, p, T} = \frac{k_bT}{\left&lt;V\right&gt; |\mathbf{B}|}\left(\frac{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b\left|\mathbf{B}^{ij}\mathbf{B}^{ab}-\mathbf{B}^{ai}\mathbf{B}^{bj}\right|}{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b \mathbf{B}^{ab}}\right)</span>
 
-<span class="sd">    :return: array of shape ``(len(systems), n, n)``</span>
+<span class="sd">    :return: array of shape `(len(systems), n, n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">b_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># this matches!!</span>
@@ -1259,12 +1277,12 @@
 <a class="viewcode-back" href="../../picmol.kbi.html#picmol.kbi.KBI.dmu_dxs">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">dmu_dxs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Convert the chemical potential derivative with respect to molecule number to the mole fraction basis.</span>
+<span class="sd">    Convert the chemical potential derivative with respect to molecule number to the mol fraction basis.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \left(\frac{\partial \mu_i}{\partial x_j}\right) = N \left(\frac{\partial \mu_i}{\partial N_j} - \frac{\partial \mu_i}{\partial N_n}\right)</span>
 
-<span class="sd">    :return: array of shape ``(len(systems), n-1, n-1)``</span>
+<span class="sd">    :return: array of shape `(len(systems), n-1, n-1)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># get chemical potential derivative wrt molecule number</span>
@@ -1296,12 +1314,12 @@
 <a class="viewcode-back" href="../../picmol.kbi.html#picmol.kbi.KBI.dlngamma_dxs">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">dlngamma_dxs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the derivative of the natural logarithm of the activity coefficient of component i with respect to its mole fraction.</span>
+<span class="sd">    Calculate the derivative of the natural logarithm of the activity coefficient of component :math:`i` with respect to its mol fraction.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \frac{\partial \ln{\gamma_i}}{\partial x_i} = \frac{1}{k_BT} \frac{\partial \mu_i}{\partial x_i} - \frac{1}{x_i}</span>
 
-<span class="sd">    :return: array of shape ``(len(systems), n)``</span>
+<span class="sd">    :return: array of shape `(len(systems), n)`</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1338,7 +1356,7 @@
 
 <span class="sd">    The integral is approximated by a summation using the trapezoidal rule, where the upper limit of summation is :math:`x_i` and the initial condition (or reference state) is :math:`a_0`. Note that the term :math:`a \pm \Delta x` behaves differently based on the value of :math:`a_0`: if :math:`a_0 = 1` (pure component reference state), it becomes :math:`a - \Delta x`, and if :math:`a_0 = 0` (infinite dilution reference state), it becomes :math:`a + \Delta x`.</span>
 
-<span class="sd">    :return: array of activity coefficients as a function of composition for each component</span>
+<span class="sd">    :return: array of activity coefficients for molecule :math:`i` as a function of composition</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1475,7 +1493,7 @@
 <span class="sd">    Excess Gibbs energy.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">      G^E = RT\sum_{i=1}^{n} x_i \ln{\gamma_i}</span>
+<span class="sd">      \frac{G^E}{RT} = \sum_{i=1}^{n} x_i \ln{\gamma_i}</span>
 
 <span class="sd">    :return: array for excess Gibbs energy as a function of composition</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -1510,7 +1528,7 @@
 <span class="sd">    Gibbs mixing free energy.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">      \Delta G_{mix} = RT\sum_{i=1}^{n} x_i \ln{\left(\gamma_i x_i\right)}</span>
+<span class="sd">      \frac{\Delta G_{mix}}{RT} = \sum_{i=1}^{n} x_i \ln{\left(\gamma_i x_i\right)}</span>
 
 <span class="sd">    :return: array for Gibbs mixing free energy as a function of composition</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -1583,7 +1601,7 @@
 
 <span class="sd">    where:</span>
 <span class="sd">      </span>
-<span class="sd">      * :math:`H` is the enthalpy for a simulation at a given composition and :math:`H_i^{pc}` is the pure component enthalpy for molecule of type i.</span>
+<span class="sd">      * :math:`H` is the enthalpy for a simulation at a given composition and :math:`H_i^{pc}` is the pure component enthalpy for molecule :math:`i`.</span>
 
 <span class="sd">    :return: array for enthalpy of mixing as a function of composition</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -1629,73 +1647,40 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">G_mix_xv</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Hmix</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">nrtl_taus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_NRTL_IP</span><span class="p">()</span>
-  
-  <span class="k">def</span><span class="w"> </span><span class="nf">_fit_NRTL_IP</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">nrtl_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit the NRTL parameters :math:`\tau_{ij}` and :math:`\tau_{ji}` to :math:`\Delta G_{mix}` from KBI analysis using :meth:`picmol.models.nrtl.NRTL.fit_Gmix`.</span>
+
+<span class="sd">    :return: NRTL parameters :math:`\tau_{ij}` and :math:`\tau_{ji}`. For a binary system.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
       <span class="k">return</span>
-    
-    <span class="k">def</span><span class="w"> </span><span class="nf">NRTL_GE_fit</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">tau12</span><span class="p">,</span> <span class="n">tau21</span><span class="p">):</span>
-      <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="c1"># randomness factor == constant</span>
-      <span class="n">G12</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">alpha</span><span class="o">*</span><span class="n">tau12</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rc</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">))</span>
-      <span class="n">G21</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">alpha</span><span class="o">*</span><span class="n">tau21</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rc</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">))</span>
-      <span class="n">x1</span> <span class="o">=</span> <span class="n">z</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">x2</span> <span class="o">=</span> <span class="n">z</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
-      <span class="n">G_ex</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau21</span> <span class="o">*</span> <span class="n">G21</span><span class="o">/</span><span class="p">(</span><span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">G21</span><span class="p">)</span> <span class="o">+</span> <span class="n">tau12</span> <span class="o">*</span> <span class="n">G12</span> <span class="o">/</span> <span class="p">(</span><span class="n">x2</span> <span class="o">+</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">G12</span><span class="p">)))</span> 
-      <span class="n">G_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span> <span class="o">*</span> <span class="p">(</span><span class="n">x1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x2</span><span class="p">))</span>
-      <span class="k">return</span> <span class="n">G_ex</span> <span class="o">+</span> <span class="n">G_id</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">nrtl_Gmix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G_mix_xv</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nrtl_Gmix0</span> <span class="o">=</span> <span class="n">add_zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nrtl_Gmix</span><span class="p">)</span>
-    <span class="n">fit</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">NRTL_GE_fit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nrtl_Gmix</span><span class="p">)</span>
-    <span class="n">tau12</span><span class="p">,</span> <span class="n">tau21</span> <span class="o">=</span> <span class="n">fit</span>
-    
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_method_dir</span><span class="si">}</span><span class="s2">NRTL_taus_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">.txt&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">tau12</span><span class="p">,</span> <span class="n">tau21</span><span class="p">],</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> 
-    <span class="n">nrtl_taus</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;tau12&quot;</span><span class="p">:</span> <span class="n">tau12</span><span class="p">,</span> <span class="s2">&quot;tau21&quot;</span><span class="p">:</span> <span class="n">tau21</span><span class="p">}</span>
-    <span class="k">return</span> <span class="n">nrtl_taus</span>
-  
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_fit_FH_chi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="c1"># check that system is binary, else don&#39;t run</span>
-      <span class="k">return</span>
-      
-    <span class="n">phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">solute_loc</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fh_phi</span> <span class="o">=</span> <span class="n">phi</span>
-
-    <span class="n">N0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="c1"># normalize the molar volumes to get N0 for Flory-Huggins</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">fh_GM</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">Tx</span><span class="p">):</span>
-      <span class="k">return</span> <span class="mf">8.314E-3</span> <span class="o">*</span> <span class="n">Tx</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">N0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">N0</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">chi</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">x</span><span class="p">)</span>
-
-    <span class="n">GM_fit_Tsim</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">fh_GM</span><span class="p">,</span> <span class="n">Tx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span>
-    
-    <span class="n">fit</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">GM_fit_Tsim</span><span class="p">,</span> <span class="n">xdata</span><span class="o">=</span><span class="n">phi</span><span class="p">,</span> <span class="n">ydata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">G_mix_xx</span><span class="p">)</span>
-    <span class="n">chi</span> <span class="o">=</span> <span class="n">fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">fh_chi</span> <span class="o">=</span> <span class="n">chi</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">fh_Gmix</span> <span class="o">=</span> <span class="n">fh_GM</span><span class="p">(</span><span class="n">phi</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span>
-
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_method_dir</span><span class="si">}</span><span class="s1">FH_chi_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-      <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fh_chi</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-  
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fh_chi</span>
+    <span class="c1"># get the tau12 and tau21 values from the NRTL model</span>
+    <span class="k">return</span> <span class="n">NRTL</span><span class="o">.</span><span class="n">fit_Gmix</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">Gmix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">G_mix_xv</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">uniquac_du</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_UNIQUAC_IP</span><span class="p">()</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">fh_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit the FH parameter :math:`\chi` to :math:`\Delta G_{mix}` from KBI analysis using :meth:`picmol.models.fh.FH.fit_Gmix`.</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_fit_UNIQUAC_IP</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_Hmix</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">Hmix</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">UNIQUAC_R</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">UNIQUAC_Q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
-    <span class="n">du</span> <span class="o">=</span> <span class="n">fit_du_to_Hmix</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">Hmix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_Hmix</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_method_dir</span><span class="si">}</span><span class="s2">UNIQUAC_du_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">.txt&quot;</span><span class="p">,</span> <span class="n">du</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> 
-    <span class="k">return</span> <span class="n">du</span>
+<span class="sd">    :return: FH parameter :math:`\chi`. For a binary system.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_mols</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="c1"># get the tau12 and tau21 values from the NRTL model</span>
+    <span class="k">return</span> <span class="n">FH</span><span class="o">.</span><span class="n">fit_Gmix</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">solute_loc</span><span class="p">],</span> <span class="n">Gmix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">G_mix_xv</span><span class="p">,</span> <span class="n">V0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
+ 
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">uniquac_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fit the UNIQUAC parameters :math:`\Delta u_{ij}` to :math:`\Delta H_{mix}` from KBI analysis using :meth:`picmol.models.uniquac.UNIQUAC.fit_Hmix`.</span>
+<span class="sd">    </span>
+<span class="sd">    :return: UNIQUAC parameters :math:`\Delta u_{ij}`. For a multicomponent system.</span>
+<span class="sd">    :rtype: numpy.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">UNIQUAC</span><span class="o">.</span><span class="n">fit_Hmix</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">Hmix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Hmix</span><span class="p">(),</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">z_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1703,58 +1688,8 @@
     <span class="n">num_pts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">2</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span><span class="mi">4</span><span class="p">}</span>
     <span class="n">point_disc</span> <span class="o">=</span> <span class="n">PointDisc</span><span class="p">(</span><span class="n">num_comp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">recursion_steps</span><span class="o">=</span><span class="n">num_pts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">load</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">z_arr</span> <span class="o">=</span> <span class="n">point_disc</span><span class="o">.</span><span class="n">points_mfr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
-    <span class="k">return</span> <span class="n">z_arr</span> 
+    <span class="k">return</span> <span class="n">z_arr</span> </div>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">uniquac_Hmix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">uniquac_du</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_fit_UNIQUAC_IP</span><span class="p">()</span>
-
-    <span class="n">uniq_model</span> <span class="o">=</span> <span class="n">UNIQUAC</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_plot</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">IP</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">uniquac_du</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">uniq_model</span><span class="o">.</span><span class="n">GE_res</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">uniquac_Smix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">uniquac_du</span>
-    <span class="k">except</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_fit_UNIQUAC_IP</span><span class="p">()</span>
-
-    <span class="n">uniq_model</span> <span class="o">=</span> <span class="n">UNIQUAC</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_plot</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">IP</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">uniquac_du</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">uniq_model</span><span class="o">.</span><span class="n">GE_comb</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span> <span class="o">+</span> <span class="n">uniq_model</span><span class="o">.</span><span class="n">Gid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">unifac_Hmix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">unif_model</span> <span class="o">=</span> <span class="n">UNIFAC</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_plot</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;lle&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">unif_model</span><span class="o">.</span><span class="n">Hmix</span><span class="p">()</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">unifac_Smix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">unif_model</span> <span class="o">=</span> <span class="n">UNIFAC</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_plot</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;lle&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">unif_model</span><span class="o">.</span><span class="n">Smix</span><span class="p">()</span>
-  
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">quartic_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_Hmix</span>
-    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">Hmix</span><span class="p">()</span>
-    <span class="n">quar_model</span> <span class="o">=</span> <span class="n">QuarticModel</span><span class="p">(</span><span class="n">z_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z_plot</span><span class="p">,</span> <span class="n">Hmix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_Hmix</span><span class="p">,</span> <span class="n">Sex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SE</span><span class="p">(),</span> <span class="n">molar_vol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">quar_model</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">quartic_Hmix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">quartic_model</span><span class="o">.</span><span class="n">Hmix_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">quartic_nTSex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">quartic_model</span><span class="o">.</span><span class="n">nTSex_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span>
-  
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">quartic_Smix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">quartic_model</span><span class="o">.</span><span class="n">Smix_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_sim</span><span class="p">)</span></div>
 
 
 

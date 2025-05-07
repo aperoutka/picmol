@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -221,14 +222,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../picmol.plotter.html">Plotting Functions (picmol.plotter)</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../examples.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../examples/01_kbi_analysis.html">Comparing KBI Correction Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../examples/02_thermo_models.html">Thermodynamic Model Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../examples/03_combined_kbi_thermo_analysis.html">Combined KBI-Thermo Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../examples/04_unifac_lle.html">UNIFAC Phase Diagram LLE Calculations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../examples/05_unifac_Tc_search.html">UNIFAC Tc Search</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_kbi_analysis.html">01_comparing_KBI_correction_methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/02_thermo_models.html">02_themodynamic_model_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/03_combined_kbi_thermo_analysis.html">03_combined_kbi_thermo_analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_unifac_lle.html">04_UNIFAC_LLE_calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/05_unifac_Tc_search.html">05_UNIFAC_Tc_search</a></li>
+</li>
 </ul>
 
 </div>
@@ -286,8 +287,7 @@
 <div class="viewcode-block" id="UNIFAC_subgroup">
 <a class="viewcode-back" href="../../../../picmol.models.unifac.html#picmol.models.unifac_subgroups.unifac_subgroup_parameters.UNIFAC_subgroup">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UNIFAC_subgroup</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Creates object for UNIFAC subgroups.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Creates object for UNIFAC subgroup parsing, setting attribtutes for each subgroup with the same name as the parameters.</span>
 
 <span class="sd">  :param group_id: The unique identifier for the subgroup.</span>
 <span class="sd">  :type group_id: int</span>
@@ -308,9 +308,8 @@
 <span class="sd">  :param atoms: List of atoms in the subgroup (optional).</span>
 <span class="sd">  :type atoms: list, optional</span>
 <span class="sd">  :param bonds: List of bonds in the subgroup (optional).</span>
-<span class="sd">  :type bonds: list, optional</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  
+<span class="sd">  :type bonds: list, optional&quot;&quot;&quot;</span>
+
   <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;group_id&#39;</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="s1">&#39;main_group_id&#39;</span><span class="p">,</span> <span class="s1">&#39;main_group&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;smarts&#39;</span><span class="p">,</span> <span class="s1">&#39;priority&#39;</span><span class="p">,</span> <span class="s1">&#39;atoms&#39;</span><span class="p">,</span> <span class="s1">&#39;bonds&#39;</span><span class="p">]</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>   <span class="c1"># pragma: no cover</span>

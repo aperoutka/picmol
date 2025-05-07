@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -275,12 +276,8 @@
 <a class="viewcode-back" href="../../../../picmol.models.cem.html#picmol.models.cem.point_discretization.PointDisc">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PointDisc</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Discretizes the composition space of a multi-component system using a simplex.</span>
-
-<span class="sd">  This class generates a set of points within the composition space of a</span>
-<span class="sd">  multi-component system by recursively subdividing a simplex. The points</span>
-<span class="sd">  can be used to represent the possible compositions of mixtures in the system,</span>
-<span class="sd">  for example, in phase equilibrium calculations.</span>
+<span class="sd">  Discretizes the composition space of a multi-component system using a simplex. The points</span>
+<span class="sd">  can be used to represent the possible compositions of mixtures in the system.</span>
 
 <span class="sd">  :param num_comp:</span>
 <span class="sd">      The number of components in the system. Must be greater than or equal to 2.</span>
@@ -332,7 +329,7 @@
 <span class="sd">  :vartype points_cart: numpy.ndarray</span>
 <span class="sd">  :ivar stepsize:</span>
 <span class="sd">      The step size used in the discretization, determined by the</span>
-<span class="sd">      `recursion_steps`.</span>
+<span class="sd">      ``recursion_steps``.</span>
 <span class="sd">  :vartype stepsize: float</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_comp</span><span class="p">,</span> <span class="n">recursion_steps</span><span class="p">,</span> <span class="n">load</span><span class="p">,</span> <span class="n">store</span><span class="p">):</span>
@@ -398,8 +395,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">get_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates the discretized points within the simplex.</span>
-
-<span class="sd">    This method recursively generates points within the simplex based on the</span>
+<span class="sd">    Recursively generates points within the simplex based on the</span>
 <span class="sd">    number of recursion steps. The points are generated in both molar fraction</span>
 <span class="sd">    and Cartesian coordinates.</span>
 
@@ -430,10 +426,8 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">construct_outer_simplex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructs the outer simplex in Cartesian coordinates.</span>
-
-<span class="sd">    This method generates the vertices of a regular n-simplex in R\ :sup:`n`, where</span>
-<span class="sd">    n is the number of components minus 1. For the case of a 3-component</span>
-<span class="sd">    system, the simplex is rotated by 285 degrees.</span>
+<span class="sd">    Generates the vertices of a regular n-simplex in R\ :sup:`n`, where</span>
+<span class="sd">    n is the number of components minus 1. </span>
 
 <span class="sd">    :returns:</span>
 <span class="sd">        A list of numpy arrays, where each array represents the Cartesian</span>
@@ -465,10 +459,8 @@
 <a class="viewcode-back" href="../../../../picmol.models.cem.html#picmol.models.cem.point_discretization.PointDisc.transform_molar_fr_to_cartesian">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">transform_molar_fr_to_cartesian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molar_fractions</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Transforms molar fractions to Cartesian coordinates.</span>
-
-<span class="sd">    This method converts a composition represented as molar fractions</span>
-<span class="sd">    (barycentric coordinates) to Cartesian coordinates using the</span>
+<span class="sd">    Transforms a composition in molar fractions</span>
+<span class="sd">    to Cartesian coordinates using the</span>
 <span class="sd">    precomputed transformation matrix.</span>
 
 <span class="sd">    :param molar_fractions:</span>
@@ -486,10 +478,8 @@
 <a class="viewcode-back" href="../../../../picmol.models.cem.html#picmol.models.cem.point_discretization.PointDisc.transform_cartesian_to_molar_fr">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">transform_cartesian_to_molar_fr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cartesian_point</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Transforms Cartesian coordinates to molar fractions.</span>
-
-<span class="sd">    This method converts a composition represented as Cartesian coordinates</span>
-<span class="sd">    to molar fractions (barycentric coordinates) using the precomputed</span>
+<span class="sd">    Transforms a composition in Cartesian coordinates</span>
+<span class="sd">    to molar fractions using the precomputed</span>
 <span class="sd">    transformation matrix.</span>
 
 <span class="sd">    :param cartesian_point:</span>
@@ -512,10 +502,7 @@
   <span class="nd">@staticmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">euclidean_distance</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the Euclidean distance between two points.</span>
-
-<span class="sd">    This static method computes the Euclidean distance between two points</span>
-<span class="sd">    in Cartesian coordinates.</span>
+<span class="sd">    Calculates the Euclidean distance between two points in Cartesian coordinates.</span>
 
 <span class="sd">    :param p1:</span>
 <span class="sd">        A numpy array representing the coordinates of the first point.</span>
@@ -538,8 +525,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the basis change matrices between molar fractions and Cartesian coordinates.</span>
 
-<span class="sd">    This static method computes the matrices A and A_inv, which are used to</span>
-<span class="sd">    transform between molar fractions (barycentric coordinates) and Cartesian</span>
+<span class="sd">    This static method computes the matrices A and A\ :sup:`-1`, which are used to</span>
+<span class="sd">    transform between molar fractions and Cartesian</span>
 <span class="sd">    coordinates. The matrix A is constructed from the vertices of the simplex.</span>
 
 <span class="sd">    :param vertices_cartesian:</span>
@@ -548,7 +535,7 @@
 <span class="sd">    :type vertices_cartesian: list[numpy.ndarray]</span>
 
 <span class="sd">    :returns:</span>
-<span class="sd">        A tuple containing the matrix A and its inverse A_inv.</span>
+<span class="sd">        A tuple containing the matrix A and its inverse A\ :sup:`-1`.</span>
 <span class="sd">    :rtype: tuple[numpy.ndarray, numpy.ndarray]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">vertices_cartesian</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">vertices_cartesian</span><span class="p">)))</span>

@@ -14,17 +14,17 @@ from .models.unifac import get_unifac_version
 from .get_molecular_properties import load_molecular_properties, search_molecule
 from .models.cem import CEM
 from .kbi import mkdr, KBI
-from .functions import mol2vol
+from .conversions import mol2vol
 
 def spinodal_fn(z, Hij):
   r"""
-  Calculates mole fractions where the Hessian of the Gibbs mixing free energy is zero, indicating spinodal points.
+  Calculates mol fractions where the Hessian of the Gibbs mixing free energy is zero, indicating spinodal points.
 
-  :param z: mol fraction array with shape ``(number of compositions, number of components)``.
+  :param z: mol fraction array with shape `(number of compositions, number of components)`.
   :type z: numpy.ndarray
   :param Hij: determinant of Hessian matrix of the Gibbs mixing free energy.
   :type Hij: numpy.ndarray
-  :return: mol fractions of the spinodal curve. Returns an array of shape ``(2, number of components)`` for binary mixtures or ``None`` if fewer or more than two spinodal points are detected (excluding the first and last 5 points).
+  :return: mol fractions of the spinodal curve.
   :rtype: numpy.ndarray or None
   """
   sign_changes = np.diff(np.sign(Hij))  # diff of signs between consecutive elements
@@ -39,7 +39,7 @@ def spinodal_fn(z, Hij):
   
 def binodal_fn(num_comp, rec_steps, G_mix, activity_coefs, solute_idx=None, bi_min=-np.inf, bi_max=np.inf):
   r"""
-  Calculates mole fractions of the coexistence curve (binodal) using the convex envelope method (:class:`picmol.models.cem.CEM`), which applies the isoactivity criterion.
+  Calculates mol fractions of the coexistence curve (binodal) using the convex envelope method (:class:`picmol.models.cem.cem_analysis.CEM`), which applies the isoactivity criterion.
 
   :param num_comp: number of components in the mixture.
   :type num_comp: int
@@ -49,14 +49,14 @@ def binodal_fn(num_comp, rec_steps, G_mix, activity_coefs, solute_idx=None, bi_m
   :type G_mix: numpy.ndarray
   :param activity_coefs: array of activity coefficients for each component at each composition in the discretized space.
   :type activity_coefs: numpy.ndarray
-  :param solute_idx: index of the solute component for reporting mole fractions (only relevant for binary systems).
+  :param solute_idx: index of the solute component for reporting mol fractions (only relevant for binary systems).
   :type solute_idx: int, optional
-  :param bi_min: lower bound for mole fractions to be considered for binodals. Defaults to negative infinity.
+  :param bi_min: lower bound for mol fractions to be considered for binodals. Defaults to negative infinity.
   :type bi_min: float, optional
-  :param bi_max: upper bound for mole fractions to be considered for binodals. Defaults to positive infinity.
+  :param bi_max: upper bound for mol fractions to be considered for binodals. Defaults to positive infinity.
   :type bi_max: float, optional
-  :return: for binary systems, returns a tuple of two floats representing the minimum and maximum binodal mole fractions of the solute. Returns an array for multicomponent systems. Returns ``(np.nan, np.nan)`` if no valid binodal points are found for binary systems.
-  :rtype: tuple[float, float] or numpy.ndarray or tuple[np.nan, np.nan]
+  :return: for binary systems, returns a tuple of two floats representing the minimum and maximum binodal mol fractions of the solute and an array for multicomponent systems.
+  :rtype: tuple[float, float] or numpy.ndarray 
   """
   bi_obj = CEM(num_comp=num_comp, rec_steps=rec_steps, G_mix=G_mix, activity_coefs=activity_coefs)
   bi_vals = bi_obj.binodal_matrix_molfrac
@@ -157,9 +157,8 @@ def calculate_saxs_Io(z, molar_vol, n_electrons, Hij, T):
     * :math:`\overline{N^e}` is the average number of electrons in the mixture.
     * :math:`|H^x|` is the determinant of the Gibbs mixing free energy Hessian.
     * :math:`k_b` is the Boltzmann constant.
-    * :math:`T` is the temperature.
 
-  :param z: mol fraction array with shape ``(number of compositions, number of components)``.
+  :param z: mol fraction array with shape `(number of compositions, number of components)`.
   :type z: numpy.ndarray
   :param molar_vol: array of molar volumes for each component.
   :type molar_vol: numpy.ndarray
@@ -191,30 +190,29 @@ def calculate_saxs_Io(z, molar_vol, n_electrons, Hij, T):
 
 def Tc_search(smiles: list, lle_type=None, Tmin=100, Tmax=500, dT=5, unif_version="unifac"):
   r"""
-  Calculates the critical temperature (K) for a binary system using the UNIFAC model. The critical temperature is identified by finding the temperature at which spinodal points appear (Hessian of Gibbs mixing free energy becomes zero). The calculation can be optimized by specifying the type of LLE.
+  Calculates the critical temperature (K) for a binary system using the UNIFAC model. The critical temperature is identified by finding the temperature at which the distance between two spinodal points (Hessian of Gibbs mixing free energy becomes zero) are minimized. The calculation can be optimized by specifying the type of LLE.
 
   :param smiles: list of SMILES representations of the two molecules in the binary system.
   :type smiles: list
   :param lle_type: type of liquid-liquid equilibrium transition. Options are:
       
-      * 'ucst': Upper critical solution temperature (critical temperature is the maximum on the phase diagram).
-      * 'lcst': Lower critical solution temperature (critical temperature is the minimum on the phase diagram).
+      * `ucst`: Upper critical solution temperature (critical temperature is the maximum on the phase diagram).
+      * `lcst`: Lower critical solution temperature (critical temperature is the minimum on the phase diagram).
   
   :type lle_type: str, optional
-  :param Tmin: minimum temperature (K) for the search. Required for ``lle_type='lcst'`` or ``None``. Defaults to 100 K.
+  :param Tmin: minimum temperature (K) for the search. Required for ``lle_type`` = `lcst` or `None`. Defaults to `100` K.
   :type Tmin: float, optional
-  :param Tmax: maximum temperature (K) for the search. Required for ``lle_type='ucst'`` or ``None``. Defaults to 500 K.
+  :param Tmax: maximum temperature (K) for the search. Required for ``lle_type`` = `ucst` or `None`. Defaults to `500` K.
   :type Tmax: float, optional
-  :param dT: temperature step (K) for the search when ``lle_type`` is ``None``. Defaults to 5 K.
+  :param dT: temperature step (K) for the search when ``lle_type`` is `None`. Defaults to `5` K.
   :type dT: float, optional
-  :param unif_version: version of the UNIFAC model to use. Options are:
+  :param unif_version: version of the UNIFAC model to use, defaults to `unifac`. Options are:
      
-      * 'unifac': Original UNIFAC.
-      * 'unifac-lle': Updated parameters for LLE.
-      * 'unifac-il': Includes support for ionic liquid molecules.
+      * `unifac`: Original UNIFAC.
+      * `unifac-il`: Includes support for ionic liquid molecules.
   
   :type unif_version: str, optional
-  :return: The critical temperature (K). Returns ``np.nan`` if the critical temperature cannot be found.
+  :return: critical temperature (K). Returns `np.nan` if the critical temperature cannot be found.
   :rtype: float or np.nan
   """
   if "md" in unif_version or 'kbi' in unif_version:
@@ -288,34 +286,33 @@ class ThermoModel:
   This class provides a framework for applying various thermodynamic models to analyze
   LLE in mixtures. It supports both binary and multicomponent
   systems, depending on the chosen thermodynamic model. The class initializes based on a
-  selected model name, a KBI (Kirkwood-Buff Integrals) model object, and a temperature
+  selected model name, a KBI (Kirkwood-Buff Integral) model object, and a temperature
   range for analysis.
 
   :param model_name: thermodynamic model to implement. Available options include:
 
-      * 'quartic': Numerical model using a 4th order Taylor series expansion (:class:`picmol.models.numerical.QuarticModel`). Supported for multicomponent mixtures.
-      * 'uniquac': UNIQUAC (Universal Quasi-Chemical) thermodynamic model (:class:`picmol.models.uniquac.UNIQUAC`). Supported for multicomponent mixtures.
-      * 'unifac': UNIFAC (Universal Functional-group Activity Coefficients) thermodynamic model (:class:`picmol.models.unifac.UNIFAC`). Supported for multicomponent mixtures.
-      * 'fh': Flory-Huggins thermodynamic model (:class:`picmol.models.fh.FH`). Supported for binary systems only.
-      * 'nrtl': NRTL (Non-Random Two-Liquid) thermodynamic model (:class:`picmol.models.nrtl.NRTL`). Supported for binary systems only.
+      * `quartic`: Numerical model using a 4th order Taylor series expansion (:class:`picmol.models.numerical.QuarticModel`). Supported for multicomponent mixtures.
+      * `uniquac`: UNIQUAC (Universal Quasi-Chemical) thermodynamic model (:class:`picmol.models.uniquac.UNIQUAC`). Supported for multicomponent mixtures.
+      * `unifac`: UNIFAC (Universal Functional-group Activity Coefficients) thermodynamic model (:class:`picmol.models.unifac.UNIFAC`). Supported for multicomponent mixtures.
+      * `fh`: Flory-Huggins thermodynamic model (:class:`picmol.models.fh.FH`). Supported for binary systems only.
+      * `nrtl`: NRTL (Non-Random Two-Liquid) thermodynamic model (:class:`picmol.models.nrtl.NRTL`). Supported for binary systems only.
 
   :type model_name: str
   :param KBIModel: KBI class object containing Kirkwood-Buff integrals and related data.
                     This object provides information about the mixture components and their interactions.
   :type KBIModel: KBI
-  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to 100 K.
+  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to `100` K.
   :type Tmin: float, optional
-  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to 400 K.
+  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to `400` K.
   :type Tmax: float, optional
-  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to 10 K.
+  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to `5` K.
   :type dT: float, optional
   """
-  """run thermo model on kbi results"""
   def __init__(
       self, 
       model_name: str, # thermo model
       KBIModel, # option to feed in kbi model
-      Tmin=100, Tmax=400, dT=10, # temperature range
+      Tmin=100, Tmax=400, dT=5, # temperature range
     ):
 
     self.kbi_model = KBIModel
@@ -356,10 +353,10 @@ class ThermoModel:
       self.model = self.model_type(T=Tmax, smiles=self.kbi_model.smiles, version=self.unif_version)
     # quartic/numerical
     elif self.model_type == QuarticModel:
-      self.model = self.model_type(z_data=KBIModel.z, Hmix=KBIModel.Hmix(), Sex=KBIModel.SE(), molar_vol=self.kbi_model.molar_vol, gid_type='vol')
+      self.model = self.model_type(z_data=KBIModel.z, Hmix_data=KBIModel.Hmix(), SE_data=KBIModel.SE(), molar_vol=self.kbi_model.molar_vol, gid_type='vol')
     # Flory-Huggins
     elif self.model_type == FH:
-      self.model = self.model_type(smiles=self.kbi_model.smiles, phi=KBIModel.v[:,self.kbi_model.solute_loc], Smix=KBIModel.SM(), Hmix=KBIModel.Hmix())
+      self.model = self.model_type(smiles=self.kbi_model.smiles, phi=KBIModel.v[:,self.kbi_model.solute_loc], Smix=KBIModel.SM(), Hmix=KBIModel.Hmix(), V0=KBIModel.molar_vol)
     # NRTL 
     elif self.model_type == NRTL:
       self.model = self.model_type(IP=self.IP)
@@ -381,22 +378,35 @@ class ThermoModel:
     properties relevant for LLE. It distinguishes between binary
     and multicomponent systems to apply appropriate calculation methods.
 
-    **Attributes (after running this method):**
-
-    * ``GM`` (kJ/mol): Gibbs mixing energy as a function of temperature and composition.
-    * ``det_Hij``: determinant of Hessian of Gibbs mixing energy with respect to composition.
-    * ``x_sp``: mol fractions at spinodal compositions as a function of temperature.
-    * ``x_bi``: mol fractions at binodal compositions as a function of temperature.
-    * ``v_sp``: volume fractions at spinodal compositions as a function of temperature.
-    * ``v_bi``: volume fractions at binodal compositions as a function of temperature.
-    * ``GM_sp`` (kJ/mol, binary only): Gibbs mixing energy at spinodal compositions.
-    * ``GM_bi`` (kJ/mol, binary only): Gibbs mixing energy at binodal compositions.
-    * ``I0_arr``: Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity
+    :ivar GM: Gibbs mixing energy (kJ/mol) as a function of temperature and composition.
+    :vartype GM: numpy.ndarray
+    :ivar det_Hij: Determinant of Hessian of Gibbs mixing energy with respect to composition.
+    :vartype det_Hij: numpy.ndarray
+    :ivar x_sp: Mol fractions at spinodal compositions as a function of temperature.
+    :vartype x_sp: numpy.ndarray
+    :ivar x_bi: Mol fractions at binodal compositions as a function of temperature.
+    :vartype x_bi: numpy.ndarray
+    :ivar v_sp: Volume fractions at spinodal compositions as a function of temperature.
+    :vartype v_sp: numpy.ndarray
+    :ivar v_bi: Volume fractions at binodal compositions as a function of temperature.
+    :vartype v_bi: numpy.ndarray
+    :ivar GM_sp: Gibbs mixing energy at spinodal compositions (kJ/mol). For binary systems only.
+    :vartype GM_sp: numpy.ndarray
+    :ivar GM_bi: Gibbs mixing energy at binodal compositions (kJ/mol). For binary systems only.
+    :vartype GM_bi: numpy.ndarray
+    :ivar I0_arr: Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity
       as a function of temperature and composition.
-    * ``x_I0_max``: Widom line compositions in mole fraction as a function of temperature.
-    * ``v_I0_max``: Widom line compositions in volume fraction as a function of temperature.
-
-    The calculated results are stored as attributes of the :class:`ThermoModel` object.
+    :vartype I0_arr: numpy.ndarray
+    :ivar x_I0_max: Widom line compositions in mol fraction as a function of temperature.
+    :vartype x_I0_max: numpy.ndarray
+    :ivar v_I0_max: Widom line compositions in volume fraction as a function of temperature.
+    :vartype v_I0_max: numpy.ndarray
+    :ivar xc: Critical composition in mol fraction. For binary systems only.
+    :vartype xc: float
+    :ivar phic: Critical volume fraction. For binary systems only.
+    :vartype phic: float
+    :ivar Tc: Critical temperature (K). For binary systems only.
+    :vartype Tc: float
     """
     if self.kbi_model.num_comp == 2:
       self._binary_temperature_scaling()
@@ -405,7 +415,8 @@ class ThermoModel:
 
   @property
   def T_values(self):
-    r""":return: np.array of temperature values (K) for scaling
+    r"""
+    :return: array of temperature values (K) for scaling
     :rtype: numpy.ndarray
     """
     return np.arange(self.Tmin, self.Tmax+1E-3, self.dT)[::-1]
@@ -485,7 +496,7 @@ class ThermoModel:
         self.GM_bi[t,:] = [self.GM[t,bi1_ind], self.GM[t,bi2_ind]]
         
       # calculate I0
-      self.I0_arr[t] = calculate_saxs_I0(z=self.z, molar_vol=self.kbi_model.molar_vol, n_electrons=self.kbi_model.n_electrons, Hij=self.det_Hij[t], T=T)
+      self.I0_arr[t] = calculate_saxs_Io(z=self.z, molar_vol=self.kbi_model.molar_vol, n_electrons=self.kbi_model.n_electrons, Hij=self.det_Hij[t], T=T)
       # get widom line where spinodals are not found, i.e., where mixture is stable
       if np.all(np.isnan(self.x_sp[t])):
         I0_mask = ~np.isnan(self.I0_arr[t])
@@ -507,7 +518,7 @@ class ThermoModel:
       self.phic = self.model.phic
     else:
       self.xc = np.mean(x_filter[crit_ind,:])
-      self.phic = mol2vol(([self.xc, 1-self.xc]), self.kbi_model.molar_vol)
+      self.phic = mol2vol(self.xc, self.kbi_model.molar_vol)
     self.Tc = T_values_filter[crit_ind]
 
 
@@ -573,17 +584,17 @@ class UNIFACThermoModel:
   :type smiles: list
   :param mol_names: list of names for each component in the mixture.
   :type mol_names: list
-  :param solute_idx: index of the solute component in the ``smiles`` and ``mol_names`` lists. Defaults to 0.
+  :param solute_idx: index of the solute component in the ``smiles`` and ``mol_names`` lists. Defaults to `0`.
   :type solute_idx: int, optional
-  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to 100 K.
+  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to `100` K.
   :type Tmin: float, optional
-  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to 400 K.
+  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to `400` K.
   :type Tmax: float, optional
-  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to 10 K.
+  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to `10` K.
   :type dT: float, optional
-  :param save_dir: directory to save output files (not currently used in the provided code). Defaults to None.
+  :param save_dir: directory to save output files. Defaults to `None`.
   :type save_dir: str, optional
-  :param unif_version: UNIFAC version to use (e.g., 'unifac', 'unifac-lle', 'unifac-il'). Defaults to 'unifac'.
+  :param unif_version: UNIFAC version to use (e.g., `unifac`, `unifac-lle`, `unifac-il`). Defaults to `unifac`.
   :type unif_version: str, optional
   """
   def __init__(
@@ -624,8 +635,37 @@ class UNIFACThermoModel:
 
     This method calculates Gibbs mixing energy, spinodal and binodal compositions as a
     function of temperature. It distinguishes between binary and multicomponent systems
-    to apply the appropriate calculation methods. The results are stored as attributes
-    of the :class:`UNIFACThermoModel` object.
+    to apply the appropriate calculation methods. 
+    
+    :ivar GM: Gibbs mixing energy (kJ/mol) as a function of temperature and composition.
+    :vartype GM: numpy.ndarray
+    :ivar det_Hij: Determinant of Hessian of Gibbs mixing energy with respect to composition. For binary systems only.
+    :vartype det_Hij: numpy.ndarray
+    :ivar x_sp: Mol fractions at spinodal compositions as a function of temperature. For binary systems only.
+    :vartype x_sp: numpy.ndarray
+    :ivar x_bi: Mol fractions at binodal compositions as a function of temperature.
+    :vartype x_bi: numpy.ndarray
+    :ivar v_sp: Volume fractions at spinodal compositions as a function of temperature. For binary systems only.
+    :vartype v_sp: numpy.ndarray
+    :ivar v_bi: Volume fractions at binodal compositions as a function of temperature.
+    :vartype v_bi: numpy.ndarray
+    :ivar GM_sp: Gibbs mixing energy at spinodal compositions (kJ/mol). For binary systems only.
+    :vartype GM_sp: numpy.ndarray
+    :ivar GM_bi: Gibbs mixing energy at binodal compositions (kJ/mol). For binary systems only.
+    :vartype GM_bi: numpy.ndarray
+    :ivar I0_arr: Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity
+      as a function of temperature and composition.
+    :vartype I0_arr: numpy.ndarray
+    :ivar x_I0_max: Widom line compositions in mol fraction as a function of temperature.
+    :vartype x_I0_max: numpy.ndarray
+    :ivar v_I0_max: Widom line compositions in volume fraction as a function of temperature.
+    :vartype v_I0_max: numpy.ndarray
+    :ivar xc: Critical composition in mol fraction. For binary systems only.
+    :vartype xc: float
+    :ivar phic: Critical volume fraction. For binary systems only.
+    :vartype phic: float
+    :ivar Tc: Critical temperature (K). For binary systems only.
+    :vartype Tc: float
     """
     if self.num_comp == 2:
       self._binary_temperature_scaling()
@@ -634,24 +674,29 @@ class UNIFACThermoModel:
 
   @property
   def num_comp(self):
-    r""":return: number of components in the mixture.
+    r"""
+    :return: number of components in the mixture.
     :rtype: int
     """
     return len(self.smiles)
 
   @property
   def T_values(self):
-    r""":return: array of temperature values (K) used for scaling.
+    r"""
+    :return: array of temperature values (K) used for scaling.
     :rtype: numpy.ndarray"""
     return np.arange(self.Tmin, self.Tmax+1E-3, self.dT)[::-1]
 
   def compute_rdkit_properties(self):
     r"""
-    Computes molecular properties using RDKit.
+    Computes the following molecular properties using RDKit based on ``smiles``, with values stored as attributes in a dictionary:
 
-    This method calculates molecular weight, density, molar volume, number of electrons,
-    and molecular charge for each component based on their SMILES strings.
-    
+    * `mol_wt`: Molar weight (g/mol)
+    * `density`:  Density (g/cm\ :sup:`3`)
+    * `molar_vol`: Molar volume (cm\ :sup:`3`/mol)
+    * `n_electrons`: Number of electrons
+    * `mol_charge`: Formal charge on molecule
+   
     :return: dicstionary of molecular properties by molecule
     :rtype: dict
     """
@@ -684,7 +729,8 @@ class UNIFACThermoModel:
 
   @property
   def mol_wt(self):
-    r""":return: molar masses of the components from :func:`compute_rdkit_properties()` function.
+    r"""
+    :return: molar masses of the components from :func:`compute_rdkit_properties()` function.
     :rtype: numpy.ndarray"""
     try:
       self._rdkit_dict
@@ -694,7 +740,8 @@ class UNIFACThermoModel:
   
   @property
   def density(self):
-    r""":return: densities of the components from :func:`compute_rdkit_properties()` function.
+    r"""
+    :return: densities of the components from :func:`compute_rdkit_properties()` function.
     :rtype: numpy.ndarray"""
     try:
       self._rdkit_dict
@@ -704,7 +751,8 @@ class UNIFACThermoModel:
 
   @property
   def molar_vol(self):
-    r""":return: molar volumes of the components from :func:`compute_rdkit_properties()` function.
+    r"""
+    :return: molar volumes of the components from :func:`compute_rdkit_properties()` function.
     :rtype: numpy.ndarray"""
     try:
       self._rdkit_dict
@@ -714,7 +762,8 @@ class UNIFACThermoModel:
 
   @property
   def n_electrons(self):
-    r""":return: number of electrons for each component from :func:`compute_rdkit_properties()` function.
+    r"""
+    :return: number of electrons for each component from :func:`compute_rdkit_properties()` function.
     :rtype: numpy.ndarray"""
     try:
       self._rdkit_dict
@@ -724,7 +773,8 @@ class UNIFACThermoModel:
 
   @property
   def mol_charge(self):
-    r""":return: molecular charges of the components from :func:`compute_rdkit_properties()` function.
+    r"""
+    :return: molecular charges of the components from :func:`compute_rdkit_properties()` function.
     :rtype: numpy.ndarray"""
     try:
       self._rdkit_dict
@@ -797,14 +847,13 @@ class UNIFACThermoModel:
     T_values_filter = self.T_values[nan_mask]
     crit_ind = np.abs(x_filter[:,0]-x_filter[:,1]).argmin()
     self.xc = np.mean(x_filter[crit_ind,:])
-    self.phic = mol2vol(([self.xc, 1-self.xc]), self.molar_vol)
+    self.phic = mol2vol(self.xc, self.molar_vol)
     self.Tc = T_values_filter[crit_ind]
 
 
   def _multicomp_temperature_scaling(self):
 
     self.GM = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
-    self.det_Hij = np.full((len(self.T_values), self.z.shape[0]), fill_value=np.nan)
     self.x_bi = []
     self.x_sp = []
 
@@ -818,11 +867,6 @@ class UNIFACThermoModel:
 
       bi_vals = binodal_fn(num_comp=self.num_comp, rec_steps=self.model.rec_steps, G_mix=GM, activity_coefs=gammas, solute_idx=self.solute_loc, bi_min=0.001, bi_max=0.99)
       self.x_bi += [bi_vals]
-
-      self.det_Hij[t] = det_Hij
-      mask = (det_Hij > -10) & (det_Hij <= 10)
-      sps = spinodal_fn(z=self.model.z, Hij=det_Hij)
-      self.x_sp += [sps]
 
 
   

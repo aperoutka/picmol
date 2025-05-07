@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>picmol.get_molecular_properties - picmol 0.0.1 documentation</title>
+        <title>picmol.conversions - picmol 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -264,113 +264,82 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for picmol.get_molecular_properties</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">AllChem</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
+          <h1>Source code for picmol.conversions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<div class="viewcode-block" id="add_molecule">
-<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.get_molecular_properties.add_molecule">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">add_molecule</span><span class="p">(</span><span class="n">mol_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">density</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Adds a molecule to ``molecular_properties.csv`` file, using user specified information and rdkit properties</span>
+<div class="viewcode-block" id="mol2vol">
+<a class="viewcode-back" href="../../picmol.conversions.html#picmol.conversions.mol2vol">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mol2vol</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">V0</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Convert mol frac to vol frac.</span>
 
-<span class="sd">  :param mol_name: molecule name identifier</span>
-<span class="sd">  :type mol_name: str</span>
-<span class="sd">  :param mol_id: molecule name in .top file</span>
-<span class="sd">  :type mol_id: str</span>
-<span class="sd">  :param smiles: SMILES string representation of the molecule</span>
-<span class="sd">  :type smiles: str</span>
-<span class="sd">  :param density: mass density (g/mL) of molecule at STP used to calculate molar volume, if not provided density and molar volume are estimated with RDkit</span>
-<span class="sd">  :type density: float, optional</span>
+<span class="sd">  .. math::</span>
+<span class="sd">    \phi_i = \frac{x_i V_i}{\sum_j x_j V_j}</span>
+
+<span class="sd">  where:</span>
+<span class="sd">  </span>
+<span class="sd">    * :math:`\phi_i` is the volume fraction of component :math:`i`</span>
+<span class="sd">    * :math:`x_i` is the mole fraction of component :math:`i`</span>
+<span class="sd">    * :math:`V_i` is the molar volume of component :math:`i`</span>
+
+<span class="sd">  :param val: mol fraction</span>
+<span class="sd">  :type val: float or numpy.ndarray</span>
+<span class="sd">  :param V0: molar volume</span>
+<span class="sd">  :type V0: numpy.ndarray</span>
+<span class="sd">  :return: volume fraction</span>
+<span class="sd">  :rtype: float or numpy.ndarray</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">mol_obj</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
-  <span class="n">mol_obj</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">get_electron_number</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
-    <span class="n">atomic_numbers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
-      <span class="n">atomic_numbers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">GetAtomicNum</span><span class="p">()]</span>
-    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">atomic_numbers</span><span class="p">)</span>
-
-  <span class="n">n_electrons</span> <span class="o">=</span> <span class="n">get_electron_number</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
-  <span class="n">mol_wt</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Descriptors</span><span class="o">.</span><span class="n">MolWt</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
-  <span class="n">mol_charge</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">GetFormalCharge</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
-  
-  <span class="k">if</span> <span class="n">density</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">molar_vol</span> <span class="o">=</span> <span class="n">mol_wt</span><span class="o">/</span><span class="n">density</span>
+  <span class="n">V0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">V0</span><span class="p">)</span>
+  <span class="c1"># if val is a float, convert to array</span>
+  <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">]:</span>
+    <span class="n">z_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">val</span><span class="p">])</span>
+    <span class="n">vbar</span> <span class="o">=</span> <span class="n">z_arr</span> <span class="o">@</span> <span class="n">V0</span>
+    <span class="n">v_arr</span> <span class="o">=</span> <span class="n">z_arr</span> <span class="o">*</span> <span class="n">V0</span> <span class="o">/</span> <span class="n">vbar</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">v_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="n">AllChem</span><span class="o">.</span><span class="n">EmbedMolecule</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">,</span> <span class="n">useRandomCoords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">molar_vol</span> <span class="o">=</span> <span class="n">AllChem</span><span class="o">.</span><span class="n">ComputeMolVolume</span><span class="p">(</span><span class="n">mol_obj</span><span class="p">)</span>
-    <span class="n">density</span> <span class="o">=</span> <span class="n">mol_wt</span><span class="o">/</span><span class="n">molar_vol</span> 
-
-  <span class="n">molarity</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">density</span><span class="o">/</span><span class="n">mol_wt</span>
-
-  <span class="n">new_molecule</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;mol_name&#39;</span><span class="p">:</span> <span class="n">mol_name</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
-    <span class="s1">&#39;mol_id&#39;</span><span class="p">:</span> <span class="n">mol_id</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
-    <span class="s1">&#39;mol_wt&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mol_wt</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;density&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">density</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;molarity&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molarity</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;molar_vol&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">molar_vol</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;n_electrons&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_electrons</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;mol_charge&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mol_charge</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s1">&#39;smiles&#39;</span><span class="p">:</span> <span class="n">smiles</span><span class="p">,</span>
-  <span class="p">}</span>
-
-  <span class="c1"># read in dataframe and add molecule and write back out</span>
-  <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span>
-  <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_append</span><span class="p">(</span><span class="n">new_molecule</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-  <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+    <span class="n">z_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="n">vbar</span> <span class="o">=</span> <span class="n">z_arr</span> <span class="o">@</span> <span class="n">V0</span>
+    <span class="n">v_arr</span> <span class="o">=</span> <span class="n">z_arr</span> <span class="o">*</span> <span class="n">V0</span> <span class="o">/</span> <span class="n">vbar</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">v_arr</span></div>
 
 
-  
-<div class="viewcode-block" id="search_molecule">
-<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.get_molecular_properties.search_molecule">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">search_molecule</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Uses molecule name to search ``molecular_properties.csv`` to determine if molecule is present</span>
+<div class="viewcode-block" id="vol2mol">
+<a class="viewcode-back" href="../../picmol.conversions.html#picmol.conversions.vol2mol">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">vol2mol</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">V0</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Convert vol frac to mol frac.</span>
 
-<span class="sd">  :param mol: molecule to look up using identifer ``index``</span>
-<span class="sd">  :type mol: str</span>
-<span class="sd">  :param index: molecule identifier type. Available options include:</span>
+<span class="sd">  .. math::</span>
+<span class="sd">    x_i = \frac{\frac{\phi_i}{V_i}}{\sum_j \frac{\phi_j}{V_j}}</span>
 
-<span class="sd">      * &#39;mol_name&#39;: molecule name identifier</span>
-<span class="sd">      * &#39;mol_id&#39;: molecule name in .top file</span>
-<span class="sd">      * &#39;smiles&#39;: SMILES string representation of the molecule</span>
-<span class="sd">    </span>
-<span class="sd">  :type index: str</span>
-<span class="sd">  :raises SystemExit: if ``mol`` is not found in ``index``</span>
+<span class="sd">  where:</span>
+
+<span class="sd">    * :math:`x_i` is the mole fraction of component :math:`i`</span>
+<span class="sd">    * :math:`\phi_i` is the volume fraction of component :math:`i`</span>
+<span class="sd">    * :math:`V_i` is the molar volume of component :math:`i`</span>
+
+<span class="sd">  :param val: volume fraction</span>
+<span class="sd">  :type val: float or numpy.ndarray</span>
+<span class="sd">  :param V0: molar volume</span>
+<span class="sd">  :type V0: numpy.ndarray</span>
+<span class="sd">  :return: mol fraction</span>
+<span class="sd">  :rtype: float or numpy.ndarray</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="n">df</span> <span class="o">=</span> <span class="n">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">mol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;molecule not found!!!&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;use &quot;add_molecule()&quot; method to add to molecule list&#39;</span><span class="p">)</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+  <span class="n">V0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">V0</span><span class="p">)</span>
+  <span class="c1"># if val is a float, convert to array</span>
+  <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">]:</span>
+    <span class="n">v_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="n">val</span><span class="p">])</span>
+    <span class="n">vfrac</span> <span class="o">=</span> <span class="n">v_arr</span> <span class="o">/</span> <span class="n">V0</span>
+    <span class="n">z_arr</span> <span class="o">=</span> <span class="n">vfrac</span> <span class="o">/</span> <span class="n">vfrac</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">z_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">v_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="n">vfrac</span> <span class="o">=</span> <span class="n">v_arr</span> <span class="o">/</span> <span class="n">V0</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+    <span class="n">z_arr</span> <span class="o">=</span> <span class="n">vfrac</span> <span class="o">/</span> <span class="p">(</span><span class="n">vfrac</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">z_arr</span></div>
 
 
 
-<div class="viewcode-block" id="load_molecular_properties">
-<a class="viewcode-back" href="../../picmol.get_molecular_properties.html#picmol.get_molecular_properties.load_molecular_properties">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_molecular_properties</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Loads ``molecular_properties.csv`` with pandas setting index to specified column</span>
-
-<span class="sd">  :param index: column to set as `index` in pandas DataFrame. Available options include:</span>
-
-<span class="sd">      * &#39;mol_name&#39;: molecule name identifier</span>
-<span class="sd">      * &#39;mol_id&#39;: molecule name in .top file</span>
-<span class="sd">      * &#39;smiles&#39;: SMILES string representation of the molecule</span>
-
-<span class="sd">  :type index: str</span>
-<span class="sd">  :return: pandas DataFrame of ``molecular_properties.csv`` with specified index</span>
-<span class="sd">  :rtype: pandas.DataFrame</span>
-<span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span> <span class="o">/</span> <span class="s2">&quot;molecular_properties.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>  </div>
-
-  
 </pre></div>
         </article>
       </div>

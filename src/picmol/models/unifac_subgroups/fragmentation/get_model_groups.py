@@ -2,30 +2,29 @@ from typing import Union, List
 import pandas as pd
 from rdkit import Chem
 
-from .fragmentation_models.fragmentation_model import *
+from .fragmentation_models.fragmentation_model import FragmentationModel
 from .get_rdkit_object import *
 from .problematics import *
 
 
 def group_matches(mol_object: Chem.rdchem.Mol, group: str, model: FragmentationModel, action: str="detection") -> tuple:
   r"""
-  Obtain the group matches in a molecule.
-
-  Given a functional group, a FragmentationModel, and an RDKit Mol object,
-  this function obtains the SubstructMatches in the molecule.
-
+  Calculates the substructure matches of a functional group in a molecule.
+  This function uses the RDKit library to find substructure matches of a
+  functional group in a given molecule. 
+  
   :param mol_object: The RDKit Mol object in which to search for the group.
   :type mol_object: Chem.rdchem.Mol
   :param group: The functional group to search for.
   :type group: str
   :param model: The FragmentationModel containing the group definitions.
   :type model: FragmentationModel
-  :param action: The action context ('detection' or 'fit').
+  :param action: The action context (`detection` or `fit`). Default is `detection`.
   :type action: str, optional
   :return: A tuple of tuples containing the atoms that participate in the
-            group substructure.  The length of the tuple equals the number of
+            group substructure. The length of the tuple equals the number of
             matches of the group in the molecule.
-  :rtype: tuple
+  :rtype: tuple[tuple[str]]
   :raises ValueError: If the action is not 'detection' or 'fit'.
   """
 
@@ -34,7 +33,7 @@ def group_matches(mol_object: Chem.rdchem.Mol, group: str, model: FragmentationM
   elif action == "fit":
     model.fit_mols[group]
   else:
-    raise ValueError(f"{action} not valid, use 'detection' or 'fit'")
+    raise ValueError(f"{action} not valid, use `detection` or `fit`")
   
   for mol in mols:
     matches = mol_object.GetSubstructMatches(mol)
@@ -47,10 +46,8 @@ def group_matches(mol_object: Chem.rdchem.Mol, group: str, model: FragmentationM
 
 def detect_groups(mol_object: Chem.rdchem.Mol, model: FragmentationModel) -> tuple[List[str], List[int]]:
   r"""
-  Detect functional groups in a molecule.
-
-  This function identifies the functional groups present in a molecule,
-  using the SMARTS representations defined in a FragmentationModel.
+  Identifies the functional groups present in a molecule,
+  using the SMARTS representations defined in a :class:`FragmentationModel`.
 
   :param mol_object: The RDKit Mol object to analyze.
   :type mol_object: Chem.rdchem.Mol
@@ -75,47 +72,38 @@ def detect_groups(mol_object: Chem.rdchem.Mol, model: FragmentationModel) -> tup
 
 
 
-def get_groups(model: FragmentationModel, 
-  identifier: Union[str, Chem.rdchem.Mol], 
-  identifier_type: str = "smiles",) -> dict:
+def get_groups(
+    model: FragmentationModel, 
+    identifier: Union[str, Chem.rdchem.Mol], 
+  ) -> dict:
   
   r"""
-  Obtain subgroups from an RDKit Mol object.
-
-  This function retrieves the subgroups of an RDKit Mol object based on the
-  definitions in a FragmentationModel.  It also handles problematic
+  Obtain subgroups from an RDKit Mol object based on the
+  definitions in a :class:`FragmentationModel`. It also handles problematic
   structures and returns corrected subgroup counts.
 
   :param model: The FragmentationModel containing the subgroup definitions.
   :type model: FragmentationModel
   :param identifier: The molecular identifier, either a SMILES string or an
                       RDKit Mol object.
-  :type identifier: Union[str, Chem.rdchem.Mol]
-  :param identifier_type: The type of identifier provided ('smiles' or 'mol').
-  :type identifier_type: str, optional
-  :return: A dictionary of subgroups and their occurrences in the molecule.
-  :rtype: dict
+  :type identifier: str or Chem.rdchem.Mol
+  :return: A dictionary of subgroups names and their occurrences in the molecule.
+  :rtype: dict[str, int]
   """
 
   # RDkit mol object
-  mol_object = instantiate_mol_object(identifier, identifier_type)
+  mol_object = instantiate_mol_object(identifier)
 
-  # =========================================================================
   # Direct detection of groups presence and occurences
-  # =========================================================================
   groups, groups_ocurrences = detect_groups(mol_object=mol_object, model=model)
 
-  # =========================================================================
   # Filter the contribution matrix and sum over row to cancel the contribs
-  # =========================================================================
   mol_subgroups = {}
   for g, group in enumerate(groups):
     mol_subgroups[group] = groups_ocurrences[g]
 
-  # =========================================================================
   # Check for the presence of problematic structures and correct.
-  # =========================================================================
-  mol_subgroups_corrected = correct_problematics(mol_object=mol_object, mol_subgroups=mol_subgroups,model=model)
+  mol_subgroups_corrected = correct_problematics(mol_object=mol_object, mol_subgroups=mol_subgroups, model=model)
 
   if mol_subgroups_corrected == {}:
     return mol_subgroups

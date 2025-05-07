@@ -208,6 +208,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -278,15 +279,11 @@
 <span id="molecule-fragmentation-picmol-models-unifac-subgroups-fragmentation"></span><h1>Molecule Fragmentation (picmol.models.unifac_subgroups.fragmentation)<a class="headerlink" href="#module-picmol.models.unifac_subgroups.fragmentation.groups" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.groups.Groups">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.groups.</span></span><span class="sig-name descname"><span class="pre">Groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'smiles'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/groups.html#Groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.groups.Groups" title="Link to this definition">¶</a></dt>
-<dd><p>Group class.</p>
-<p>Stores the solved FragmentationModels subgroups of a molecule.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.groups.</span></span><span class="sig-name descname"><span class="pre">Groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/groups.html#Groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.groups.Groups" title="Link to this definition">¶</a></dt>
+<dd><p>Group class. Stores the solved FragmentationModels subgroups of a molecule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The molecular identifier (SMILES string or RDKit Mol object).</p></li>
-<li><p><strong>identifier_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The type of identifier used (‘smiles’ or ‘mol’).</p></li>
-</ul>
+<dd class="field-odd"><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>rdkit.rdchem.Mol</em>) – The molecular identifier (SMILES string or RDKit Mol object).</p>
 </dd>
 <dt class="field-even">Variables<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -319,7 +316,7 @@ RDKit’s GetPeriodicTable.</p>
 atomic radii.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[V_{vdw} = \sum_i \frac{4}{3} \pi r_i^3 \cdot N_A \cdot 10^{-24}\]</div>
+\[V_{vdw} = N_A \sum_i \frac{4}{3} \pi r_i^3\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -338,7 +335,7 @@ atomic radii.</p>
 atomic radii.</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[SA_{vdw} = \sum_i 4 \pi r_i^2 \cdot N_A \cdot 10^{-16}\]</div>
+\[SA_{vdw} = N_A \sum_i 4 \pi r_i^2\]</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -352,20 +349,14 @@ atomic radii.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.groups.Groups.SubgroupModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SubgroupModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/groups.html#Groups.SubgroupModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.groups.Groups.SubgroupModel" title="Link to this definition">¶</a></dt>
-<dd><p>Handles subgroup-related calculations for a specific model.</p>
-<p>This class performs calculations related to molecular subgroups,
-such as converting subgroup names to IDs and calculating molar
-van der Waals volume and surface area parameters.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SubgroupModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/groups.html#Groups.SubgroupModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.groups.Groups.SubgroupModel" title="Link to this definition">¶</a></dt>
+<dd><p>Handles subgroup-related calculations for a specific UNIFAC model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The identifier of the molecule.  This could be a SMILES string or
-other molecule identifier, depending on the context.</p></li>
-<li><p><strong>identifier_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The type of the molecule identifier (e.g., ‘smiles’).
-This is case-insensitive.</p></li>
-<li><p><strong>model</strong> (<a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><em>FragmentationModel</em></a>) – The fragmentation model instance (e.g., a <code class="xref py py-class docutils literal notranslate"><span class="pre">GibbsModel</span></code>)
-containing the subgroup definitions and parameters.</p></li>
+<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>rdkit.rdchem.Mol</em>) – The identifier of the molecule. This could be a SMILES string or
+rdkit.rdchem.Mol object.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><em>FragmentationModel</em></a>) – The fragmentation model instance containing the subgroup definitions and parameters.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Variables<span class="colon">:</span></dt>
@@ -428,13 +419,13 @@ the summation of surface area parameters (<span class="math notranslate nohighli
 <dl class="py property">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.groups.Groups.SubgroupModel.subgroup_q">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subgroup_q</span></span><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.groups.Groups.SubgroupModel.subgroup_q" title="Link to this definition">¶</a></dt>
-<dd><p>Gets the surface area parameter (Q) for each subgroup. Creates a dictionary mapping subgroup IDs to their surface area parameters (Q).</p>
+<dd><p>Maps the surface area parameter (<span class="math notranslate nohighlight">\(Q_j\)</span>) for each subgroup <span class="math notranslate nohighlight">\(j\)</span> in molecule <span class="math notranslate nohighlight">\(i\)</span> to its corresponding subgroup ID.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A dictionary of subgroup IDs and their Q values.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -446,22 +437,18 @@ the summation of surface area parameters (<span class="math notranslate nohighli
 <dl class="py class" id="module-picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.</span></span><span class="sig-name descname"><span class="pre">FragmentationModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subgroups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">RQ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_detection_smarts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problematic_structures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/fragmentation_models/fragmentation_model.html#FragmentationModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="Link to this definition">¶</a></dt>
-<dd><p>Represents a model for fragmenting molecules and analyzing their subgroups.</p>
-<p>This class initializes a fragmentation model with subgroup definitions,
-regression coefficients, and optional information about problematic
-structural patterns. It also precomputes data structures for efficient
-molecule analysis.</p>
+<dd><p>A model for fragmenting molecules and analyzing their subgroups.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>subgroups</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame defining the molecular subgroups.
-The index of the DataFrame represents the subgroup identifiers.
+The index of the DataFrame represents the subgroup IDs.
 It must contain columns named “smarts” and “contribute”.</p></li>
 <li><p><strong>RQ</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame representing the subgroup R &amp; Q UNIFAC terms.</p></li>
-<li><p><strong>split_detection_smarts</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – A list of subgroup identifiers (corresponding to the index in the
+<li><p><strong>split_detection_smarts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – A list of subgroup identifiers (corresponding to the index in the
 <cite>subgroups</cite> DataFrame) for which the SMARTS patterns for detection
 are split into multiple patterns.</p></li>
-<li><p><strong>problematic_structures</strong> (<em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – A pandas DataFrame describing problematic structural patterns.
+<li><p><strong>problematic_structures</strong> (<em>pd.DataFrame</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – A pandas DataFrame describing problematic structural patterns.
 The index of the DataFrame contains SMARTS patterns, and the
 DataFrame must contain a column named “contribute”.
 The “contribute” column should contain string representations of
@@ -474,14 +461,14 @@ If None, an empty DataFrame is created.</p></li>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>contribution_matrix</strong> (<em>pd.DataFrame</em>) – A pandas DataFrame representing the contribution matrix,
 derived from the “contribute” column of the <cite>subgroups</cite> DataFrame.</p></li>
-<li><p><strong>detection_mols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – A dictionary mapping subgroup identifiers to lists of RDKit Mol
+<li><p><strong>detection_mols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – A dictionary mapping subgroup IDs to lists of RDKit Mol
 objects, instantiated from the SMARTS patterns in the “smarts”
-column of the <cite>subgroups</cite> DataFrame.  For subgroups in
-<cite>split_detection_smarts</cite>, the value is a list of multiple Mol objects.</p></li>
-<li><p><strong>fit_mols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – A dictionary mapping subgroup identifiers to lists of RDKit Mol
-objects, similar to <cite>detection_mols</cite>, but using the original
-SMARTS patterns from the “smarts” column of the <cite>subgroups</cite> DataFrame,
-even for subgroups in <cite>split_detection_smarts</cite>.</p></li>
+column of the <code class="docutils literal notranslate"><span class="pre">subgroups</span></code> DataFrame.  For subgroups in
+<code class="docutils literal notranslate"><span class="pre">split_detection_smarts</span></code>, the value is a list of multiple Mol objects.</p></li>
+<li><p><strong>fit_mols</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>rdkit.Chem.rdchem.Mol</em><em>]</em><em>]</em>) – A dictionary mapping subgroup IDs to lists of RDKit Mol
+objects, similar to <code class="docutils literal notranslate"><span class="pre">detection_mols</span></code>, but using the original
+SMARTS patterns from the “smarts” column of the <code class="docutils literal notranslate"><span class="pre">subgroups</span></code> DataFrame,
+even for subgroups in <code class="docutils literal notranslate"><span class="pre">split_detection_smarts</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -489,14 +476,11 @@ even for subgroups in <cite>split_detection_smarts</cite>.</p></li>
 
 <dl class="py function" id="module-picmol.models.unifac_subgroups.fragmentation.get_rdkit_object">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.get_rdkit_object.instantiate_mol_object">
-<span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.get_rdkit_object.</span></span><span class="sig-name descname"><span class="pre">instantiate_mol_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'smiles'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mol</span></span></span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/get_rdkit_object.html#instantiate_mol_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.get_rdkit_object.instantiate_mol_object" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.get_rdkit_object.</span></span><span class="sig-name descname"><span class="pre">instantiate_mol_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Mol</span></span></span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/get_rdkit_object.html#instantiate_mol_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.get_rdkit_object.instantiate_mol_object" title="Link to this definition">¶</a></dt>
 <dd><p>Instantiate a RDKit Mol object from SMILES or an existing Mol object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>identifier</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>Chem.rdchem.Mol</em><em>]</em>) – The molecular identifier, either a SMILES string or an RDKit Mol object.</p></li>
-<li><p><strong>identifier_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The type of identifier provided.  Must be ‘smiles’ or ‘mol’.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Chem.rdchem.Mol</em>) – The molecular identifier, either a SMILES string or an RDKit Mol object.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>An RDKit Mol object.</p>
@@ -505,7 +489,7 @@ even for subgroups in <cite>split_detection_smarts</cite>.</p></li>
 <dd class="field-odd"><p>Chem.rdchem.Mol</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the identifier type is invalid or if a ‘mol’ type identifier is not an RDKit Mol object.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the identifier type is invalid or if a  <cite>mol</cite> type identifier is not an RDKit Mol object.</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -518,25 +502,25 @@ will return the same Mol object.</p>
 <dl class="py function" id="module-picmol.models.unifac_subgroups.fragmentation.get_model_groups">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.get_model_groups.group_matches">
 <span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.get_model_groups.</span></span><span class="sig-name descname"><span class="pre">group_matches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_object</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><span class="pre">FragmentationModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'detection'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a></span></span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/get_model_groups.html#group_matches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.get_model_groups.group_matches" title="Link to this definition">¶</a></dt>
-<dd><p>Obtain the group matches in a molecule.</p>
-<p>Given a functional group, a FragmentationModel, and an RDKit Mol object,
-this function obtains the SubstructMatches in the molecule.</p>
+<dd><p>Calculates the substructure matches of a functional group in a molecule.
+This function uses the RDKit library to find substructure matches of a
+functional group in a given molecule.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mol_object</strong> (<em>Chem.rdchem.Mol</em>) – The RDKit Mol object in which to search for the group.</p></li>
 <li><p><strong>group</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The functional group to search for.</p></li>
 <li><p><strong>model</strong> (<a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><em>FragmentationModel</em></a>) – The FragmentationModel containing the group definitions.</p></li>
-<li><p><strong>action</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The action context (‘detection’ or ‘fit’).</p></li>
+<li><p><strong>action</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The action context (<cite>detection</cite> or <cite>fit</cite>). Default is <cite>detection</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A tuple of tuples containing the atoms that participate in the
-group substructure.  The length of the tuple equals the number of
+group substructure. The length of the tuple equals the number of
 matches of the group in the molecule.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]]</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the action is not ‘detection’ or ‘fit’.</p>
@@ -547,9 +531,8 @@ matches of the group in the molecule.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.get_model_groups.detect_groups">
 <span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.get_model_groups.</span></span><span class="sig-name descname"><span class="pre">detect_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_object</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><span class="pre">FragmentationModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/get_model_groups.html#detect_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.get_model_groups.detect_groups" title="Link to this definition">¶</a></dt>
-<dd><p>Detect functional groups in a molecule.</p>
-<p>This function identifies the functional groups present in a molecule,
-using the SMARTS representations defined in a FragmentationModel.</p>
+<dd><p>Identifies the functional groups present in a molecule,
+using the SMARTS representations defined in a <code class="xref py py-class docutils literal notranslate"><span class="pre">FragmentationModel</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -569,25 +552,23 @@ their corresponding occurrences.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.get_model_groups.get_groups">
-<span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.get_model_groups.</span></span><span class="sig-name descname"><span class="pre">get_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><span class="pre">FragmentationModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'smiles'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/get_model_groups.html#get_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.get_model_groups.get_groups" title="Link to this definition">¶</a></dt>
-<dd><p>Obtain subgroups from an RDKit Mol object.</p>
-<p>This function retrieves the subgroups of an RDKit Mol object based on the
-definitions in a FragmentationModel.  It also handles problematic
+<span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.get_model_groups.</span></span><span class="sig-name descname"><span class="pre">get_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><span class="pre">FragmentationModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/get_model_groups.html#get_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.get_model_groups.get_groups" title="Link to this definition">¶</a></dt>
+<dd><p>Obtain subgroups from an RDKit Mol object based on the
+definitions in a <code class="xref py py-class docutils literal notranslate"><span class="pre">FragmentationModel</span></code>. It also handles problematic
 structures and returns corrected subgroup counts.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><em>FragmentationModel</em></a>) – The FragmentationModel containing the subgroup definitions.</p></li>
-<li><p><strong>identifier</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>Chem.rdchem.Mol</em><em>]</em>) – The molecular identifier, either a SMILES string or an
+<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> or </em><em>Chem.rdchem.Mol</em>) – The molecular identifier, either a SMILES string or an
 RDKit Mol object.</p></li>
-<li><p><strong>identifier_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – The type of identifier provided (‘smiles’ or ‘mol’).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dictionary of subgroups and their occurrences in the molecule.</p>
+<dd class="field-even"><p>A dictionary of subgroups names and their occurrences in the molecule.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -595,8 +576,7 @@ RDKit Mol object.</p></li>
 <dl class="py function" id="module-picmol.models.unifac_subgroups.fragmentation.problematics">
 <dt class="sig sig-object py" id="picmol.models.unifac_subgroups.fragmentation.problematics.correct_problematics">
 <span class="sig-prename descclassname"><span class="pre">picmol.models.unifac_subgroups.fragmentation.problematics.</span></span><span class="sig-name descname"><span class="pre">correct_problematics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_object</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mol_subgroups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><span class="pre">FragmentationModel</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="_modules/picmol/models/unifac_subgroups/fragmentation/problematics.html#correct_problematics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.unifac_subgroups.fragmentation.problematics.correct_problematics" title="Link to this definition">¶</a></dt>
-<dd><p>Correct problematic structures in mol_object.</p>
-<p>Identifies and corrects problematic structural patterns within a molecule
+<dd><p>Identifies and corrects problematic structural patterns within a molecule
 by adjusting the counts of its subgroups. It uses a fragmentation model to
 determine which substructures are problematic and how their contributions
 should be redistributed.</p>
@@ -604,16 +584,11 @@ should be redistributed.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mol_object</strong> (<em>Chem.rdchem.Mol</em>) – The molecule to be corrected, represented as an RDKit Mol object.</p></li>
-<li><p><strong>mol_subgroups</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – A dictionary containing the initial counts of subgroups in the molecule.
+<li><p><strong>mol_subgroups</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – A dictionary containing the initial counts of subgroups in the molecule.
 The keys are subgroup identifiers (e.g., SMARTS strings), and the values
 are their corresponding counts.</p></li>
-<li><p><strong>model</strong> (<a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><em>FragmentationModel</em></a>) – A FragmentationModel object that provides information about problematic
-structures and their correction factors.  It must have an attribute
-<code class="docutils literal notranslate"><span class="pre">problematic_structures</span></code> which is a pandas DataFrame.  The index of the
-DataFrame contains SMARTS patterns, and the DataFrame must contain a
-column named “contribute”.  The “contribute” column should contain
-string representations of dictionaries.  These dictionaries map subgroup
-identifiers to the contribution factors for each problematic structure.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel" title="picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel"><em>FragmentationModel</em></a>) – Instance of the FragmentationModel containing the definitions of
+problematic structures and their contributions to the subgroups.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -622,7 +597,7 @@ subgroup identifiers, and the values are their corrected counts.
 Subgroups with a final count of 0 are removed from the dictionary.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>

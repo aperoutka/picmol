@@ -208,6 +208,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -318,7 +319,7 @@ curve within the discretized composition space.</p></li>
 phase separation occurs. It stores the geometric and compositional
 information of the simplex, along with data about the phase split. This allows
 the class to be used to define a unit operation.</p>
-<p>A simplex of dimension n has <span class="math notranslate nohighlight">\(N = n + 1\)</span> vertices. Edges are classified as
+<p>A simplex of dimension n has N, (n + 1), vertices. Edges are classified as
 homogeneous (between neighboring points) or heterogeneous (between
 non-neighboring points, indicating a phase split). “Neighboring points”
 are defined as two points contained within the same subsimplex from the
@@ -326,16 +327,14 @@ discretization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>points_coords_cart</strong> (<em>numpy.ndarray</em>) – A numpy array containing the Cartesian coordinates of the simplex vertices.
-Shape: (N, n), where N is the number of vertices (n+1) and n is the
-dimension of the simplex.</p></li>
-<li><p><strong>points_mfr</strong> (<em>numpy.ndarray</em>) – A numpy array containing the molar fractions (barycentric coordinates) of
-the simplex vertices. Shape: (N, n+1).</p></li>
+<li><p><strong>points_coords_cart</strong> (<em>numpy.ndarray</em>) – A numpy array containing the Cartesian coordinates of the simplex vertices.</p></li>
+<li><p><strong>points_mfr</strong> (<em>numpy.ndarray</em>) – A numpy array containing the molar fractions of
+the simplex vertices.</p></li>
 <li><p><strong>points_ind</strong> (<em>numpy.ndarray</em>) – A numpy array containing the indices of the simplex vertices within the
-original discretization. Shape: (N,).</p></li>
-<li><p><strong>matrix</strong> (<em>numpy.ndarray</em>) – A matrix used to transform molar fractions (barycentric coordinates) to
-a combined vector of ones and cartesian coordinates.  Shape: (n+1, n+1).</p></li>
-<li><p><strong>matrix_inv</strong> (<em>numpy.ndarray</em>) – The inverse of the <cite>matrix</cite>.  Shape: (n+1, n+1).</p></li>
+original discretization.</p></li>
+<li><p><strong>matrix</strong> (<em>numpy.ndarray</em>) – A matrix used to transform molar fractions to
+a combined vector of ones and cartesian coordinates.</p></li>
+<li><p><strong>matrix_inv</strong> (<em>numpy.ndarray</em>) – The inverse of the <cite>matrix</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Variables<span class="colon">:</span></dt>
@@ -346,33 +345,16 @@ a combined vector of ones and cartesian coordinates.  Shape: (n+1, n+1).</p></li
 <li><p><strong>points_indices</strong> (<em>numpy.ndarray</em>) – The indices of the simplex vertices in the original discretization.</p></li>
 <li><p><strong>matrix</strong> (<em>numpy.ndarray</em>) – The transformation matrix from molar fractions to Cartesian coordinates.</p></li>
 <li><p><strong>matrix_inv</strong> (<em>numpy.ndarray</em>) – The inverse of the transformation matrix.</p></li>
-<li><p><strong>edge_classification</strong> (<em>numpy.ndarray</em>) – A symmetric N x N matrix.  <cite>edge_classification[i][j] == 1</cite> indicates
-that the edge between vertex i and vertex j is heterogeneous
-(i.e., the points are in different phases).  Initialized to a matrix of
+<li><p><strong>edge_classification</strong> (<em>numpy.ndarray</em>) – A symmetric N x N matrix. Element of <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(i\)</span> with value of 1 indicates
+that the edge between vertex <span class="math notranslate nohighlight">\(i\)</span> and vertex <span class="math notranslate nohighlight">\(j\)</span> is heterogeneous
+(i.e., the points are in different phases). Initialized to a matrix of
 zeros (all edges homogeneous).</p></li>
-<li><p><strong>phase_blocks</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em><em>]</em>) – A list of lists.  Each inner list contains the indices (0 to N-1) of
-the vertices that form the basis of a single liquid phase.  The order
+<li><p><strong>phase_blocks</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em><em>]</em>) – A list of lists. Each inner list contains the indices (0 to N-1) of
+the vertices that form the basis of a single liquid phase. The order
 of phases in this list is fixed.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityGapSimplex.get_middle">
-<span class="sig-name descname"><span class="pre">get_middle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityGapSimplex.get_middle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityGapSimplex.get_middle" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates the composition at the center of the simplex.</p>
-<p>This method computes the average composition (in molar fractions) of the
-simplex by averaging the molar fractions of its vertices.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A numpy array representing the composition at the center of the
-simplex in molar fractions.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -382,7 +364,7 @@ simplex in molar fractions.</p>
 <p>This class performs liquid-liquid equilibrium (LLE) calculations to determine
 the binodal curve and identify phase separation regions. It uses a
 discretized representation of the composition space generated by the
-PointDisc class.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">cem.point_discretization.PointDisc</span></code> class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -404,12 +386,8 @@ each component as a function of composition.</p></li>
 calculated graph (which includes the Gibbs free energy difference
 <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> as the last coordinate). It determines if each
 simplex connects neighboring points in the original composition space
-(i.e., before the addition of <span class="math notranslate nohighlight">\(\Delta g_{mix}\)</span>). Simplices that do
+(i.e., before the addition of <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span>). Simplices that do
 <em>not</em> connect neighboring points model a phase split.</p>
-<p>The method calculates the volume of each simplex and compares it to the
-expected volume of a simplex in the discretized space. It also uses
-the <code class="xref py py-func docutils literal notranslate"><span class="pre">_check_simplex()</span></code> method to perform
-the detailed analysis of each simplex.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A list of <a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex" title="picmol.models.cem.lle.MiscibilityGapSimplex"><code class="xref py py-class docutils literal notranslate"><span class="pre">MiscibilityGapSimplex</span></code></a> objects, where each object
@@ -434,16 +412,6 @@ represents a composition in the multi-component system. The input points
 are augmented with the Gibbs free energy of mixing (<span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span>)
 as an additional coordinate. This convex hull is used to identify regions of
 phase separation.</p>
-<p>The method performs the following steps:</p>
-<ol class="arabic simple">
-<li><p>Calculates <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> for each point in the discretized
-composition space. Positive values of <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> are
-clamped to zero, as they do not contribute to phase instability.</p></li>
-<li><p>Constructs a graph where each node represents a composition, and the
-coordinates are the original Cartesian coordinates augmented with
-<span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span>.</p></li>
-<li><p>Computes the convex hull of this graph.</p></li>
-</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A numpy array representing the simplices of the convex hull. Each
@@ -454,15 +422,12 @@ simplex is defined by a set of indices into the input point set.</p>
 </dd>
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>graph</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list (which is used like a deque) of numpy arrays.  Each array
+<li><p><strong>graph</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list of numpy arrays, where each array
 represents a point in the composition space, with the last element
-being the <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> value.  This is constructed by
-this method.</p></li>
-<li><p><strong>graph_points_real_indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – A list of integers.  Each integer maps a point in the <cite>graph</cite> to its
+being the <span class="math notranslate nohighlight">\(\Delta G_{mix}\)</span> value.</p></li>
+<li><p><strong>graph_points_real_indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – A list of integers, where each integer maps a point in the <code class="docutils literal notranslate"><span class="pre">graph</span></code> to its
 index in the original discretized composition space
-(<cite>self.discretized_system.points_mfr</cite> or
-<cite>self.discretized_system.points_cart</cite>).  This is constructed by
-this method.</p></li>
+(<code class="docutils literal notranslate"><span class="pre">PointDisc.points_mfr</span></code> or <code class="docutils literal notranslate"><span class="pre">PointDisc.points_cart</span></code>).</p></li>
 </ul>
 </dd>
 </dl>
@@ -471,19 +436,12 @@ this method.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac">
 <span class="sig-name descname"><span class="pre">compute_phase_eq_molfrac</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.compute_phase_eq_molfrac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac" title="Link to this definition">¶</a></dt>
-<dd><p>Computes the phase equilibrium compositions in mole fractions.</p>
-<p>This method calculates the compositions of the two phases at equilibrium
-by finding points on the binodal curve. It uses the discretized
-composition space from the PointDisc object and the Gibbs free energy
-of mixing and activity coefficient arrays. The results are returned
-as a matrix of mol fractions.</p>
+<dd><p>Computes the phase equilibrium compositions in mol fractions by finding points on the binodal curve.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A numpy array where each row represents a pair of equilibrium
-compositions (two phases) in mole fractions, and each column
-represents a component. The shape of the array is (n, 2 * num_comp),
-where n is the number of equilibrium pairs. If no equilibrium
-is found, return an empty array of shape (0, 2 * num_comp).</p>
+<dd class="field-odd"><p>A numpy array where each row represents equilibrium
+compositions in mol fractions, and each column
+represents a component.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -494,18 +452,13 @@ is found, return an empty array of shape (0, 2 * num_comp).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_cartcoord">
 <span class="sig-name descname"><span class="pre">compute_phase_eq_cartcoord</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.compute_phase_eq_cartcoord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_cartcoord" title="Link to this definition">¶</a></dt>
-<dd><p>Computes the phase equilibrium compositions in Cartesian coordinates.</p>
-<p>This method calculates the compositions of the two phases at equilibrium
-in Cartesian coordinates, corresponding to the mol fraction
+<dd><p>Computes the phase equilibrium compositions in Cartesian coordinates, corresponding to the mol fraction
 compositions calculated by <a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac" title="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_phase_eq_molfrac()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A numpy array where each row represents a pair of equilibrium
-compositions (two phases) in Cartesian coordinates,
-and each column represents a component. The shape of the array is
-(n, 2 * (num_comp -1)), where n is the number of equilibrium pairs.
-If no equilibrium is found, return an empty array of shape
-(0, 2 * (num_comp -1)).</p>
+<dd class="field-odd"><p>A numpy array where each row represents equilibrium
+compositions in Cartesian coordinates,
+and each column represents a component.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -516,85 +469,17 @@ If no equilibrium is found, return an empty array of shape
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_indices">
 <span class="sig-name descname"><span class="pre">compute_phase_eq_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.compute_phase_eq_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_indices" title="Link to this definition">¶</a></dt>
-<dd><p>Computes the indices of the phase equilibrium points.</p>
-<p>This method calculates the indices of the points in the discretized
+<dd><p>Computes the indices of the phase equilibrium points in the discretized
 composition space that correspond to the equilibrium phase
 compositions. These indices can be used to retrieve the corresponding
-compositions from the PointDisc object’s point arrays.</p>
+compositions from the <code class="xref py py-class docutils literal notranslate"><span class="pre">PointDisc</span></code> object’s point arrays.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A numpy array where each row represents a pair of indices
-corresponding to the equilibrium phase compositions.  The shape
-of the array is (n, 2), where n is the number of equilibrium pairs.
-If no equilibrium is found, return an empty array of shape (0, 2).</p>
+<dd class="field-odd"><p>A numpy array where each row represents indices
+corresponding to the equilibrium phase compositions.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.get_split_flowrates">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_split_flowrates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molar_flowrates_feed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phases_mfr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_ratio</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.get_split_flowrates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.get_split_flowrates" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates the molar flow rates of individual phases from a feed stream.</p>
-<p>This static method determines the molar flow rates of each phase resulting
-from a split of the feed stream, given the molar fractions of each phase
-and the split ratios.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>molar_flowrates_feed</strong> (<em>numpy.ndarray</em>) – A numpy array representing the molar flow rates of the feed stream.</p></li>
-<li><p><strong>phases_mfr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><em>numpy.ndarray</em><em>]</em>) – A list of numpy arrays, where each array represents the molar
-fractions of a phase. The order of phases in this list corresponds
-to the order of split ratios.</p></li>
-<li><p><strong>split_ratio</strong> (<em>numpy.ndarray</em>) – A numpy array representing the split ratios for each phase. The
-split ratio of a phase is the fraction of the total feed flow rate
-that goes into that phase. The elements of split_ratio should be
-non-negative and sum to 1.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A list of numpy arrays, where each array represents the molar flow
-rates of a single phase.  The order of phases in this list
-corresponds to the order in <cite>phases_mfr</cite> and <cite>split_ratio</cite>.
-Returns None if the calculated flow rates for the last phase
-are negative.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a>[numpy.ndarray] or None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="picmol.models.cem.lle.MiscibilityAnalysis.point_in_simplex_via_bary">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">point_in_simplex_via_bary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simplex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_cartesian</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/lle.html#MiscibilityAnalysis.point_in_simplex_via_bary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.lle.MiscibilityAnalysis.point_in_simplex_via_bary" title="Link to this definition">¶</a></dt>
-<dd><p>Determines if a point is within a simplex using barycentric coordinates.</p>
-<p>This static method calculates the barycentric coordinates of a given point
-with respect to a simplex.  It then checks if the barycentric coordinates
-are within the valid range (0 to 1) to determine if the point lies within
-the simplex.  It assumes that the simplex object already contains the
-necessary transformation matrices.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>simplex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><em>object</em></a>) – A <code class="xref py py-class docutils literal notranslate"><span class="pre">Simplex</span></code> object (or an object with similar attributes)
-containing the inverse of the matrix that transforms Cartesian
-coordinates to barycentric coordinates.  This object is assumed to
-have an attribute <cite>matrix_inv</cite>.</p></li>
-<li><p><strong>point_cartesian</strong> (<em>numpy.ndarray</em>) – A numpy array representing the Cartesian coordinates of the point
-to be checked.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>True if the point is within the simplex, False if the point is
-outside the simplex, and None if the sum of the barycentric
-coordinates is not approximately 1 (which should not occur in a
-correctly formed simplex).</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a> or None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -604,11 +489,8 @@ correctly formed simplex).</p>
 <dl class="py class" id="module-picmol.models.cem.point_discretization">
 <dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.cem.point_discretization.</span></span><span class="sig-name descname"><span class="pre">PointDisc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursion_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc" title="Link to this definition">¶</a></dt>
-<dd><p>Discretizes the composition space of a multi-component system using a simplex.</p>
-<p>This class generates a set of points within the composition space of a
-multi-component system by recursively subdividing a simplex. The points
-can be used to represent the possible compositions of mixtures in the system,
-for example, in phase equilibrium calculations.</p>
+<dd><p>Discretizes the composition space of a multi-component system using a simplex. The points
+can be used to represent the possible compositions of mixtures in the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -636,15 +518,15 @@ to Cartesian coordinates.</p></li>
 (barycentric) coordinates.</p></li>
 <li><p><strong>points_cart</strong> (<em>numpy.ndarray</em>) – A numpy array containing the discretized points in Cartesian coordinates.</p></li>
 <li><p><strong>stepsize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – The step size used in the discretization, determined by the
-<cite>recursion_steps</cite>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">recursion_steps</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.get_points">
 <span class="sig-name descname"><span class="pre">get_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.get_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.get_points" title="Link to this definition">¶</a></dt>
-<dd><p>Generates the discretized points within the simplex.</p>
-<p>This method recursively generates points within the simplex based on the
+<dd><p>Generates the discretized points within the simplex.
+Recursively generates points within the simplex based on the
 number of recursion steps. The points are generated in both molar fraction
 and Cartesian coordinates.</p>
 <dl class="field-list simple">
@@ -658,10 +540,9 @@ and Cartesian coordinates.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.construct_outer_simplex">
 <span class="sig-name descname"><span class="pre">construct_outer_simplex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.construct_outer_simplex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.construct_outer_simplex" title="Link to this definition">¶</a></dt>
-<dd><p>Constructs the outer simplex in Cartesian coordinates.</p>
-<p>This method generates the vertices of a regular n-simplex in R<sup>n</sup>, where
-n is the number of components minus 1. For the case of a 3-component
-system, the simplex is rotated by 285 degrees.</p>
+<dd><p>Constructs the outer simplex in Cartesian coordinates.
+Generates the vertices of a regular n-simplex in R<sup>n</sup>, where
+n is the number of components minus 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A list of numpy arrays, where each array represents the Cartesian
@@ -676,9 +557,8 @@ coordinates of a vertex of the simplex.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.transform_molar_fr_to_cartesian">
 <span class="sig-name descname"><span class="pre">transform_molar_fr_to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molar_fractions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.transform_molar_fr_to_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.transform_molar_fr_to_cartesian" title="Link to this definition">¶</a></dt>
-<dd><p>Transforms molar fractions to Cartesian coordinates.</p>
-<p>This method converts a composition represented as molar fractions
-(barycentric coordinates) to Cartesian coordinates using the
+<dd><p>Transforms a composition in molar fractions
+to Cartesian coordinates using the
 precomputed transformation matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -696,9 +576,8 @@ precomputed transformation matrix.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.transform_cartesian_to_molar_fr">
 <span class="sig-name descname"><span class="pre">transform_cartesian_to_molar_fr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cartesian_point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.transform_cartesian_to_molar_fr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.transform_cartesian_to_molar_fr" title="Link to this definition">¶</a></dt>
-<dd><p>Transforms Cartesian coordinates to molar fractions.</p>
-<p>This method converts a composition represented as Cartesian coordinates
-to molar fractions (barycentric coordinates) using the precomputed
+<dd><p>Transforms a composition in Cartesian coordinates
+to molar fractions using the precomputed
 transformation matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -716,9 +595,7 @@ transformation matrix.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.euclidean_distance">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">euclidean_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.euclidean_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.euclidean_distance" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates the Euclidean distance between two points.</p>
-<p>This static method computes the Euclidean distance between two points
-in Cartesian coordinates.</p>
+<dd><p>Calculates the Euclidean distance between two points in Cartesian coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -739,8 +616,8 @@ in Cartesian coordinates.</p>
 <dt class="sig sig-object py" id="picmol.models.cem.point_discretization.PointDisc.get_basis_change">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_basis_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices_cartesian</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/cem/point_discretization.html#PointDisc.get_basis_change"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.cem.point_discretization.PointDisc.get_basis_change" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates the basis change matrices between molar fractions and Cartesian coordinates.</p>
-<p>This static method computes the matrices A and A_inv, which are used to
-transform between molar fractions (barycentric coordinates) and Cartesian
+<p>This static method computes the matrices A and A<sup>-1</sup>, which are used to
+transform between molar fractions and Cartesian
 coordinates. The matrix A is constructed from the vertices of the simplex.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -748,7 +625,7 @@ coordinates. The matrix A is constructed from the vertices of the simplex.</p>
 coordinates of a vertex of the simplex.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A tuple containing the matrix A and its inverse A_inv.</p>
+<dd class="field-even"><p>A tuple containing the matrix A and its inverse A<sup>-1</sup>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[numpy.ndarray, numpy.ndarray]</p>
@@ -839,18 +716,13 @@ using the determinant of a matrix formed from the vertex coordinates.</p>
             <ul>
 <li><a class="reference internal" href="#">Convex Envelope Method (picmol.models.cem)</a><ul>
 <li><a class="reference internal" href="#picmol.models.cem.cem_analysis.CEM"><code class="docutils literal notranslate"><span class="pre">CEM</span></code></a></li>
-<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex"><code class="docutils literal notranslate"><span class="pre">MiscibilityGapSimplex</span></code></a><ul>
-<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex.get_middle"><code class="docutils literal notranslate"><span class="pre">MiscibilityGapSimplex.get_middle()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityGapSimplex"><code class="docutils literal notranslate"><span class="pre">MiscibilityGapSimplex</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis</span></code></a><ul>
 <li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compare_simplices"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compare_simplices()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.get_hull"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.get_hull()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_molfrac"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compute_phase_eq_molfrac()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_cartcoord"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compute_phase_eq_cartcoord()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.compute_phase_eq_indices"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.compute_phase_eq_indices()</span></code></a></li>
-<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.get_split_flowrates"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.get_split_flowrates()</span></code></a></li>
-<li><a class="reference internal" href="#picmol.models.cem.lle.MiscibilityAnalysis.point_in_simplex_via_bary"><code class="docutils literal notranslate"><span class="pre">MiscibilityAnalysis.point_in_simplex_via_bary()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#picmol.models.cem.point_discretization.PointDisc"><code class="docutils literal notranslate"><span class="pre">PointDisc</span></code></a><ul>

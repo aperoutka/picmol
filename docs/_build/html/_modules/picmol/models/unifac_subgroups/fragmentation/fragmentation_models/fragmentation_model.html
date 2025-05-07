@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -275,16 +276,11 @@
 <a class="viewcode-back" href="../../../../../../picmol.models.unifac_subgroups.fragmentation.html#picmol.models.unifac_subgroups.fragmentation.fragmentation_models.fragmentation_model.FragmentationModel">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FragmentationModel</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Represents a model for fragmenting molecules and analyzing their subgroups.</span>
-
-<span class="sd">  This class initializes a fragmentation model with subgroup definitions,</span>
-<span class="sd">  regression coefficients, and optional information about problematic</span>
-<span class="sd">  structural patterns. It also precomputes data structures for efficient</span>
-<span class="sd">  molecule analysis.</span>
+<span class="sd">  A model for fragmenting molecules and analyzing their subgroups.</span>
 
 <span class="sd">  :param subgroups:</span>
 <span class="sd">      A pandas DataFrame defining the molecular subgroups.</span>
-<span class="sd">      The index of the DataFrame represents the subgroup identifiers.</span>
+<span class="sd">      The index of the DataFrame represents the subgroup IDs.</span>
 <span class="sd">      It must contain columns named &quot;smarts&quot; and &quot;contribute&quot;.</span>
 <span class="sd">  :type subgroups: pd.DataFrame</span>
 <span class="sd">  :param RQ:</span>
@@ -294,7 +290,7 @@
 <span class="sd">      A list of subgroup identifiers (corresponding to the index in the</span>
 <span class="sd">      `subgroups` DataFrame) for which the SMARTS patterns for detection</span>
 <span class="sd">      are split into multiple patterns.</span>
-<span class="sd">  :type split_detection_smarts: List[str], optional</span>
+<span class="sd">  :type split_detection_smarts: list[str], optional</span>
 <span class="sd">  :param problematic_structures:</span>
 <span class="sd">      A pandas DataFrame describing problematic structural patterns.</span>
 <span class="sd">      The index of the DataFrame contains SMARTS patterns, and the</span>
@@ -303,24 +299,24 @@
 <span class="sd">      dictionaries. These dictionaries map subgroup identifiers to the</span>
 <span class="sd">      contribution factors for each problematic structure.</span>
 <span class="sd">      If None, an empty DataFrame is created.</span>
-<span class="sd">  :type problematic_structures: Union[pd.DataFrame, None], optional</span>
+<span class="sd">  :type problematic_structures: pd.DataFrame or None, optional</span>
 
 <span class="sd">  :ivar contribution_matrix:</span>
 <span class="sd">      A pandas DataFrame representing the contribution matrix,</span>
 <span class="sd">      derived from the &quot;contribute&quot; column of the `subgroups` DataFrame.</span>
 <span class="sd">  :vartype contribution_matrix: pd.DataFrame</span>
 <span class="sd">  :ivar detection_mols:</span>
-<span class="sd">      A dictionary mapping subgroup identifiers to lists of RDKit Mol</span>
+<span class="sd">      A dictionary mapping subgroup IDs to lists of RDKit Mol</span>
 <span class="sd">      objects, instantiated from the SMARTS patterns in the &quot;smarts&quot;</span>
-<span class="sd">      column of the `subgroups` DataFrame.  For subgroups in</span>
-<span class="sd">      `split_detection_smarts`, the value is a list of multiple Mol objects.</span>
+<span class="sd">      column of the ``subgroups`` DataFrame.  For subgroups in</span>
+<span class="sd">      ``split_detection_smarts``, the value is a list of multiple Mol objects.</span>
 <span class="sd">  :vartype detection_mols: dict</span>
 <span class="sd">  :ivar fit_mols:</span>
-<span class="sd">      A dictionary mapping subgroup identifiers to lists of RDKit Mol</span>
-<span class="sd">      objects, similar to `detection_mols`, but using the original</span>
-<span class="sd">      SMARTS patterns from the &quot;smarts&quot; column of the `subgroups` DataFrame,</span>
-<span class="sd">      even for subgroups in `split_detection_smarts`.</span>
-<span class="sd">  :vartype fit_mols: dict</span>
+<span class="sd">      A dictionary mapping subgroup IDs to lists of RDKit Mol</span>
+<span class="sd">      objects, similar to ``detection_mols``, but using the original</span>
+<span class="sd">      SMARTS patterns from the &quot;smarts&quot; column of the ``subgroups`` DataFrame,</span>
+<span class="sd">      even for subgroups in ``split_detection_smarts``.</span>
+<span class="sd">  :vartype fit_mols: dict[int, list[rdkit.Chem.rdchem.Mol]]</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -329,14 +325,12 @@
       <span class="n">RQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
       <span class="n">split_detection_smarts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
       <span class="n">problematic_structures</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span> <span class="o">=</span> <span class="n">subgroups</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">split_detection_smarts</span> <span class="o">=</span> <span class="n">split_detection_smarts</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">RQ</span> <span class="o">=</span> <span class="n">RQ</span>
 
-    <span class="c1"># =====================================================================</span>
     <span class="c1"># Empty problematics template</span>
-    <span class="c1"># =====================================================================</span>
     <span class="k">if</span> <span class="n">problematic_structures</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">problematic_structures</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">[],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;smarts&quot;</span><span class="p">,</span> <span class="s2">&quot;contribute&quot;</span><span class="p">]</span>
@@ -344,14 +338,10 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">problematic_structures</span> <span class="o">=</span> <span class="n">problematic_structures</span>
 
-    <span class="c1"># =====================================================================</span>
     <span class="c1"># Contribution matrix build</span>
-    <span class="c1"># =====================================================================</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">contribution_matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_contrib_matrix</span><span class="p">()</span>
 
-    <span class="c1"># =====================================================================</span>
     <span class="c1"># Instantiate all de mol object from their smarts</span>
-    <span class="c1"># =====================================================================</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">detection_mols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instantiate_detection_mol</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">fit_mols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_instantiate_fit_mols</span><span class="p">()</span>  
 

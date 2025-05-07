@@ -7,16 +7,11 @@ from rdkit import Chem
 
 class FragmentationModel:
   """
-  Represents a model for fragmenting molecules and analyzing their subgroups.
-
-  This class initializes a fragmentation model with subgroup definitions,
-  regression coefficients, and optional information about problematic
-  structural patterns. It also precomputes data structures for efficient
-  molecule analysis.
+  A model for fragmenting molecules and analyzing their subgroups.
 
   :param subgroups:
       A pandas DataFrame defining the molecular subgroups.
-      The index of the DataFrame represents the subgroup identifiers.
+      The index of the DataFrame represents the subgroup IDs.
       It must contain columns named "smarts" and "contribute".
   :type subgroups: pd.DataFrame
   :param RQ:
@@ -26,7 +21,7 @@ class FragmentationModel:
       A list of subgroup identifiers (corresponding to the index in the
       `subgroups` DataFrame) for which the SMARTS patterns for detection
       are split into multiple patterns.
-  :type split_detection_smarts: List[str], optional
+  :type split_detection_smarts: list[str], optional
   :param problematic_structures:
       A pandas DataFrame describing problematic structural patterns.
       The index of the DataFrame contains SMARTS patterns, and the
@@ -35,24 +30,24 @@ class FragmentationModel:
       dictionaries. These dictionaries map subgroup identifiers to the
       contribution factors for each problematic structure.
       If None, an empty DataFrame is created.
-  :type problematic_structures: Union[pd.DataFrame, None], optional
+  :type problematic_structures: pd.DataFrame or None, optional
 
   :ivar contribution_matrix:
       A pandas DataFrame representing the contribution matrix,
       derived from the "contribute" column of the `subgroups` DataFrame.
   :vartype contribution_matrix: pd.DataFrame
   :ivar detection_mols:
-      A dictionary mapping subgroup identifiers to lists of RDKit Mol
+      A dictionary mapping subgroup IDs to lists of RDKit Mol
       objects, instantiated from the SMARTS patterns in the "smarts"
-      column of the `subgroups` DataFrame.  For subgroups in
-      `split_detection_smarts`, the value is a list of multiple Mol objects.
+      column of the ``subgroups`` DataFrame.  For subgroups in
+      ``split_detection_smarts``, the value is a list of multiple Mol objects.
   :vartype detection_mols: dict
   :ivar fit_mols:
-      A dictionary mapping subgroup identifiers to lists of RDKit Mol
-      objects, similar to `detection_mols`, but using the original
-      SMARTS patterns from the "smarts" column of the `subgroups` DataFrame,
-      even for subgroups in `split_detection_smarts`.
-  :vartype fit_mols: dict
+      A dictionary mapping subgroup IDs to lists of RDKit Mol
+      objects, similar to ``detection_mols``, but using the original
+      SMARTS patterns from the "smarts" column of the ``subgroups`` DataFrame,
+      even for subgroups in ``split_detection_smarts``.
+  :vartype fit_mols: dict[int, list[rdkit.Chem.rdchem.Mol]]
   """
   
   def __init__(
@@ -61,14 +56,12 @@ class FragmentationModel:
       RQ: pd.DataFrame,
       split_detection_smarts: List[str] = [],
       problematic_structures: Union[pd.DataFrame, None] = None,
-  ) -> None:
+    ) -> None:
     self.subgroups = subgroups
     self.split_detection_smarts = split_detection_smarts
     self.RQ = RQ
 
-    # =====================================================================
     # Empty problematics template
-    # =====================================================================
     if problematic_structures is None:
       self.problematic_structures = pd.DataFrame(
         [], columns=["smarts", "contribute"]
@@ -76,14 +69,10 @@ class FragmentationModel:
     else:
       self.problematic_structures = problematic_structures
 
-    # =====================================================================
     # Contribution matrix build
-    # =====================================================================
     self.contribution_matrix = self._build_contrib_matrix()
 
-    # =====================================================================
     # Instantiate all de mol object from their smarts
-    # =====================================================================
     self.detection_mols = self._instantiate_detection_mol()
     self.fit_mols = self._instantiate_fit_mols()  
 

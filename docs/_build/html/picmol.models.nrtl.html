@@ -208,6 +208,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -427,6 +428,48 @@ values from PointDisc.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.nrtl.NRTL.fGM">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fGM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau21</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/nrtl.html#NRTL.fGM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.nrtl.NRTL.fGM" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the Gibbs free energy of mixing for a binary mixture using the NRTL model (<a class="reference internal" href="#picmol.models.nrtl.NRTL.GM" title="picmol.models.nrtl.NRTL.GM"><code class="xref py py-func docutils literal notranslate"><span class="pre">GM()</span></code></a>) for any interaction parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p></li>
+<li><p><strong>z</strong> (<em>numpy.ndarray</em>) – composition array</p></li>
+<li><p><strong>tau12</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – interaction parameter between components 1 and 2</p></li>
+<li><p><strong>tau21</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – interaction parameter between components 2 and 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Gibbs free energy of mixing</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.nrtl.NRTL.fit_Gmix">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit_Gmix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gmix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/nrtl.html#NRTL.fit_Gmix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.nrtl.NRTL.fit_Gmix" title="Link to this definition">¶</a></dt>
+<dd><p>Fits the NRTL model to the Gibbs free energy of mixing data using relationship in <a class="reference internal" href="#picmol.models.nrtl.NRTL.GM" title="picmol.models.nrtl.NRTL.GM"><code class="xref py py-func docutils literal notranslate"><span class="pre">GM()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p></li>
+<li><p><strong>Gmix</strong> (<em>numpy.ndarray</em>) – Gibbs free energy of mixing data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>fitted interaction parameters <span class="math notranslate nohighlight">\(\tau_{12}\)</span> and <span class="math notranslate nohighlight">\(\tau_{21}\)</span></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -496,6 +539,8 @@ values from PointDisc.</p></li>
 <li><a class="reference internal" href="#picmol.models.nrtl.NRTL.GM"><code class="docutils literal notranslate"><span class="pre">NRTL.GM()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.nrtl.NRTL.dGM_dxs"><code class="docutils literal notranslate"><span class="pre">NRTL.dGM_dxs()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.nrtl.NRTL.det_Hij"><code class="docutils literal notranslate"><span class="pre">NRTL.det_Hij()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.nrtl.NRTL.fGM"><code class="docutils literal notranslate"><span class="pre">NRTL.fGM()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.nrtl.NRTL.fit_Gmix"><code class="docutils literal notranslate"><span class="pre">NRTL.fit_Gmix()</span></code></a></li>
 </ul>
 </li>
 </ul>

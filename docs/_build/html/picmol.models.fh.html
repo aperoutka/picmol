@@ -208,6 +208,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -278,7 +279,7 @@
 <span id="flory-huggins-picmol-models-fh"></span><h1>Flory-Huggins (picmol.models.fh)<a class="headerlink" href="#module-picmol.models.fh" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="picmol.models.fh.FH">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.fh.</span></span><span class="sig-name descname"><span class="pre">FH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Smix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hmix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.models.fh.</span></span><span class="sig-name descname"><span class="pre">FH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Smix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hmix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH" title="Link to this definition">¶</a></dt>
 <dd><p>Implements the Flory-Huggins thermodynamic model for binary mixtures.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -290,44 +291,6 @@
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="picmol.models.fh.FH.fit_chi">
-<span class="sig-name descname"><span class="pre">fit_chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH.fit_chi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH.fit_chi" title="Link to this definition">¶</a></dt>
-<dd><p>Fits the Flory-Huggins interaction parameter (<span class="math notranslate nohighlight">\(\chi\)</span>) to experimental Gibbs mixing free energy at a given temperature.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>fitted <span class="math notranslate nohighlight">\(\chi\)</span> parameter</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="picmol.models.fh.FH.vol2mol">
-<span class="sig-name descname"><span class="pre">vol2mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH.vol2mol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH.vol2mol" title="Link to this definition">¶</a></dt>
-<dd><p>Converts volume fraction to mole fraction, where <span class="math notranslate nohighlight">\(V_i\)</span> is molar volume of component i.</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[x = \frac{\phi \left(\frac{V_2}{V_1}\right)}{1 - \phi + \phi \left(\frac{V_2}{V_1}\right)}\]</div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – volume fraction</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>mol fraction</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="picmol.models.fh.FH.phic">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phic</span></span><a class="headerlink" href="#picmol.models.fh.FH.phic" title="Link to this definition">¶</a></dt>
@@ -379,6 +342,45 @@
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.fh.FH.scaled_Gmix">
+<span class="sig-name descname"><span class="pre">scaled_Gmix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH.scaled_Gmix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH.scaled_Gmix" title="Link to this definition">¶</a></dt>
+<dd><p>Estimates the Gibbs mixing free energy as a function of temperature.</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\Delta G_{mix} = \Delta H_{mix} - T \Delta S_{mix}\]</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>scaled Gibbs mixing free energy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.fh.FH.chi">
+<span class="sig-name descname"><span class="pre">chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH.chi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH.chi" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the Flory-Huggins interaction parameter <span class="math notranslate nohighlight">\(\chi\)</span> at a given temperature.
+The interaction parameter is calculated using the Gibbs mixing free energy data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Flory-Huggins interaction parameter</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -575,6 +577,50 @@ the binodal compositions.  All compositions are in mol fraction.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.fh.FH.fGM">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fGM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH.fGM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH.fGM" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the Gibbs free energy of mixing for a binary mixture using the Flory-Huggins model (<a class="reference internal" href="#picmol.models.fh.FH.GM" title="picmol.models.fh.FH.GM"><code class="xref py py-func docutils literal notranslate"><span class="pre">GM()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p></li>
+<li><p><strong>phi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – volume fraction of solute</p></li>
+<li><p><strong>V0</strong> (<em>numpy.ndarray</em>) – molar volumes of components</p></li>
+<li><p><strong>chi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Flory-Huggins interaction parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Gibbs mixing free energy</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="picmol.models.fh.FH.fit_Gmix">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit_Gmix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gmix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/models/fh.html#FH.fit_Gmix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.models.fh.FH.fit_Gmix" title="Link to this definition">¶</a></dt>
+<dd><p>Fits the Flory-Huggins model to the Gibbs free energy of mixing data using relationship in <a class="reference internal" href="#picmol.models.fh.FH.GM" title="picmol.models.fh.FH.GM"><code class="xref py py-func docutils literal notranslate"><span class="pre">GM()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – temperature (K)</p></li>
+<li><p><strong>phi</strong> (<em>numpy.ndarray</em>) – volume fraction of solute</p></li>
+<li><p><strong>Gmix</strong> (<em>numpy.ndarray</em>) – Gibbs free energy of mixing</p></li>
+<li><p><strong>V0</strong> (<em>numpy.ndarray</em>) – molar volumes of components</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>fitted <span class="math notranslate nohighlight">\(\chi\)</span> parameter</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -639,17 +685,19 @@ the binodal compositions.  All compositions are in mol fraction.</p>
             <ul>
 <li><a class="reference internal" href="#">Flory-Huggins (picmol.models.fh)</a><ul>
 <li><a class="reference internal" href="#picmol.models.fh.FH"><code class="docutils literal notranslate"><span class="pre">FH</span></code></a><ul>
-<li><a class="reference internal" href="#picmol.models.fh.FH.fit_chi"><code class="docutils literal notranslate"><span class="pre">FH.fit_chi()</span></code></a></li>
-<li><a class="reference internal" href="#picmol.models.fh.FH.vol2mol"><code class="docutils literal notranslate"><span class="pre">FH.vol2mol()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.phic"><code class="docutils literal notranslate"><span class="pre">FH.phic</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.xc"><code class="docutils literal notranslate"><span class="pre">FH.xc</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.chic"><code class="docutils literal notranslate"><span class="pre">FH.chic</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.fh.FH.scaled_Gmix"><code class="docutils literal notranslate"><span class="pre">FH.scaled_Gmix()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.fh.FH.chi"><code class="docutils literal notranslate"><span class="pre">FH.chi()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.GM"><code class="docutils literal notranslate"><span class="pre">FH.GM()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.dGM_dxs"><code class="docutils literal notranslate"><span class="pre">FH.dGM_dxs()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.det_Hij"><code class="docutils literal notranslate"><span class="pre">FH.det_Hij()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.Fall"><code class="docutils literal notranslate"><span class="pre">FH.Fall()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.Jall"><code class="docutils literal notranslate"><span class="pre">FH.Jall()</span></code></a></li>
 <li><a class="reference internal" href="#picmol.models.fh.FH.calculate_spinodals_binodals"><code class="docutils literal notranslate"><span class="pre">FH.calculate_spinodals_binodals()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.fh.FH.fGM"><code class="docutils literal notranslate"><span class="pre">FH.fGM()</span></code></a></li>
+<li><a class="reference internal" href="#picmol.models.fh.FH.fit_Gmix"><code class="docutils literal notranslate"><span class="pre">FH.fit_Gmix()</span></code></a></li>
 </ul>
 </li>
 </ul>

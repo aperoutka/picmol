@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -284,14 +285,14 @@
 <span class="sd">  Map UNIFAC version parameters to their corresponding ID.</span>
 
 <span class="sd">  This function retrieves a dictionary that maps UNIFAC version parameters</span>
-<span class="sd">  to their corresponding IDs or data structures.  The specific mapping</span>
+<span class="sd">  to their corresponding IDs or data structures. The specific mapping</span>
 <span class="sd">  depends on the provided ``map_type``.</span>
 
 <span class="sd">  :param map_type: identifier to retrieve the desired mapping dictionary. Valid options are:</span>
 
-<span class="sd">      * &#39;version&#39;:  dictionary with UNIFAC version strings as keys and version IDs as values.</span>
-<span class="sd">      * &#39;subgroup&#39;: dictionary with version IDs as keys and subgroup parameter objects as values.</span>
-<span class="sd">      * &#39;interaction&#39;: dictionary with version IDs as keys and interaction parameter objects as values.</span>
+<span class="sd">      * `version`:  dictionary with UNIFAC version strings as keys and version IDs as values.</span>
+<span class="sd">      * `subgroup`: dictionary with version IDs as keys and subgroup parameter objects as values.</span>
+<span class="sd">      * `interaction`: dictionary with version IDs as keys and interaction parameter objects as values.</span>
 
 <span class="sd">  :type map_type: str</span>
 <span class="sd">  :return: dictionary containing the mapped UNIFAC version parameters.</span>
@@ -328,19 +329,13 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.get_unifac_version">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_unifac_version</span><span class="p">(</span><span class="n">version_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Determine the UNIFAC version from a string and optionally SMILES strings.</span>
-
-<span class="sd">  This function determines the UNIFAC version based on a provided string</span>
-<span class="sd">  and optionally a list of SMILES strings.  It prioritizes detecting</span>
-<span class="sd">  &quot;unifac-il&quot; if any of the SMILES strings contain a &#39;.&#39; (indicating an</span>
-<span class="sd">  ionic liquid).</span>
+<span class="sd">  Determines if ionic liquids are present and sets the UNIFAC version accordingly.</span>
+<span class="sd">  It prioritizes detecting &quot;unifac-il&quot; if any of the SMILES strings contain a &#39;.&#39; (indicating an ionic liquid).</span>
 
 <span class="sd">  :param version_str: a string indicating the UNIFAC version (e.g.,</span>
-<span class="sd">                      &quot;unifac&quot;, &quot;unifac-il&quot;, &quot;unifac-kbi&quot;).  Case-insensitive.</span>
+<span class="sd">                      &quot;unifac&quot;, &quot;unifac-il&quot;, &quot;unifac-kbi&quot;). Case-insensitive.</span>
 <span class="sd">  :type version_str: str</span>
-<span class="sd">  :param smiles: an optional list of SMILES strings. If provided, the</span>
-<span class="sd">                function checks for &#39;.&#39; in any of the SMILES strings to</span>
-<span class="sd">                identify ionic liquids and force the version to &quot;unifac-il&quot;.</span>
+<span class="sd">  :param smiles: an optional list of SMILES strings to check if ionic liquids are present.</span>
 <span class="sd">  :type smiles: list, optional</span>
 <span class="sd">  :returns: A string representing the determined UNIFAC version</span>
 <span class="sd">            (&quot;unifac&quot;, &quot;unifac-il&quot;, or &quot;unifac-kbi&quot;).</span>
@@ -378,8 +373,18 @@
 <span class="sd">  :type smiles: list</span>
 <span class="sd">  :param z: composition array (mol fractions). If None, it defaults to values from PointDisc.</span>
 <span class="sd">  :type z: numpy.ndarray, optional</span>
-<span class="sd">  :param version: UNIFAC version to use for interaction data, as well as R and Q parameters.</span>
+<span class="sd">  :param version: UNIFAC version to use for interaction data, as well as R and Q parameters. Options include:</span>
+
+<span class="sd">    * `unifac`: standard UNIFAC</span>
+<span class="sd">    * `unifac-il`: UNIFAC for ionic liquids</span>
+<span class="sd">    * `unifac-kbi`: UNIFAC with regressed parameters from KBI analysis</span>
+
 <span class="sd">  :type version: str</span>
+
+<span class="sd">  :ivar interaction_data: dictionary containing interaction parameters for the specified UNIFAC version.</span>
+<span class="sd">  :vartype interaction_data: dict[int, dict[int, float]]</span>
+<span class="sd">  :ivar subgroup_data: dictionary containing subgroup parameters for the specified UNIFAC version.</span>
+<span class="sd">  :vartype subgroup_data: dict[int, UNIFAC_subgroup]</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;unifac&quot;</span><span class="p">):</span>
@@ -489,7 +494,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the relative size of a molecule. </span>
-<span class="sd">    This property is determined by summing the product of each subgroup&#39;s r parameter (:math:`r_k`) and its frequency (:math:`\nu_{ki}`) within the molecule (:math:`i`).</span>
+<span class="sd">    This property is determined by summing the product of each subgroup&#39;s r parameter (:math:`r_k`) and its frequency (:math:`\nu_{ki}`) within molecule :math:`i`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        r_i = \sum_k^N \nu_{ki} r_k</span>
@@ -513,7 +518,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the relative surface area of a molecule. </span>
-<span class="sd">    This property is determined by summing the product of each subgroup&#39;s q parameter (:math:`q_k`) and its frequency (:math:`\nu_{ki}`) within the molecule (:math:`i`).</span>
+<span class="sd">    This property is determined by summing the product of each subgroup&#39;s q parameter (:math:`q_k`) and its frequency (:math:`\nu_{ki}`) within molecule :math:`i`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        q_i = \sum_k^N \nu_{ki} q_k</span>
@@ -536,9 +541,8 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.occurance_matrix">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">occurance_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates a matrix representing subgroup occurrences in each molecule.</span>
-
-<span class="sd">    This method generates a matrix where each row represents a unique subgroup and each column corresponds to a molecule in the mixture. Each element, :math:`\nu_{ji}`, indicates the number of times subgroup :math:`j` appears in molecule :math:`i`.</span>
+<span class="sd">    Generates a matrix representing subgroup occurrences in each molecule, where each row represents a unique subgroup and each column corresponds to a molecule in the mixture. </span>
+<span class="sd">    Each element, :math:`\nu_{ji}`, indicates the number of times subgroup :math:`j` appears in molecule :math:`i`.</span>
 <span class="sd">   </span>
 <span class="sd">    :return: subgroup occurrence matrix</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -561,9 +565,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.subgroup_matrix">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">subgroup_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates a matrix representing subgroup IDs for each molecule.</span>
-
-<span class="sd">    This method creates a matrix where rows correspond to unique subgroups</span>
+<span class="sd">    Generates a matrix representing subgroup IDs for each molecule, where rows correspond to unique subgroups</span>
 <span class="sd">    and columns correspond to molecules. Each element (:math:`j`, :math:`i`) represents the</span>
 <span class="sd">    ID of subgroup :math:`j` in molecule :math:`i`. If a molecule does not contain a</span>
 <span class="sd">    particular subgroup, the corresponding element is 0.</span>
@@ -589,9 +591,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.Q_matrix">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">Q_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generates a matrix of subgroup area parameters (:func:`q` values).</span>
-
-<span class="sd">    This method creates a matrix with the same shape as :func:`subgroup_matrix`, where</span>
+<span class="sd">    Generates a matrix of subgroup area parameters (:func:`q` values), with the same shape as :func:`subgroup_matrix`, where</span>
 <span class="sd">    each element (:math:`j`, :math:`i`) represents the ID of subgroup :math:`j` in molecule :math:`i`.</span>
 
 <span class="sd">    :return: array of subgroup Q values.</span>
@@ -689,9 +689,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.weighted_number">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">weighted_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Weighted mol fraction matrix.</span>
-
-<span class="sd">    This method calculates a matrix, with elements :math:`W_{ijk}`, </span>
+<span class="sd">    Weighted mol fraction matrix, with elements :math:`W_{ijk}`, </span>
 <span class="sd">    where each element represents the mol fraction of molecule :math:`i`, </span>
 <span class="sd">    weighted by the occurrence of subgroup :math:`j` in molecule :math:`k`.</span>
 
@@ -714,11 +712,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.group_X">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">group_X</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Mol fraction of each subgroup in the mixture.</span>
-
-<span class="sd">    This method calculates :math:`X_j`, the mol fraction of subgroup :math:`j`</span>
-<span class="sd">    in the entire mixture considering the contributions from all</span>
-<span class="sd">    molecules.</span>
+<span class="sd">    Mol fraction of subgroup :math:`j` in the mixture (:math:`X_j`) considering the contributions from all molecules.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        X_j = \frac{\sum_i^N x_i \nu_{ji}}{\sum_i^N \sum_k^M x_i \nu_{ki}}</span>
@@ -986,7 +980,8 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.lngammas_c">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">lngammas_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the combinatorial contribution (:math:`\gamma_i^c`) to the activity coefficient of molecule :math:`i` in a mixture. The combinatorial contribution accounts for differences in molecular size and shape and is calculated using the following equation:</span>
+<span class="sd">    Calculates the combinatorial contribution (:math:`\gamma_i^c`) to the activity coefficient of molecule :math:`i` in a mixture.</span>
+<span class="sd">    This accounts for differences in molecular size and shape between molecules.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \ln \gamma_i^c = 1 - V_i + \ln V_i - 5 q_i \left( 1 - \frac{V_i}{A_i} + \ln \frac{V_i}{A_i} \right)</span>
@@ -1019,7 +1014,8 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.lngammas_r">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">lngammas_r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates residual (:math:`\gamma_i^r`) contribution to activity coefficients of molecule :math:`i` in mixture. The residual contribution accounts for the difference compared to the residual activity coefficient of subgroup :math:`k` in the pure component reference state of molecule :math:`i`.</span>
+<span class="sd">    Calculates residual (:math:`\gamma_i^r`) contribution to activity coefficients of molecule :math:`i` in mixture. </span>
+<span class="sd">    This accounts for the difference compared to the residual activity coefficient of subgroup :math:`k` in the pure component reference state of molecule :math:`i`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \ln \gamma_i^r = \sum_k^M \nu_{ki} \left( \ln \Gamma_k - \ln \Gamma_{ki}  \right)</span>
@@ -1141,6 +1137,20 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_GE</span></div>
 
 
+  <span class="k">def</span><span class="w"> </span><span class="nf">Hmix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_gammas</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> 
+      <span class="bp">self</span><span class="o">.</span><span class="n">gammas</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lngammas_r</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">Smix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_gammas</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> 
+      <span class="bp">self</span><span class="o">.</span><span class="n">gammas</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rc</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lngammas_c</span><span class="p">()</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">))</span> <span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
 <div class="viewcode-block" id="UNIFAC.GM">
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.GM">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">GM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1205,7 +1215,7 @@
 <span class="sd">    Calculates the derivative of the residual contribution to the activity coefficients with respect to the mol fractions.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">      \frac{\partial \ln \gamma_i^r}{\partial x_j} = \sum_k \nu_{ki} \frac{\partial \ln \Gamma_k}{\partial x_j}</span>
+<span class="sd">      \frac{\partial \ln \gamma_i^r}{\partial x_j} = \sum_k^M \nu_{ki} \frac{\partial \ln \Gamma_k}{\partial x_j}</span>
 
 <span class="sd">    :return: array of the derivatives of the residual activity coefficients with respect to mol fractions</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -1293,7 +1303,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">G</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates a parameter, :math:`G`, related to the group contributions in the mixture.</span>
-<span class="sd">    This method computes :math:`G` as the inverse of the sum of the products of :math:`X_k` and :math:`Q_k` for all subgroups in the mixture.</span>
+<span class="sd">    Specifically, :math:`G`, is the inverse of the sum of the products of :math:`X_k` and :math:`Q_k` for all subgroups in the mixture.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      G = \frac{1}{\sum_j^M X_j Q_j}</span>
@@ -1777,7 +1787,7 @@
 <span class="sd">    Calculates the second mol fraction derivatives of volume term with respect to molecule :math:`i` and molecule :math:`j`.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">      \frac{\partial^2 V_i}{\partial x_j \partial x_k} = \frac{2 r_i r_j r_k}{\left( \sum_l r_l x_l \right)^3}</span>
+<span class="sd">      \frac{\partial^2 V_i}{\partial x_j \partial x_k} = \frac{2 r_i r_j r_k}{\left( \sum_l^N r_l x_l \right)^3}</span>
 
 <span class="sd">    :return: second derivative of volume terms</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -1804,7 +1814,7 @@
 <span class="sd">    Calculates the second mol fraction derivatives of surface area term with respect to molecule :math:`i` and molecule :math:`j`.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">      \frac{\partial^2 A_i}{\partial x_j \partial x_k} = \frac{2 q_i q_j q_k}{ \left( \sum_l q_l x_l \right)^3}</span>
+<span class="sd">      \frac{\partial^2 A_i}{\partial x_j \partial x_k} = \frac{2 q_i q_j q_k}{ \left( \sum_l^N q_l x_l \right)^3}</span>
 
 <span class="sd">    :return: second derivative of surface area terms</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
@@ -1840,7 +1850,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.d2lnGammas_subgroups_dxixjs">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">d2lnGammas_subgroups_dxixjs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the second mol fraction derivatives of the :math:`\ln \Gamma_k` parameters for the phase with respect to molecule :math:`i` and molecule :math:`j`.</span>
+<span class="sd">    Calculate the second mol fraction derivatives of the :math:`\ln \Gamma_k` (for subgroup :math:`k`) parameters for the phase with respect to molecule :math:`i` and molecule :math:`j`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">        \frac{\partial^2 \ln \Gamma_k}{\partial x_i \partial x_j} = -Q_k\left(</span>
@@ -1926,10 +1936,10 @@
 <span class="sd">      \frac{Q_i}{\sum_n^N Q_n (\nu x)_{sum,n}}\left(</span>
 <span class="sd">      -F(\nu)_{sum,j} \nu_{ik} - F (\nu)_{sum,k}\nu_{ij}</span>
 <span class="sd">      + 2F^2(\nu)_{sum,j} (\nu)_{sum,k} (\nu x)_{sum,i}</span>
-<span class="sd">      + \frac{F (\nu x)_{sum,i}\left[</span>
+<span class="sd">      + \frac{F (\nu x)_{sum,i}\left(</span>
 <span class="sd">      \sum_n^M(-2 F Q_n (\nu)_{sum,j} (\nu)_{sum,k}</span>
 <span class="sd">      (\nu x)_{sum,n} + Q_n (\nu)_{sum,j} \nu_{nk} + Q_n (\nu)_{sum,k}\nu_{nj}</span>
-<span class="sd">      )\right] }</span>
+<span class="sd">      )\right) }</span>
 <span class="sd">      {\sum_n^M Q_n (\nu x)_{sum,n} }</span>
 <span class="sd">      + \frac{2(\nu x)_{sum,i}(\sum_n^M[-FQ_n (\nu)_{sum,j} (\nu x)_{sum,n} + Q_n \nu_{nj}])</span>
 <span class="sd">      (\sum_n^M[-FQ_n (\nu)_{sum,k} (\nu x)_{sum,n} + Q_n \nu_{nk}])  }</span>
@@ -2076,7 +2086,7 @@
 <span class="sd">        + \frac{\partial \ln \gamma_i^r}{\partial x_j}</span>
 <span class="sd">        + \frac{\partial \ln \gamma_j^c}{\partial x_i}</span>
 <span class="sd">        + \frac{\partial \ln \gamma_j^r}{\partial x_i}</span>
-<span class="sd">        +\sum_k \left(</span>
+<span class="sd">        +\sum_k^N \left(</span>
 <span class="sd">          \frac{\partial^2 \ln \gamma_k^c}{\partial x_i \partial x_j}</span>
 <span class="sd">          + \frac{\partial^2 \ln \gamma_k^r}{\partial x_i \partial x_j}</span>
 <span class="sd">        \right)</span>
@@ -2120,7 +2130,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.dmu_dz">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">dmu_dz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the derivative of the chemical potential (:math:`\mu_i`) with respect to the composition (:math:`j`).</span>
+<span class="sd">    Calculates the derivative of the chemical potential of molecule :math:`i` (:math:`\mu_i`) with respect to the mol fraction of molecule :math:`j`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      \frac{1}{RT}\frac{\partial \mu_i}{\partial x_j} = </span>
@@ -2172,7 +2182,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.Mij">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">Mij</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the :math:`M` matrix with elements :math:`M_{i,j}` from :func:`dmu_dz`.</span>
+<span class="sd">    Calculate the :math:`M` matrix with elements :math:`M_{i,j}` for molecules :math:`i` and :math:`j` from :func:`dmu_dz`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      M_{i,j} = </span>
@@ -2209,7 +2219,7 @@
 <a class="viewcode-back" href="../../../picmol.models.unifac.html#picmol.models.unifac.UNIFAC.Hij">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">Hij</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculate the Hessian (:math:`H`) of Gibbs mixing free energy, with elements :math:`H_{ij}`.</span>
+<span class="sd">    Calculate the Hessian (:math:`H`) of Gibbs mixing free energy, with elements :math:`H_{ij}` for molecules :math:`i` and :math:`j`.</span>
 
 <span class="sd">    .. math::</span>
 <span class="sd">      H_{i,j} = M_{i,j} - M_{i,N-1} - M_{N-1,j} + M_{N-1,N-1}</span>

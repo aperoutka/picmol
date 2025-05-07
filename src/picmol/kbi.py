@@ -14,10 +14,10 @@ plt.style.use(Path(__file__).parent / 'presentation.mplstyle')
 from scipy.constants import R, pi, N_A
 
 from .get_molecular_properties import load_molecular_properties
-from .models.uniquac import UNIQUAC_R, UNIQUAC_Q, fit_du_to_Hmix
-from .models import UNIQUAC, UNIFAC, QuarticModel, FH
+from .models.uniquac import UNIQUAC_R, UNIQUAC_Q
+from .models import NRTL, UNIQUAC, FH, UNIFAC, QuarticModel
 from .models.cem import PointDisc
-from .functions import mol2vol
+from .conversions import mol2vol
 
 
 def mkdr(dir_path):
@@ -44,15 +44,15 @@ class KBI:
   :type solute_mol: str
   :param rdf_dir: directory name where RDF files are located in each system directory, default is ``rdf_files``
   :type rdf_dir: str, optional
-  :param kbi_method: correction method to apply to correlation function, default is ``adj``
+  :param kbi_method: correction method to apply to correlation function, default is `adj`
 
-      * ``raw``: no correction
-      * ``adj``: correcting for tail of RDF :math:`\neq` 1 at large r
-      * ``gv``: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt
-      * ``kgv``: applying a damping function introduced by Kruger to ``gv`` correction
+      * `raw`: no correction
+      * `adj`: correcting for tail of RDF :math:`\neq` 1 at large r
+      * `gv`: correcting the number densities to account for excess/depletion, introduced by Ganguly and Van der Vegt
+      * `kgv`: applying a damping function introduced by Kruger to `gv` correction
 
   :type kbi_method: str, optional
-  :param rkbi_min: fraction of r; lower bound for extrapolation to the thermodynamic limit, default is ``0.75``. Options: 
+  :param rkbi_min: fraction of r; lower bound for extrapolation to the thermodynamic limit, default is `0.75`. Options: 
   
       * float: used for all systems 
       * dict[str, float]: keys: systems, values: rkbi_min for each system
@@ -60,7 +60,7 @@ class KBI:
   :type rkbi_min: float or dict[str, float], optional
   :param kbi_fig_dirname: directory name for results from KBI analysis, default is ``kbi_analysis``
   :type kbi_fig_dirname: str, optional
-  :param avg_start_time: start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is ``100``
+  :param avg_start_time: start time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is `100`
   :type avg_start_time: float, optional
   :param avg_end_time: end time (ns) for property (temperature, volume, enthalpy) analysis from .edr file, default is end of trajectory
   :type avg_start_time: float, optional
@@ -157,7 +157,7 @@ class KBI:
   def _get_edr_file(self, sys):
     r"""Get the .edr file for a given system.
 
-    Requires that ``'npt'`` is in filename to distinguish from other ensembles.
+    Requires that `'npt'` is in filename to distinguish from other ensembles.
     This is used to get the temperature, volume, enthalpy.
 
     :param sys: system name
@@ -348,7 +348,7 @@ class KBI:
   @property
   def properties_by_molid(self):
     r"""
-    :return: pandas DataFrame only for molecules present in project. Load ``molecular_properties.csv`` and set molecule name in .top file as index. 
+    :return: pandas DataFrame only for molecules present in project. Load `molecular_properties.csv` and set molecule name in .top file as index. 
     :rtype: pandas.DataFrame
     """
     prop_df = load_molecular_properties("mol_id")
@@ -384,7 +384,7 @@ class KBI:
   @property
   def molar_vol(self):
     r"""
-    :return: array of pure component molar volumes (cm\ :sup:`3`/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from ``molecular_properties.csv``
+    :return: array of pure component molar volumes (cm\ :sup:`3`/mol), defaults to results from pure component simulations, if pure component simulation not found use value at STP from `molecular_properties.csv`
     :rtype: numpy.ndarray
     """
     V0 = np.zeros(len(self.unique_mols)) # initialize array for molar volumes
@@ -510,7 +510,7 @@ class KBI:
   def _n_mol(self):
     r"""Calculate molecule numbers for each component in each system.
 
-    :return: array of molecule numbers, shape ``(len(systems), n)``
+    :return: array of molecule numbers, shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     n_mol = np.zeros((self.n_sys, len(self._top_unique_mols))) # initialize array for molecule numbers
@@ -526,7 +526,7 @@ class KBI:
   def _top_z(self):
     r"""Get mol fraction matrix from system compositions.
 
-    :return: array of mol fractions, shape ``(len(systems), n)``
+    :return: array of mol fractions, shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     return self._n_mol / self._n_mol.sum(axis=1)[:,np.newaxis]
@@ -535,7 +535,7 @@ class KBI:
   def _top_v(self):
     r"""Convert mol fraction matrix to volume fraction matrix.
 
-    :return: array of volume fractions, shape ``(len(systems), n)``
+    :return: array of volume fractions, shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     return mol2vol(self._top_z, self.molar_vol)
@@ -544,7 +544,7 @@ class KBI:
   def _top_c(self):
     r"""Calculate molarity (mol/L) of each molecule in each system.
 
-    :return:array of molarities (mol/L), shape ``(len(systems), n)``
+    :return:array of molarities (mol/L), shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     return self._top_rho * (10**24) / N_A
@@ -553,7 +553,7 @@ class KBI:
   def _top_rho(self):
     r"""Calculate the number density (nm\ :sup:`-3`) for each molecule in each system.
 
-    :return: array of number densities (nm\ :sup:`-3`), shape ``(len(systems), n)``
+    :return: array of number densities (nm\ :sup:`-3`), shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     return self._n_mol / self._box_vol_nm3[:,np.newaxis]
@@ -584,17 +584,17 @@ class KBI:
     r"""
     For a given radial distribution function, calculate KBI from ``r_lo`` to ``r_hi`` by applying a correction to the correlation function.
 
-    The correlation function, :math:`h_{ij}(r)`, is not corrected when ``kbi_method`` = 'raw'.
+    The correlation function, :math:`h_{ij}(r)`, is not corrected when ``kbi_method`` = `raw`.
 
     .. math::
       h_{ij}(r) = g_{ij}^{NpT}(r) - 1
 
-    For the ``kbi_method`` = 'adj' correlation function correction, the excess/depletion of molecule j around molecule i in a system with fixed number of components is adjusted based on the limiting behavior of the radial distribution function tail at large r.
+    For the ``kbi_method`` = `adj` correlation function correction, the excess/depletion of molecule :math:`j` around molecule :math:`i` in a system with fixed number of components is adjusted based on the limiting behavior of the radial distribution function tail at large r.
 
     .. math::
       h_{ij}^{adj}(r) = g_{ij}^{NpT}(r) - \text{avg}
 
-    `Ganguly and Van der Vegt (2013) <https://doi.org/10.1021/ct301017q>`_ introduced a correction to the radial distribution function (``kbi_method`` = 'gv') to correct the number of molecule :math:`j` around molecule :math:`i`, where :math:`N_j` is the number of molecules :math:`j`, :math:`\Delta N_{ij}` is the number of molecules :math:`j` around molecule i in radius of shell dr, and :math:`V` is the volume of simulation box.
+    `Ganguly and Van der Vegt (2013) <https://doi.org/10.1021/ct301017q>`_ introduced a correction to the radial distribution function (``kbi_method`` = `gv`) to correct the number of molecule :math:`j` around molecule :math:`i`, where :math:`N_j` is the number of molecules :math:`j`, :math:`\Delta N_{ij}` is the number of molecules :math:`j` around molecule :math:`i` in radius of shell dr, and :math:`V` is the volume of simulation box.
 
     .. math::
       h_{ij}^{gv}(r) = g_{ij}^{NpT}(r) \left(\frac{N_j\left(1 - \frac{4/3 \pi r^3}{V} \right)}{N_j \left(1 - \frac{4/3 \pi r^3}{V} \right) - \Delta N_{ij}  - \delta_{ij}} \right) - 1
@@ -602,7 +602,7 @@ class KBI:
     .. math::
       \Delta N_{ij} = \int_0^R 4 \pi r^2 \rho_j \left(g_{ij}^{NpT}(r) - 1\right) dr
 
-    `Dawass and Krüger et al. (2019) <https://doi.org/10.1016/j.fluid.2018.12.027>`_ applied a damping function for hyperspheres geometry (``kbi_method`` = 'kgv') to the Ganguly and Van der Vegt correction to force limiting behavior of correlation function at large r to be 1.
+    `Dawass and Krüger et al. (2019) <https://doi.org/10.1016/j.fluid.2018.12.027>`_ applied a damping function for hyperspheres geometry (``kbi_method`` = `kgv`) to the Ganguly and Van der Vegt correction to force limiting behavior of correlation function at large r to be 1.
 
     .. math::
       h_{ij}^{kgv}(r) = h_{ij}^{gv} \left(1 - \frac{3r}{2R} + \frac{r^3}{2r^3} \right)
@@ -625,9 +625,9 @@ class KBI:
     :type avg: float
     :param sys_num: system index
     :type sys_num: int
-    :param mol_i: molecule id in .top file for i in :math:`g_{ij}(r)`
+    :param mol_i: molecule id in .top file for :math:`i` in :math:`g_{ij}(r)`
     :type mol_i: str
-    :param mol_j: molecule id in .top file for j in :math:`g_{ij}(r)`
+    :param mol_j: molecule id in .top file for :math:`j` in :math:`g_{ij}(r)`
     :type mol_j: str
     :return: KBI in units of nm\ :sup:`3` and cm\ :sup:`3`/mol.
     :rtype: tuple[float, float]
@@ -814,7 +814,7 @@ class KBI:
     .. math::
       x_i = \frac{N_i}{\sum_j N_j}
 
-    :return: mol fraction array, with shape ``(len(systems), n)``
+    :return: mol fraction array, with shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     return self._z
@@ -831,7 +831,7 @@ class KBI:
     .. math::
       \phi_i = \frac{x_i V_i}{\sum_j x_j V_j}
 
-    :return: volume fraction array, with shape ``(len(systems), n)``
+    :return: volume fraction array, with shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     return self._v
@@ -852,7 +852,7 @@ class KBI:
         G_{n1}^\infty & G_{n2}^\infty & \cdots & G_{nn}^\infty \\
       \end{bmatrix}
 
-    :return: array of KBI values for each pairwise interaction, with shape ``(len(systems), n, n)``
+    :return: array of KBI values for each pairwise interaction, with shape `(len(systems), n, n)`
     :rtype: numpy.ndarray
     """
     try:
@@ -889,7 +889,7 @@ class KBI:
         \rho_1 \rho_n \mathbf{G}_{n1} & \rho_2 \rho_n \mathbf{G}_{n2} & \cdots & \rho_n^2 \mathbf{G}_{nn} + \rho_n \\
       \end{bmatrix}
 
-    :return: array with shape ``(len(systems), n, n)``
+    :return: array with shape `(len(systems), n, n)`
     :rtype: numpy.ndarray
     """
     B = np.full((self.z.shape[0],len(self.unique_mols), len(self.unique_mols)), fill_value=np.nan)
@@ -924,7 +924,7 @@ class KBI:
     .. math::
       \mathbf{B}^{ij} = \left(|\mathbf{B}| \mathbf{B}^{-1}\right)_{ij}
 
-    :return: cofactor matrix with shape ``(len(systems), n, n)``
+    :return: cofactor matrix with shape `(len(systems), n, n)`
     :rtype: numpy.ndarray
     """
     B_ij = np.zeros((self.z.shape[0], len(self.unique_mols), len(self.unique_mols), len(self.unique_mols), len(self.unique_mols)))
@@ -937,7 +937,7 @@ class KBI:
   def _rho_ij(self):
     r"""Product of number densities between two components.
 
-    :return: array with shape ``(len(systems), n, n)``
+    :return: array with shape `(len(systems), n, n)`
     :rtype: numpy.ndarray
     """
     _top_rho = np.zeros((self.z.shape[0], len(self.unique_mols), len(self.unique_mols)))
@@ -955,7 +955,7 @@ class KBI:
     .. math::
       \left(\frac{\partial \mu_i}{\partial N_j}\right)_{N, p, T} = \frac{k_bT}{\left<V\right> |\mathbf{B}|}\left(\frac{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b\left|\mathbf{B}^{ij}\mathbf{B}^{ab}-\mathbf{B}^{ai}\mathbf{B}^{bj}\right|}{\sum_{a=1}^N\sum_{b=1}^N \rho_a\rho_b \mathbf{B}^{ab}}\right)
 
-    :return: array of shape ``(len(systems), n, n)``
+    :return: array of shape `(len(systems), n, n)`
     :rtype: numpy.ndarray
     """
     b_lower = np.zeros(self.z.shape[0]) # this matches!!
@@ -987,7 +987,7 @@ class KBI:
     .. math::
       \left(\frac{\partial \mu_i}{\partial x_j}\right) = N \left(\frac{\partial \mu_i}{\partial N_j} - \frac{\partial \mu_i}{\partial N_n}\right)
 
-    :return: array of shape ``(len(systems), n-1, n-1)``
+    :return: array of shape `(len(systems), n-1, n-1)`
     :rtype: numpy.ndarray
     """
     # get chemical potential derivative wrt molecule number
@@ -1021,7 +1021,7 @@ class KBI:
     .. math::
       \frac{\partial \ln{\gamma_i}}{\partial x_i} = \frac{1}{k_BT} \frac{\partial \mu_i}{\partial x_i} - \frac{1}{x_i}
 
-    :return: array of shape ``(len(systems), n)``
+    :return: array of shape `(len(systems), n)`
     :rtype: numpy.ndarray
     """
     try:
@@ -1333,73 +1333,40 @@ class KBI:
     return self.G_mix_xv - self._Hmix
 
   @property
-  def nrtl_taus(self):
-    return self._fit_NRTL_IP()
-  
-  def _fit_NRTL_IP(self):
+  def nrtl_ip(self):
+    r"""
+    Fit the NRTL parameters :math:`\tau_{ij}` and :math:`\tau_{ji}` to :math:`\Delta G_{mix}` from KBI analysis using :meth:`picmol.models.nrtl.NRTL.fit_Gmix`.
+
+    :return: NRTL parameters :math:`\tau_{ij}` and :math:`\tau_{ji}`. For a binary system.
+    :rtype: numpy.ndarray
+    """
     if len(self.unique_mols) != 2:
       return
-    
-    def NRTL_GE_fit(z, tau12, tau21):
-      alpha = 0.2 # randomness factor == constant
-      G12 = np.exp(-alpha*tau12/(self.Rc*self.T_sim))
-      G21 = np.exp(-alpha*tau21/(self.Rc*self.T_sim))
-      x1 = z[:,0]
-      x2 = z[:,1]
-      G_ex = -self.Rc * self.T_sim * (x1 * x2 * (tau21 * G21/(x1 + x2 * G21) + tau12 * G12 / (x2 + x1 * G12))) 
-      G_id = self.Rc * self.T_sim * (x1 * np.log(x1) + x2 * np.log(x2))
-      return G_ex + G_id
-
-    self.nrtl_Gmix = self.G_mix_xv
-    self.nrtl_Gmix0 = add_zeros(self.nrtl_Gmix)
-    fit, pcov = curve_fit(NRTL_GE_fit, self.z, self.nrtl_Gmix)
-    tau12, tau21 = fit
-    
-    np.savetxt(f"{self.kbi_method_dir}NRTL_taus_{self.kbi_method.lower()}.txt", [tau12, tau21], delimiter=",") 
-    nrtl_taus = {"tau12": tau12, "tau21": tau21}
-    return nrtl_taus
-  
-
-  def _fit_FH_chi(self):
-    if len(self.unique_mols) != 2:
-      # check that system is binary, else don't run
-      return
-      
-    phi = self.v[:,self.solute_loc]
-    self.fh_phi = phi
-
-    N0 = self.molar_vol / self.molar_vol.max() # normalize the molar volumes to get N0 for Flory-Huggins
-
-    def fh_GM(x, chi, Tx):
-      return 8.314E-3 * Tx * (x * np.log(x)/N0[0] + (1-x) * np.log(1-x)/N0[1]) + chi*x*(1-x)
-
-    GM_fit_Tsim = partial(fh_GM, Tx=self.T_sim)
-    
-    fit, pcov = curve_fit(GM_fit_Tsim, xdata=phi, ydata=self.G_mix_xx)
-    chi = fit[0]
-    
-    self.fh_chi = chi
-    self.fh_Gmix = fh_GM(phi, chi, self.T_sim)
-
-    with open(f'{self.kbi_method_dir}FH_chi_{self.kbi_method.lower()}.txt', 'w') as f:
-      f.write(f'{self.fh_chi}\n')
-  
-    return self.fh_chi
+    # get the tau12 and tau21 values from the NRTL model
+    return NRTL.fit_Gmix(T=self.T_sim, z=self.z, Gmix=self.G_mix_xv)
 
   @property
-  def uniquac_du(self):
-    return self._fit_UNIQUAC_IP()
+  def fh_ip(self):
+    r"""
+    Fit the FH parameter :math:`\chi` to :math:`\Delta G_{mix}` from KBI analysis using :meth:`picmol.models.fh.FH.fit_Gmix`.
 
-  def _fit_UNIQUAC_IP(self):
-    try:
-      self._Hmix
-    except AttributeError:
-      self.Hmix()
-    self.r = UNIQUAC_R(self.smiles)
-    self.q = UNIQUAC_Q(self.smiles)
-    du = fit_du_to_Hmix(z=self.z, Hmix=self._Hmix, T=self.T_sim, smiles=self.smiles)
-    np.savetxt(f"{self.kbi_method_dir}UNIQUAC_du_{self.kbi_method.lower()}.txt", du, delimiter=",") 
-    return du
+    :return: FH parameter :math:`\chi`. For a binary system.
+    :rtype: numpy.ndarray
+    """
+    if len(self.unique_mols) != 2:
+      return
+    # get the tau12 and tau21 values from the NRTL model
+    return FH.fit_Gmix(T=self.T_sim, phi=self.v[:,self.solute_loc], Gmix=self.G_mix_xv, V0=self.molar_vol)
+ 
+  @property
+  def uniquac_ip(self):
+    r"""
+    Fit the UNIQUAC parameters :math:`\Delta u_{ij}` to :math:`\Delta H_{mix}` from KBI analysis using :meth:`picmol.models.uniquac.UNIQUAC.fit_Hmix`.
+    
+    :return: UNIQUAC parameters :math:`\Delta u_{ij}`. For a multicomponent system.
+    :rtype: numpy.ndarray
+    """
+    return UNIQUAC.fit_Hmix(T=self.T_sim, z=self.z, Hmix=self.Hmix(), smiles=self.smiles)
 
   @property
   def z_plot(self):
@@ -1409,56 +1376,6 @@ class KBI:
     z_arr = point_disc.points_mfr[1:-1,:]
     return z_arr 
 
-  @property
-  def uniquac_Hmix(self):
-    try:
-      self.uniquac_du
-    except:
-      self._fit_UNIQUAC_IP()
-
-    uniq_model = UNIQUAC(z=self.z_plot, smiles=self.smiles, IP=self.uniquac_du)
-    return uniq_model.GE_res(self.T_sim)
-
-  @property
-  def uniquac_Smix(self):
-    try:
-      self.uniquac_du
-    except:
-      self._fit_UNIQUAC_IP()
-
-    uniq_model = UNIQUAC(z=self.z_plot, smiles=self.smiles, IP=self.uniquac_du)
-    return uniq_model.GE_comb(self.T_sim) + uniq_model.Gid(self.T_sim)
-
-  @property
-  def unifac_Hmix(self):
-    unif_model = UNIFAC(z=self.z_plot, T=self.T_sim, smiles=self.smiles, version="lle")
-    return unif_model.Hmix()
-
-  @property
-  def unifac_Smix(self):
-    unif_model = UNIFAC(z=self.z_plot, T=self.T_sim, smiles=self.smiles, version="lle")
-    return unif_model.Smix()
-  
-  @property
-  def quartic_model(self):
-    try:
-      self._Hmix
-    except AttributeError:
-      self.Hmix()
-    quar_model = QuarticModel(z_data=self.z, z=self.z_plot, Hmix=self._Hmix, Sex=self.SE(), molar_vol=self.molar_vol)
-    return quar_model
-
-  @property
-  def quartic_Hmix(self):
-    return self.quartic_model.Hmix_func(self.T_sim)
-
-  @property
-  def quartic_nTSex(self):
-    return self.quartic_model.nTSex_func(self.T_sim)
-  
-  @property
-  def quartic_Smix(self):
-    return self.quartic_model.Smix_func(self.T_sim)
 
 
   

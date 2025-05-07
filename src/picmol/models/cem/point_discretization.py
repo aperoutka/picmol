@@ -7,12 +7,8 @@ import math
 
 class PointDisc:
   """
-  Discretizes the composition space of a multi-component system using a simplex.
-
-  This class generates a set of points within the composition space of a
-  multi-component system by recursively subdividing a simplex. The points
-  can be used to represent the possible compositions of mixtures in the system,
-  for example, in phase equilibrium calculations.
+  Discretizes the composition space of a multi-component system using a simplex. The points
+  can be used to represent the possible compositions of mixtures in the system.
 
   :param num_comp:
       The number of components in the system. Must be greater than or equal to 2.
@@ -64,7 +60,7 @@ class PointDisc:
   :vartype points_cart: numpy.ndarray
   :ivar stepsize:
       The step size used in the discretization, determined by the
-      `recursion_steps`.
+      ``recursion_steps``.
   :vartype stepsize: float
   """
   def __init__(self, num_comp, recursion_steps, load, store):
@@ -128,8 +124,7 @@ class PointDisc:
   def get_points(self, base):
     """
     Generates the discretized points within the simplex.
-
-    This method recursively generates points within the simplex based on the
+    Recursively generates points within the simplex based on the
     number of recursion steps. The points are generated in both molar fraction
     and Cartesian coordinates.
 
@@ -157,10 +152,8 @@ class PointDisc:
   def construct_outer_simplex(self):
     """
     Constructs the outer simplex in Cartesian coordinates.
-
-    This method generates the vertices of a regular n-simplex in R\ :sup:`n`, where
-    n is the number of components minus 1. For the case of a 3-component
-    system, the simplex is rotated by 285 degrees.
+    Generates the vertices of a regular n-simplex in R\ :sup:`n`, where
+    n is the number of components minus 1. 
 
     :returns:
         A list of numpy arrays, where each array represents the Cartesian
@@ -189,10 +182,8 @@ class PointDisc:
 
   def transform_molar_fr_to_cartesian(self, molar_fractions):
     """
-    Transforms molar fractions to Cartesian coordinates.
-
-    This method converts a composition represented as molar fractions
-    (barycentric coordinates) to Cartesian coordinates using the
+    Transforms a composition in molar fractions
+    to Cartesian coordinates using the
     precomputed transformation matrix.
 
     :param molar_fractions:
@@ -207,10 +198,8 @@ class PointDisc:
 
   def transform_cartesian_to_molar_fr(self, cartesian_point):
     """
-    Transforms Cartesian coordinates to molar fractions.
-
-    This method converts a composition represented as Cartesian coordinates
-    to molar fractions (barycentric coordinates) using the precomputed
+    Transforms a composition in Cartesian coordinates
+    to molar fractions using the precomputed
     transformation matrix.
 
     :param cartesian_point:
@@ -230,10 +219,7 @@ class PointDisc:
   @staticmethod
   def euclidean_distance(p1, p2):
     """
-    Calculates the Euclidean distance between two points.
-
-    This static method computes the Euclidean distance between two points
-    in Cartesian coordinates.
+    Calculates the Euclidean distance between two points in Cartesian coordinates.
 
     :param p1:
         A numpy array representing the coordinates of the first point.
@@ -253,8 +239,8 @@ class PointDisc:
     """
     Calculates the basis change matrices between molar fractions and Cartesian coordinates.
 
-    This static method computes the matrices A and A_inv, which are used to
-    transform between molar fractions (barycentric coordinates) and Cartesian
+    This static method computes the matrices A and A\ :sup:`-1`, which are used to
+    transform between molar fractions and Cartesian
     coordinates. The matrix A is constructed from the vertices of the simplex.
 
     :param vertices_cartesian:
@@ -263,7 +249,7 @@ class PointDisc:
     :type vertices_cartesian: list[numpy.ndarray]
 
     :returns:
-        A tuple containing the matrix A and its inverse A_inv.
+        A tuple containing the matrix A and its inverse A\ :sup:`-1`.
     :rtype: tuple[numpy.ndarray, numpy.ndarray]
     """
     matrix = np.empty((len(vertices_cartesian), len(vertices_cartesian)))

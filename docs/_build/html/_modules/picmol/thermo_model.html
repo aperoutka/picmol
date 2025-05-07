@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -280,19 +281,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.get_molecular_properties</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_molecular_properties</span><span class="p">,</span> <span class="n">search_molecule</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models.cem</span><span class="w"> </span><span class="kn">import</span> <span class="n">CEM</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.kbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">mkdr</span><span class="p">,</span> <span class="n">KBI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">mol2vol</span>
 
 <div class="viewcode-block" id="spinodal_fn">
 <a class="viewcode-back" href="../../picmol.thermo_model.html#picmol.thermo_model.spinodal_fn">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">spinodal_fn</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">Hij</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Calculates mole fractions where the Hessian of the Gibbs mixing free energy is zero, indicating spinodal points.</span>
+<span class="sd">  Calculates mol fractions where the Hessian of the Gibbs mixing free energy is zero, indicating spinodal points.</span>
 
-<span class="sd">  :param z: mol fraction array with shape ``(number of compositions, number of components)``.</span>
+<span class="sd">  :param z: mol fraction array with shape `(number of compositions, number of components)`.</span>
 <span class="sd">  :type z: numpy.ndarray</span>
 <span class="sd">  :param Hij: determinant of Hessian matrix of the Gibbs mixing free energy.</span>
 <span class="sd">  :type Hij: numpy.ndarray</span>
-<span class="sd">  :return: mol fractions of the spinodal curve. Returns an array of shape ``(2, number of components)`` for binary mixtures or ``None`` if fewer or more than two spinodal points are detected (excluding the first and last 5 points).</span>
+<span class="sd">  :return: mol fractions of the spinodal curve.</span>
 <span class="sd">  :rtype: numpy.ndarray or None</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">sign_changes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">Hij</span><span class="p">))</span>  <span class="c1"># diff of signs between consecutive elements</span>
@@ -310,7 +311,7 @@
 <a class="viewcode-back" href="../../picmol.thermo_model.html#picmol.thermo_model.binodal_fn">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">binodal_fn</span><span class="p">(</span><span class="n">num_comp</span><span class="p">,</span> <span class="n">rec_steps</span><span class="p">,</span> <span class="n">G_mix</span><span class="p">,</span> <span class="n">activity_coefs</span><span class="p">,</span> <span class="n">solute_idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bi_min</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">bi_max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Calculates mole fractions of the coexistence curve (binodal) using the convex envelope method (:class:`picmol.models.cem.CEM`), which applies the isoactivity criterion.</span>
+<span class="sd">  Calculates mol fractions of the coexistence curve (binodal) using the convex envelope method (:class:`picmol.models.cem.cem_analysis.CEM`), which applies the isoactivity criterion.</span>
 
 <span class="sd">  :param num_comp: number of components in the mixture.</span>
 <span class="sd">  :type num_comp: int</span>
@@ -320,14 +321,14 @@
 <span class="sd">  :type G_mix: numpy.ndarray</span>
 <span class="sd">  :param activity_coefs: array of activity coefficients for each component at each composition in the discretized space.</span>
 <span class="sd">  :type activity_coefs: numpy.ndarray</span>
-<span class="sd">  :param solute_idx: index of the solute component for reporting mole fractions (only relevant for binary systems).</span>
+<span class="sd">  :param solute_idx: index of the solute component for reporting mol fractions (only relevant for binary systems).</span>
 <span class="sd">  :type solute_idx: int, optional</span>
-<span class="sd">  :param bi_min: lower bound for mole fractions to be considered for binodals. Defaults to negative infinity.</span>
+<span class="sd">  :param bi_min: lower bound for mol fractions to be considered for binodals. Defaults to negative infinity.</span>
 <span class="sd">  :type bi_min: float, optional</span>
-<span class="sd">  :param bi_max: upper bound for mole fractions to be considered for binodals. Defaults to positive infinity.</span>
+<span class="sd">  :param bi_max: upper bound for mol fractions to be considered for binodals. Defaults to positive infinity.</span>
 <span class="sd">  :type bi_max: float, optional</span>
-<span class="sd">  :return: for binary systems, returns a tuple of two floats representing the minimum and maximum binodal mole fractions of the solute. Returns an array for multicomponent systems. Returns ``(np.nan, np.nan)`` if no valid binodal points are found for binary systems.</span>
-<span class="sd">  :rtype: tuple[float, float] or numpy.ndarray or tuple[np.nan, np.nan]</span>
+<span class="sd">  :return: for binary systems, returns a tuple of two floats representing the minimum and maximum binodal mol fractions of the solute and an array for multicomponent systems.</span>
+<span class="sd">  :rtype: tuple[float, float] or numpy.ndarray </span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">bi_obj</span> <span class="o">=</span> <span class="n">CEM</span><span class="p">(</span><span class="n">num_comp</span><span class="o">=</span><span class="n">num_comp</span><span class="p">,</span> <span class="n">rec_steps</span><span class="o">=</span><span class="n">rec_steps</span><span class="p">,</span> <span class="n">G_mix</span><span class="o">=</span><span class="n">G_mix</span><span class="p">,</span> <span class="n">activity_coefs</span><span class="o">=</span><span class="n">activity_coefs</span><span class="p">)</span>
   <span class="n">bi_vals</span> <span class="o">=</span> <span class="n">bi_obj</span><span class="o">.</span><span class="n">binodal_matrix_molfrac</span>
@@ -431,9 +432,8 @@
 <span class="sd">    * :math:`\overline{N^e}` is the average number of electrons in the mixture.</span>
 <span class="sd">    * :math:`|H^x|` is the determinant of the Gibbs mixing free energy Hessian.</span>
 <span class="sd">    * :math:`k_b` is the Boltzmann constant.</span>
-<span class="sd">    * :math:`T` is the temperature.</span>
 
-<span class="sd">  :param z: mol fraction array with shape ``(number of compositions, number of components)``.</span>
+<span class="sd">  :param z: mol fraction array with shape `(number of compositions, number of components)`.</span>
 <span class="sd">  :type z: numpy.ndarray</span>
 <span class="sd">  :param molar_vol: array of molar volumes for each component.</span>
 <span class="sd">  :type molar_vol: numpy.ndarray</span>
@@ -468,30 +468,29 @@
 <a class="viewcode-back" href="../../picmol.thermo_model.html#picmol.thermo_model.Tc_search">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">Tc_search</span><span class="p">(</span><span class="n">smiles</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">lle_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Tmin</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">Tmax</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">dT</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">unif_version</span><span class="o">=</span><span class="s2">&quot;unifac&quot;</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Calculates the critical temperature (K) for a binary system using the UNIFAC model. The critical temperature is identified by finding the temperature at which spinodal points appear (Hessian of Gibbs mixing free energy becomes zero). The calculation can be optimized by specifying the type of LLE.</span>
+<span class="sd">  Calculates the critical temperature (K) for a binary system using the UNIFAC model. The critical temperature is identified by finding the temperature at which the distance between two spinodal points (Hessian of Gibbs mixing free energy becomes zero) are minimized. The calculation can be optimized by specifying the type of LLE.</span>
 
 <span class="sd">  :param smiles: list of SMILES representations of the two molecules in the binary system.</span>
 <span class="sd">  :type smiles: list</span>
 <span class="sd">  :param lle_type: type of liquid-liquid equilibrium transition. Options are:</span>
 <span class="sd">      </span>
-<span class="sd">      * &#39;ucst&#39;: Upper critical solution temperature (critical temperature is the maximum on the phase diagram).</span>
-<span class="sd">      * &#39;lcst&#39;: Lower critical solution temperature (critical temperature is the minimum on the phase diagram).</span>
+<span class="sd">      * `ucst`: Upper critical solution temperature (critical temperature is the maximum on the phase diagram).</span>
+<span class="sd">      * `lcst`: Lower critical solution temperature (critical temperature is the minimum on the phase diagram).</span>
 <span class="sd">  </span>
 <span class="sd">  :type lle_type: str, optional</span>
-<span class="sd">  :param Tmin: minimum temperature (K) for the search. Required for ``lle_type=&#39;lcst&#39;`` or ``None``. Defaults to 100 K.</span>
+<span class="sd">  :param Tmin: minimum temperature (K) for the search. Required for ``lle_type`` = `lcst` or `None`. Defaults to `100` K.</span>
 <span class="sd">  :type Tmin: float, optional</span>
-<span class="sd">  :param Tmax: maximum temperature (K) for the search. Required for ``lle_type=&#39;ucst&#39;`` or ``None``. Defaults to 500 K.</span>
+<span class="sd">  :param Tmax: maximum temperature (K) for the search. Required for ``lle_type`` = `ucst` or `None`. Defaults to `500` K.</span>
 <span class="sd">  :type Tmax: float, optional</span>
-<span class="sd">  :param dT: temperature step (K) for the search when ``lle_type`` is ``None``. Defaults to 5 K.</span>
+<span class="sd">  :param dT: temperature step (K) for the search when ``lle_type`` is `None`. Defaults to `5` K.</span>
 <span class="sd">  :type dT: float, optional</span>
-<span class="sd">  :param unif_version: version of the UNIFAC model to use. Options are:</span>
+<span class="sd">  :param unif_version: version of the UNIFAC model to use, defaults to `unifac`. Options are:</span>
 <span class="sd">     </span>
-<span class="sd">      * &#39;unifac&#39;: Original UNIFAC.</span>
-<span class="sd">      * &#39;unifac-lle&#39;: Updated parameters for LLE.</span>
-<span class="sd">      * &#39;unifac-il&#39;: Includes support for ionic liquid molecules.</span>
+<span class="sd">      * `unifac`: Original UNIFAC.</span>
+<span class="sd">      * `unifac-il`: Includes support for ionic liquid molecules.</span>
 <span class="sd">  </span>
 <span class="sd">  :type unif_version: str, optional</span>
-<span class="sd">  :return: The critical temperature (K). Returns ``np.nan`` if the critical temperature cannot be found.</span>
+<span class="sd">  :return: critical temperature (K). Returns `np.nan` if the critical temperature cannot be found.</span>
 <span class="sd">  :rtype: float or np.nan</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="s2">&quot;md&quot;</span> <span class="ow">in</span> <span class="n">unif_version</span> <span class="ow">or</span> <span class="s1">&#39;kbi&#39;</span> <span class="ow">in</span> <span class="n">unif_version</span><span class="p">:</span>
@@ -568,34 +567,33 @@
 <span class="sd">  This class provides a framework for applying various thermodynamic models to analyze</span>
 <span class="sd">  LLE in mixtures. It supports both binary and multicomponent</span>
 <span class="sd">  systems, depending on the chosen thermodynamic model. The class initializes based on a</span>
-<span class="sd">  selected model name, a KBI (Kirkwood-Buff Integrals) model object, and a temperature</span>
+<span class="sd">  selected model name, a KBI (Kirkwood-Buff Integral) model object, and a temperature</span>
 <span class="sd">  range for analysis.</span>
 
 <span class="sd">  :param model_name: thermodynamic model to implement. Available options include:</span>
 
-<span class="sd">      * &#39;quartic&#39;: Numerical model using a 4th order Taylor series expansion (:class:`picmol.models.numerical.QuarticModel`). Supported for multicomponent mixtures.</span>
-<span class="sd">      * &#39;uniquac&#39;: UNIQUAC (Universal Quasi-Chemical) thermodynamic model (:class:`picmol.models.uniquac.UNIQUAC`). Supported for multicomponent mixtures.</span>
-<span class="sd">      * &#39;unifac&#39;: UNIFAC (Universal Functional-group Activity Coefficients) thermodynamic model (:class:`picmol.models.unifac.UNIFAC`). Supported for multicomponent mixtures.</span>
-<span class="sd">      * &#39;fh&#39;: Flory-Huggins thermodynamic model (:class:`picmol.models.fh.FH`). Supported for binary systems only.</span>
-<span class="sd">      * &#39;nrtl&#39;: NRTL (Non-Random Two-Liquid) thermodynamic model (:class:`picmol.models.nrtl.NRTL`). Supported for binary systems only.</span>
+<span class="sd">      * `quartic`: Numerical model using a 4th order Taylor series expansion (:class:`picmol.models.numerical.QuarticModel`). Supported for multicomponent mixtures.</span>
+<span class="sd">      * `uniquac`: UNIQUAC (Universal Quasi-Chemical) thermodynamic model (:class:`picmol.models.uniquac.UNIQUAC`). Supported for multicomponent mixtures.</span>
+<span class="sd">      * `unifac`: UNIFAC (Universal Functional-group Activity Coefficients) thermodynamic model (:class:`picmol.models.unifac.UNIFAC`). Supported for multicomponent mixtures.</span>
+<span class="sd">      * `fh`: Flory-Huggins thermodynamic model (:class:`picmol.models.fh.FH`). Supported for binary systems only.</span>
+<span class="sd">      * `nrtl`: NRTL (Non-Random Two-Liquid) thermodynamic model (:class:`picmol.models.nrtl.NRTL`). Supported for binary systems only.</span>
 
 <span class="sd">  :type model_name: str</span>
 <span class="sd">  :param KBIModel: KBI class object containing Kirkwood-Buff integrals and related data.</span>
 <span class="sd">                    This object provides information about the mixture components and their interactions.</span>
 <span class="sd">  :type KBIModel: KBI</span>
-<span class="sd">  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to 100 K.</span>
+<span class="sd">  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to `100` K.</span>
 <span class="sd">  :type Tmin: float, optional</span>
-<span class="sd">  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to 400 K.</span>
+<span class="sd">  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to `400` K.</span>
 <span class="sd">  :type Tmax: float, optional</span>
-<span class="sd">  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to 10 K.</span>
+<span class="sd">  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to `5` K.</span>
 <span class="sd">  :type dT: float, optional</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;run thermo model on kbi results&quot;&quot;&quot;</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
       <span class="bp">self</span><span class="p">,</span> 
       <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="c1"># thermo model</span>
       <span class="n">KBIModel</span><span class="p">,</span> <span class="c1"># option to feed in kbi model</span>
-      <span class="n">Tmin</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">Tmax</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">dT</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="c1"># temperature range</span>
+      <span class="n">Tmin</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">Tmax</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">dT</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="c1"># temperature range</span>
     <span class="p">):</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span> <span class="o">=</span> <span class="n">KBIModel</span>
@@ -636,10 +634,10 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="n">Tmax</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unif_version</span><span class="p">)</span>
     <span class="c1"># quartic/numerical</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="n">QuarticModel</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span><span class="p">(</span><span class="n">z_data</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">Hmix</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">Hmix</span><span class="p">(),</span> <span class="n">Sex</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">SE</span><span class="p">(),</span> <span class="n">molar_vol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">,</span> <span class="n">gid_type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span><span class="p">(</span><span class="n">z_data</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">Hmix_data</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">Hmix</span><span class="p">(),</span> <span class="n">SE_data</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">SE</span><span class="p">(),</span> <span class="n">molar_vol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">,</span> <span class="n">gid_type</span><span class="o">=</span><span class="s1">&#39;vol&#39;</span><span class="p">)</span>
     <span class="c1"># Flory-Huggins</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="n">FH</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">solute_loc</span><span class="p">],</span> <span class="n">Smix</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">SM</span><span class="p">(),</span> <span class="n">Hmix</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">Hmix</span><span class="p">())</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">v</span><span class="p">[:,</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">solute_loc</span><span class="p">],</span> <span class="n">Smix</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">SM</span><span class="p">(),</span> <span class="n">Hmix</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">Hmix</span><span class="p">(),</span> <span class="n">V0</span><span class="o">=</span><span class="n">KBIModel</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
     <span class="c1"># NRTL </span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span> <span class="o">==</span> <span class="n">NRTL</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_type</span><span class="p">(</span><span class="n">IP</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">IP</span><span class="p">)</span>
@@ -663,22 +661,35 @@
 <span class="sd">    properties relevant for LLE. It distinguishes between binary</span>
 <span class="sd">    and multicomponent systems to apply appropriate calculation methods.</span>
 
-<span class="sd">    **Attributes (after running this method):**</span>
-
-<span class="sd">    * ``GM`` (kJ/mol): Gibbs mixing energy as a function of temperature and composition.</span>
-<span class="sd">    * ``det_Hij``: determinant of Hessian of Gibbs mixing energy with respect to composition.</span>
-<span class="sd">    * ``x_sp``: mol fractions at spinodal compositions as a function of temperature.</span>
-<span class="sd">    * ``x_bi``: mol fractions at binodal compositions as a function of temperature.</span>
-<span class="sd">    * ``v_sp``: volume fractions at spinodal compositions as a function of temperature.</span>
-<span class="sd">    * ``v_bi``: volume fractions at binodal compositions as a function of temperature.</span>
-<span class="sd">    * ``GM_sp`` (kJ/mol, binary only): Gibbs mixing energy at spinodal compositions.</span>
-<span class="sd">    * ``GM_bi`` (kJ/mol, binary only): Gibbs mixing energy at binodal compositions.</span>
-<span class="sd">    * ``I0_arr``: Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity</span>
+<span class="sd">    :ivar GM: Gibbs mixing energy (kJ/mol) as a function of temperature and composition.</span>
+<span class="sd">    :vartype GM: numpy.ndarray</span>
+<span class="sd">    :ivar det_Hij: Determinant of Hessian of Gibbs mixing energy with respect to composition.</span>
+<span class="sd">    :vartype det_Hij: numpy.ndarray</span>
+<span class="sd">    :ivar x_sp: Mol fractions at spinodal compositions as a function of temperature.</span>
+<span class="sd">    :vartype x_sp: numpy.ndarray</span>
+<span class="sd">    :ivar x_bi: Mol fractions at binodal compositions as a function of temperature.</span>
+<span class="sd">    :vartype x_bi: numpy.ndarray</span>
+<span class="sd">    :ivar v_sp: Volume fractions at spinodal compositions as a function of temperature.</span>
+<span class="sd">    :vartype v_sp: numpy.ndarray</span>
+<span class="sd">    :ivar v_bi: Volume fractions at binodal compositions as a function of temperature.</span>
+<span class="sd">    :vartype v_bi: numpy.ndarray</span>
+<span class="sd">    :ivar GM_sp: Gibbs mixing energy at spinodal compositions (kJ/mol). For binary systems only.</span>
+<span class="sd">    :vartype GM_sp: numpy.ndarray</span>
+<span class="sd">    :ivar GM_bi: Gibbs mixing energy at binodal compositions (kJ/mol). For binary systems only.</span>
+<span class="sd">    :vartype GM_bi: numpy.ndarray</span>
+<span class="sd">    :ivar I0_arr: Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity</span>
 <span class="sd">      as a function of temperature and composition.</span>
-<span class="sd">    * ``x_I0_max``: Widom line compositions in mole fraction as a function of temperature.</span>
-<span class="sd">    * ``v_I0_max``: Widom line compositions in volume fraction as a function of temperature.</span>
-
-<span class="sd">    The calculated results are stored as attributes of the :class:`ThermoModel` object.</span>
+<span class="sd">    :vartype I0_arr: numpy.ndarray</span>
+<span class="sd">    :ivar x_I0_max: Widom line compositions in mol fraction as a function of temperature.</span>
+<span class="sd">    :vartype x_I0_max: numpy.ndarray</span>
+<span class="sd">    :ivar v_I0_max: Widom line compositions in volume fraction as a function of temperature.</span>
+<span class="sd">    :vartype v_I0_max: numpy.ndarray</span>
+<span class="sd">    :ivar xc: Critical composition in mol fraction. For binary systems only.</span>
+<span class="sd">    :vartype xc: float</span>
+<span class="sd">    :ivar phic: Critical volume fraction. For binary systems only.</span>
+<span class="sd">    :vartype phic: float</span>
+<span class="sd">    :ivar Tc: Critical temperature (K). For binary systems only.</span>
+<span class="sd">    :vartype Tc: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">num_comp</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_binary_temperature_scaling</span><span class="p">()</span>
@@ -688,7 +699,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">T_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: np.array of temperature values (K) for scaling</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: array of temperature values (K) for scaling</span>
 <span class="sd">    :rtype: numpy.ndarray</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Tmin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tmax</span><span class="o">+</span><span class="mf">1E-3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dT</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -768,7 +780,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">GM_bi</span><span class="p">[</span><span class="n">t</span><span class="p">,:]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="p">[</span><span class="n">t</span><span class="p">,</span><span class="n">bi1_ind</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="p">[</span><span class="n">t</span><span class="p">,</span><span class="n">bi2_ind</span><span class="p">]]</span>
         
       <span class="c1"># calculate I0</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">I0_arr</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_saxs_I0</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">molar_vol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">,</span> <span class="n">n_electrons</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">n_electrons</span><span class="p">,</span> <span class="n">Hij</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">det_Hij</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">I0_arr</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_saxs_Io</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">molar_vol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">,</span> <span class="n">n_electrons</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">n_electrons</span><span class="p">,</span> <span class="n">Hij</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">det_Hij</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">)</span>
       <span class="c1"># get widom line where spinodals are not found, i.e., where mixture is stable</span>
       <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_sp</span><span class="p">[</span><span class="n">t</span><span class="p">])):</span>
         <span class="n">I0_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">I0_arr</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
@@ -790,7 +802,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">phic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">phic</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x_filter</span><span class="p">[</span><span class="n">crit_ind</span><span class="p">,:])</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">phic</span> <span class="o">=</span> <span class="n">mol2vol</span><span class="p">(([</span><span class="bp">self</span><span class="o">.</span><span class="n">xc</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">xc</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">phic</span> <span class="o">=</span> <span class="n">mol2vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kbi_model</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span> <span class="o">=</span> <span class="n">T_values_filter</span><span class="p">[</span><span class="n">crit_ind</span><span class="p">]</span>
 
 
@@ -859,17 +871,17 @@
 <span class="sd">  :type smiles: list</span>
 <span class="sd">  :param mol_names: list of names for each component in the mixture.</span>
 <span class="sd">  :type mol_names: list</span>
-<span class="sd">  :param solute_idx: index of the solute component in the ``smiles`` and ``mol_names`` lists. Defaults to 0.</span>
+<span class="sd">  :param solute_idx: index of the solute component in the ``smiles`` and ``mol_names`` lists. Defaults to `0`.</span>
 <span class="sd">  :type solute_idx: int, optional</span>
-<span class="sd">  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to 100 K.</span>
+<span class="sd">  :param Tmin: minimum temperature (K) for the temperature scaling analysis. Defaults to `100` K.</span>
 <span class="sd">  :type Tmin: float, optional</span>
-<span class="sd">  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to 400 K.</span>
+<span class="sd">  :param Tmax: maximum temperature (K) for the temperature scaling analysis. Defaults to `400` K.</span>
 <span class="sd">  :type Tmax: float, optional</span>
-<span class="sd">  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to 10 K.</span>
+<span class="sd">  :param dT: temperature step (K) for the temperature scaling analysis. Defaults to `10` K.</span>
 <span class="sd">  :type dT: float, optional</span>
-<span class="sd">  :param save_dir: directory to save output files (not currently used in the provided code). Defaults to None.</span>
+<span class="sd">  :param save_dir: directory to save output files. Defaults to `None`.</span>
 <span class="sd">  :type save_dir: str, optional</span>
-<span class="sd">  :param unif_version: UNIFAC version to use (e.g., &#39;unifac&#39;, &#39;unifac-lle&#39;, &#39;unifac-il&#39;). Defaults to &#39;unifac&#39;.</span>
+<span class="sd">  :param unif_version: UNIFAC version to use (e.g., `unifac`, `unifac-lle`, `unifac-il`). Defaults to `unifac`.</span>
 <span class="sd">  :type unif_version: str, optional</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -912,8 +924,37 @@
 
 <span class="sd">    This method calculates Gibbs mixing energy, spinodal and binodal compositions as a</span>
 <span class="sd">    function of temperature. It distinguishes between binary and multicomponent systems</span>
-<span class="sd">    to apply the appropriate calculation methods. The results are stored as attributes</span>
-<span class="sd">    of the :class:`UNIFACThermoModel` object.</span>
+<span class="sd">    to apply the appropriate calculation methods. </span>
+<span class="sd">    </span>
+<span class="sd">    :ivar GM: Gibbs mixing energy (kJ/mol) as a function of temperature and composition.</span>
+<span class="sd">    :vartype GM: numpy.ndarray</span>
+<span class="sd">    :ivar det_Hij: Determinant of Hessian of Gibbs mixing energy with respect to composition. For binary systems only.</span>
+<span class="sd">    :vartype det_Hij: numpy.ndarray</span>
+<span class="sd">    :ivar x_sp: Mol fractions at spinodal compositions as a function of temperature. For binary systems only.</span>
+<span class="sd">    :vartype x_sp: numpy.ndarray</span>
+<span class="sd">    :ivar x_bi: Mol fractions at binodal compositions as a function of temperature.</span>
+<span class="sd">    :vartype x_bi: numpy.ndarray</span>
+<span class="sd">    :ivar v_sp: Volume fractions at spinodal compositions as a function of temperature. For binary systems only.</span>
+<span class="sd">    :vartype v_sp: numpy.ndarray</span>
+<span class="sd">    :ivar v_bi: Volume fractions at binodal compositions as a function of temperature.</span>
+<span class="sd">    :vartype v_bi: numpy.ndarray</span>
+<span class="sd">    :ivar GM_sp: Gibbs mixing energy at spinodal compositions (kJ/mol). For binary systems only.</span>
+<span class="sd">    :vartype GM_sp: numpy.ndarray</span>
+<span class="sd">    :ivar GM_bi: Gibbs mixing energy at binodal compositions (kJ/mol). For binary systems only.</span>
+<span class="sd">    :vartype GM_bi: numpy.ndarray</span>
+<span class="sd">    :ivar I0_arr: Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity</span>
+<span class="sd">      as a function of temperature and composition.</span>
+<span class="sd">    :vartype I0_arr: numpy.ndarray</span>
+<span class="sd">    :ivar x_I0_max: Widom line compositions in mol fraction as a function of temperature.</span>
+<span class="sd">    :vartype x_I0_max: numpy.ndarray</span>
+<span class="sd">    :ivar v_I0_max: Widom line compositions in volume fraction as a function of temperature.</span>
+<span class="sd">    :vartype v_I0_max: numpy.ndarray</span>
+<span class="sd">    :ivar xc: Critical composition in mol fraction. For binary systems only.</span>
+<span class="sd">    :vartype xc: float</span>
+<span class="sd">    :ivar phic: Critical volume fraction. For binary systems only.</span>
+<span class="sd">    :vartype phic: float</span>
+<span class="sd">    :ivar Tc: Critical temperature (K). For binary systems only.</span>
+<span class="sd">    :vartype Tc: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_binary_temperature_scaling</span><span class="p">()</span>
@@ -923,14 +964,16 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">num_comp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: number of components in the mixture.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: number of components in the mixture.</span>
 <span class="sd">    :rtype: int</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">T_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: array of temperature values (K) used for scaling.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: array of temperature values (K) used for scaling.</span>
 <span class="sd">    :rtype: numpy.ndarray&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Tmin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tmax</span><span class="o">+</span><span class="mf">1E-3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dT</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -938,11 +981,14 @@
 <a class="viewcode-back" href="../../picmol.thermo_model.html#picmol.thermo_model.UNIFACThermoModel.compute_rdkit_properties">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">compute_rdkit_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Computes molecular properties using RDKit.</span>
+<span class="sd">    Computes the following molecular properties using RDKit based on ``smiles``, with values stored as attributes in a dictionary:</span>
 
-<span class="sd">    This method calculates molecular weight, density, molar volume, number of electrons,</span>
-<span class="sd">    and molecular charge for each component based on their SMILES strings.</span>
-<span class="sd">    </span>
+<span class="sd">    * `mol_wt`: Molar weight (g/mol)</span>
+<span class="sd">    * `density`:  Density (g/cm\ :sup:`3`)</span>
+<span class="sd">    * `molar_vol`: Molar volume (cm\ :sup:`3`/mol)</span>
+<span class="sd">    * `n_electrons`: Number of electrons</span>
+<span class="sd">    * `mol_charge`: Formal charge on molecule</span>
+<span class="sd">   </span>
 <span class="sd">    :return: dicstionary of molecular properties by molecule</span>
 <span class="sd">    :rtype: dict</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -976,7 +1022,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mol_wt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: molar masses of the components from :func:`compute_rdkit_properties()` function.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: molar masses of the components from :func:`compute_rdkit_properties()` function.</span>
 <span class="sd">    :rtype: numpy.ndarray&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_rdkit_dict</span>
@@ -986,7 +1033,8 @@
   
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: densities of the components from :func:`compute_rdkit_properties()` function.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: densities of the components from :func:`compute_rdkit_properties()` function.</span>
 <span class="sd">    :rtype: numpy.ndarray&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_rdkit_dict</span>
@@ -996,7 +1044,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">molar_vol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: molar volumes of the components from :func:`compute_rdkit_properties()` function.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: molar volumes of the components from :func:`compute_rdkit_properties()` function.</span>
 <span class="sd">    :rtype: numpy.ndarray&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_rdkit_dict</span>
@@ -1006,7 +1055,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">n_electrons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: number of electrons for each component from :func:`compute_rdkit_properties()` function.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: number of electrons for each component from :func:`compute_rdkit_properties()` function.</span>
 <span class="sd">    :rtype: numpy.ndarray&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_rdkit_dict</span>
@@ -1016,7 +1066,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mol_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:return: molecular charges of the components from :func:`compute_rdkit_properties()` function.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :return: molecular charges of the components from :func:`compute_rdkit_properties()` function.</span>
 <span class="sd">    :rtype: numpy.ndarray&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_rdkit_dict</span>
@@ -1089,14 +1140,13 @@
     <span class="n">T_values_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T_values</span><span class="p">[</span><span class="n">nan_mask</span><span class="p">]</span>
     <span class="n">crit_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x_filter</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">x_filter</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x_filter</span><span class="p">[</span><span class="n">crit_ind</span><span class="p">,:])</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">phic</span> <span class="o">=</span> <span class="n">mol2vol</span><span class="p">(([</span><span class="bp">self</span><span class="o">.</span><span class="n">xc</span><span class="p">,</span> <span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">xc</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">phic</span> <span class="o">=</span> <span class="n">mol2vol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">molar_vol</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span> <span class="o">=</span> <span class="n">T_values_filter</span><span class="p">[</span><span class="n">crit_ind</span><span class="p">]</span>
 
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_multicomp_temperature_scaling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">GM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_values</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">det_Hij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T_values</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">x_bi</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">x_sp</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -1109,12 +1159,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">GM</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">GM</span>
 
       <span class="n">bi_vals</span> <span class="o">=</span> <span class="n">binodal_fn</span><span class="p">(</span><span class="n">num_comp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_comp</span><span class="p">,</span> <span class="n">rec_steps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rec_steps</span><span class="p">,</span> <span class="n">G_mix</span><span class="o">=</span><span class="n">GM</span><span class="p">,</span> <span class="n">activity_coefs</span><span class="o">=</span><span class="n">gammas</span><span class="p">,</span> <span class="n">solute_idx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solute_loc</span><span class="p">,</span> <span class="n">bi_min</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">bi_max</span><span class="o">=</span><span class="mf">0.99</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">x_bi</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bi_vals</span><span class="p">]</span>
-
-      <span class="bp">self</span><span class="o">.</span><span class="n">det_Hij</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">det_Hij</span>
-      <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">det_Hij</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">det_Hij</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">)</span>
-      <span class="n">sps</span> <span class="o">=</span> <span class="n">spinodal_fn</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">Hij</span><span class="o">=</span><span class="n">det_Hij</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">x_sp</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sps</span><span class="p">]</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">x_bi</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bi_vals</span><span class="p">]</span></div>
 
 
 

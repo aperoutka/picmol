@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -272,14 +273,12 @@
 <div class="viewcode-block" id="correct_problematics">
 <a class="viewcode-back" href="../../../../../picmol.models.unifac_subgroups.fragmentation.html#picmol.models.unifac_subgroups.fragmentation.problematics.correct_problematics">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">correct_problematics</span><span class="p">(</span>
-  <span class="n">mol_object</span><span class="p">:</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">Mol</span><span class="p">,</span>
-  <span class="n">mol_subgroups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-  <span class="n">model</span><span class="p">:</span> <span class="n">FragmentationModel</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">mol_object</span><span class="p">:</span> <span class="n">Chem</span><span class="o">.</span><span class="n">rdchem</span><span class="o">.</span><span class="n">Mol</span><span class="p">,</span>
+    <span class="n">mol_subgroups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">FragmentationModel</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">  </span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Correct problematic structures in mol_object.</span>
-
 <span class="sd">  Identifies and corrects problematic structural patterns within a molecule</span>
 <span class="sd">  by adjusting the counts of its subgroups. It uses a fragmentation model to</span>
 <span class="sd">  determine which substructures are problematic and how their contributions</span>
@@ -292,21 +291,16 @@
 <span class="sd">      A dictionary containing the initial counts of subgroups in the molecule.</span>
 <span class="sd">      The keys are subgroup identifiers (e.g., SMARTS strings), and the values</span>
 <span class="sd">      are their corresponding counts.</span>
-<span class="sd">  :type mol_subgroups: dict</span>
+<span class="sd">  :type mol_subgroups: dict[str, int]</span>
 <span class="sd">  :param model:</span>
-<span class="sd">      A FragmentationModel object that provides information about problematic</span>
-<span class="sd">      structures and their correction factors.  It must have an attribute</span>
-<span class="sd">      ``problematic_structures`` which is a pandas DataFrame.  The index of the</span>
-<span class="sd">      DataFrame contains SMARTS patterns, and the DataFrame must contain a</span>
-<span class="sd">      column named &quot;contribute&quot;.  The &quot;contribute&quot; column should contain</span>
-<span class="sd">      string representations of dictionaries.  These dictionaries map subgroup</span>
-<span class="sd">      identifiers to the contribution factors for each problematic structure.</span>
+<span class="sd">      Instance of the FragmentationModel containing the definitions of</span>
+<span class="sd">      problematic structures and their contributions to the subgroups.</span>
 <span class="sd">  :type model: FragmentationModel</span>
 
 <span class="sd">  :returns: A dictionary representing the corrected subgroup counts.  The keys are</span>
 <span class="sd">      subgroup identifiers, and the values are their corrected counts.</span>
 <span class="sd">      Subgroups with a final count of 0 are removed from the dictionary.</span>
-<span class="sd">  :rtype: dict</span>
+<span class="sd">  :rtype: dict[str, int]</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="n">corrected_subgroups</span> <span class="o">=</span> <span class="n">mol_subgroups</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>

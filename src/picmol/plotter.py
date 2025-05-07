@@ -11,8 +11,9 @@ from scipy.interpolate import griddata
 import mpltern
 
 from .thermo_model import ThermoModel, UNIFACThermoModel
-from .functions import mol2vol
+from .conversions import mol2vol
 from .kbi import add_zeros, KBI
+from .models import NRTL, UNIQUAC, FH, UNIFAC, QuarticModel
 
 
 def get_cmap(xx, colormap: str = 'jet', levels: int = 40):
@@ -218,25 +219,30 @@ class KBIPlotter:
     :param show_fig: Whether to display the figures. Defaults to False.
     :type show_fig: bool, optional
     """
+    try:
+      self.kbi_model._dlngamma_dxs
+    except AttributeError:
+      self.kbi_model.dlngamma_dxs()
+
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     colors = plt.cm.jet(np.linspace(0,1,len(self.kbi_model.unique_mols)+1))
     for i, mol in enumerate(self.kbi_model.unique_mols):
       if zplot.shape[1] > 2:
-        ax.scatter(zplot[:,i], self.kbi_model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
+        ax.scatter(zplot[:,i], self.kbi_model._dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_i$')
       else:
-        ax.scatter(zplot[:,self.kbi_model.solute_loc], self.kbi_model.dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
+        ax.scatter(zplot[:,self.kbi_model.solute_loc], self.kbi_model._dlngamma_dxs[:,i], c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
     else:
-      dg = self.kbi_model.dlngamma_dxs.max() - self.kbi_model.dlngamma_dxs.min()
-      gamma_min = self.kbi_model.dlngamma_dxs.min() - 0.1*dg
-      gamma_max = self.kbi_model.dlngamma_dxs.max() + 0.1*dg
+      dg = self.kbi_model._dlngamma_dxs.max() - self.kbi_model._dlngamma_dxs.min()
+      gamma_min = self.kbi_model._dlngamma_dxs.min() - 0.1*dg
+      gamma_max = self.kbi_model._dlngamma_dxs.max() + 0.1*dg
       ymin = min([-0.05, gamma_min])
       ymax = max([0.05, gamma_max])
       ax.set_ylim(ymin, ymax)
@@ -259,25 +265,30 @@ class KBIPlotter:
     :param show_fig: Whether to display the figures. Defaults to False.
     :type show_fig: bool, optional
     """
+    try:
+      self.kbi_model._gammas
+    except AttributeError:
+      self.kbi_model.gammas()
+
     zplot, xplot, x_lab = self.x_basis(basis)
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 4))
     colors = plt.cm.jet(np.linspace(0,1,len(self.kbi_model.unique_mols)+1))
     for i, mol in enumerate(self.kbi_model.unique_mols):
       if zplot.shape[1] > 2:
-        ax.scatter(zplot[:,i], np.log(self.kbi_model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
+        ax.scatter(zplot[:,i], np.log(self.kbi_model._gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_i$')
       else:
-        ax.scatter(zplot[:,self.kbi_model.solute_loc], np.log(self.kbi_model.gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
+        ax.scatter(zplot[:,self.kbi_model.solute_loc], np.log(self.kbi_model._gammas[:,i]), c=colors[i], linewidth=1.8, marker='s', label=self.kbi_model.mol_name_dict[mol])
         ax.set_xlabel(f'${x_lab}_{{{self.kbi_model.solute_name}}}$')
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlim(-0.05, 1.05)
     if len(ylimits) > 0:
       ax.set_ylim(ylimits)
     else:
-      dg = np.log(self.kbi_model.gammas.max()) - np.log(self.kbi_model.gammas.min())
-      gamma_min = np.log(self.kbi_model.gammas.min()) - 0.1*dg
-      gamma_max = np.log(self.kbi_model.gammas.max()) + 0.1*dg
+      dg = np.log(self.kbi_model._gammas.max()) - np.log(self.kbi_model._gammas.min())
+      gamma_min = np.log(self.kbi_model._gammas.min()) - 0.1*dg
+      gamma_max = np.log(self.kbi_model._gammas.max()) + 0.1*dg
       ymin = min([-0.05, gamma_min])
       ymax = max([0.05, gamma_max])
       ax.set_ylim(ymin, ymax)
@@ -359,20 +370,35 @@ class KBIPlotter:
     """
     fig, ax = plt.subplots(1, 3, figsize=(12,3.75), sharex=True)
     xplot = self.kbi_model.z_plot[:,self.kbi_model.solute_loc]
-    
+
+    # unifac
+    unif_model = UNIFAC(z=self.kbi_model.z_plot, T=self.kbi_model.T_sim, smiles=self.kbi_model.smiles, version="lle")
+
+    # quartic
+    quar_model = QuarticModel(z_data=self.kbi_model.z, z=self.kbi_model.z_plot, Hmix_data=self.kbi_model.Hmix(), SE_data=self.kbi_model.SE(), molar_vol=self.kbi_model.molar_vol)
+
+
+    uniq_H = UNIQUAC.fHmix(self.kbi_model.T_sim, self.kbi_model.z_plot, self.kbi_model.uniquac_ip, self.kbi_model.smiles)
+    unif_H = unif_model.Hmix()
+    quar_H = quar_model.Hmix()
+
     ax[0].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.Hmix(), c='k', zorder=10)
-    ax[0].plot(xplot, self.kbi_model.quartic_Hmix, c='k', ls='solid')
-    ax[0].plot(xplot, self.kbi_model.uniquac_Hmix, c='dodgerblue', ls='dashed')
-    ax[0].plot(xplot, self.kbi_model.unifac_Hmix, c='limegreen', ls='dotted')
+    ax[0].plot(xplot, quar_H, c='k', ls='solid')
+    ax[0].plot(xplot, uniq_H, c='dodgerblue', ls='dashed')
+    ax[0].plot(xplot, unif_H, c='limegreen', ls='dotted')
+
+    uniq_S = UNIQUAC.fGM(self.kbi_model.T_sim, self.kbi_model.z_plot, self.kbi_model.uniquac_ip, self.kbi_model.smiles)
+    unif_S = unif_model.Smix()
+    quar_S = quar_model.GM(self.kbi_model.T_sim) - quar_model.Hmix()
 
     ax[1].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.nTdSmix, c='k', label='KB + MD', zorder=10)
-    ax[1].plot(xplot, self.kbi_model.quartic_Smix, c='k', ls='solid', label='Fit')
-    ax[1].plot(xplot, self.kbi_model.uniquac_Smix, c='dodgerblue', ls='dashed', label='uniquac')
-    ax[1].plot(xplot, self.kbi_model.unifac_Smix, c='limegreen', ls='dotted', label='unifac')
+    ax[1].plot(xplot, quar_S, c='k', ls='solid', label='Fit')
+    ax[1].plot(xplot, uniq_S, c='dodgerblue', ls='dashed', label='uniquac')
+    ax[1].plot(xplot, unif_S, c='limegreen', ls='dotted', label='unifac')
 
-    uniq_G = self.kbi_model.uniquac_Hmix + self.kbi_model.uniquac_Smix
-    unif_G = self.kbi_model.unifac_Hmix + self.kbi_model.unifac_Smix
-    quar_G = self.kbi_model.quartic_Hmix + self.kbi_model.quartic_Smix
+    uniq_G = uniq_H + uniq_S
+    unif_G = unif_H + unif_S
+    quar_G = quar_H + quar_S
 
     ax[2].scatter(self.kbi_model.z[:,self.kbi_model.solute_loc], self.kbi_model.G_mix_xv, c='k', zorder=10)
     ax[2].plot(xplot, quar_G, c='k', ls='solid')
@@ -402,8 +428,7 @@ class KBIPlotter:
 
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.kbi_model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    uniq_G = self.kbi_model.uniquac_Hmix + self.kbi_model.uniquac_Smix
-    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], uniq_G, linewidth=2.5, color='tab:red', label='UNIQUAC')      
+    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], UNIQUAC.fGM(self.kbi_model.T_sim, self.kbi_model.z_plot, self.kbi_model.uniquac_ip, self.kbi_model.smiles), linewidth=2.5, color='tab:red', label='UNIQUAC')      
     ax.set_xlim(-0.05,1.05)
     ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
@@ -418,26 +443,14 @@ class KBIPlotter:
     if len(self.kbi_model.unique_mols) != 2:
       return
 
-    tau12, tau21 = list(self.kbi_model.nrtl_taus.values())
-
-    def NRTL_GE(z, tau12, tau21):
-      alpha = 0.2 # randomness factor == constant
-      G12 = np.exp(-alpha*tau12/(self.kbi_model.Rc*self.kbi_model.T_sim))
-      G21 = np.exp(-alpha*tau21/(self.kbi_model.Rc*self.kbi_model.T_sim))
-      x1 = z[:,0]
-      x2 = z[:,1]
-      G_ex = -self.kbi_model.Rc * self.kbi_model.T_sim * (x1 * x2 * (tau21 * G21/(x1 + x2 * G21) + tau12 * G12 / (x2 + x1 * G12))) 
-      G_id = self.kbi_model.Rc * self.kbi_model.T_sim * (x1 * np.log(x1) + x2 * np.log(x2))
-      return G_ex + G_id
-    
-    Gmix_fit0 = NRTL_GE(self.kbi_model.z_plot, tau12, tau21)
-    Gmix_fit0 = np.nan_to_num(Gmix_fit0, nan=0)
+    tau12, tau21 = self.kbi_model.nrtl_ip   
+    nrtl_gmix = NRTL.fGM(z=self.kbi_model.z_plot, tau12=tau12, tau21=tau21, T=self.kbi_model.T_sim)
 
     xplot0 = self.xplot0("mol")
 
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.kbi_model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], Gmix_fit0, linewidth=2.5, color='tab:red', label='NRTL')      
+    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], nrtl_gmix, linewidth=2.5, color='tab:red', label='NRTL')      
     ax.set_xlim(-0.05,1.05)
     ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
@@ -450,23 +463,14 @@ class KBIPlotter:
     r"""
     Plot Flory-Huggins :math:`\Delta G_{mix}` and compares to results from KBI.
     """
-    try:
-      self.kbi_model.fh_chi
-    except:
-      self.kbi_model.fit_FH_chi()
-
-    pplot = np.zeros(len(self.kbi_model.fh_phi)+2)
-    pplot[1:-1] = self.kbi_model.fh_phi
-    pplot[-1] = 1
-
-    Gmix0 = np.zeros(len(self.kbi_model.G_mix_xv)+2)
-    Gmix0[1:-1] = self.kbi_model.G_mix_xv
-    fh_gmix0 = np.zeros(len(self.kbi_model.fh_Gmix)+2)
-    fh_gmix0[1:-1] = self.kbi_model.fh_Gmix
+    pplot = self.xplot0("vol")
+    vplot = mol2vol(self.kbi_model.z_plot, self.kbi_model.molar_vol)
+    vplot0 = vplot[:,self.kbi_model.solute_loc]
+    fh_gmix = FH.fGM(phi=vplot0, chi=self.kbi_model.fh_ip, T=self.kbi_model.T_sim, V0=self.kbi_model.molar_vol)
 
     fig, ax = plt.subplots()
-    ax.scatter(pplot, Gmix0, color='k', marker='o', linewidth=1.8, label="Simulated", zorder=10)
-    ax.plot(pplot, fh_gmix0, color='tab:red', linewidth=2.5, label='FH')
+    ax.scatter(pplot, add_zeros(self.kbi_model.G_mix_xv), color='k', marker='o', linewidth=1.8, label="Simulated", zorder=10)
+    ax.plot(vplot0, fh_gmix, color='tab:red', linewidth=2.5, label='FH')
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     ax.set_xlabel(f'$\phi_{{{self.kbi_model.solute_name}}}$')
     ax.set_xlim(-0.05, 1.05)
@@ -481,18 +485,20 @@ class KBIPlotter:
     """
     xplot0 = self.xplot0("mol")
 
+    quar_model = QuarticModel(z_data=self.kbi_model.z, z=self.kbi_model.z_plot, Hmix_data=self.kbi_model.Hmix(), SE_data=self.kbi_model.SE(), molar_vol=self.kbi_model.molar_vol)
+    quar_H = quar_model.Hmix()
+    quar_S = quar_model.SE() + quar_model.Gid(self.kbi_model.T_sim)
+    quar_G = quar_H + quar_S
+
     fig, ax = plt.subplots()
     ax.scatter(xplot0, add_zeros(self.kbi_model.G_mix_xv), marker='o', linewidth=1.8, color='k', label='Simulated', zorder=10)
-    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], self.kbi_model.quartic_Smix + self.kbi_model.quartic_Hmix, linewidth=2.5, color='tab:red', label='Quartic')      
+    ax.plot(self.kbi_model.z_plot[:,self.kbi_model.solute_loc], quar_G, linewidth=2.5, color='tab:red', label='Quartic')      
     ax.set_xlim(-0.05,1.05)
     ax.set_xlabel(f'$x_{{{self.kbi_model.solute_name}}}$')
     ax.set_ylabel(f'$\Delta G_{{mix}}$ $[kJ$ $mol^{{-1}}]$')
     ax.legend(fontsize=11, labelspacing=0.5, frameon=True, edgecolor='k', framealpha=0.5)
     plt.savefig(f'{self.kbi_model.kbi_method_dir}QUARTIC_fit_molfrac_{self.kbi_model.kbi_method.lower()}.png')
     plt.close()
-
-
-
 
 
 class PhaseDiagramPlotter:

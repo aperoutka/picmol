@@ -1,16 +1,13 @@
 import numpy as np
 import scipy.optimize as sco 
 from scipy.optimize import curve_fit
+from scipy import constants
 from pathlib import Path
 import pandas as pd
 from functools import partial
 
-from ..get_molecular_properties import load_molecular_properties
+from ..conversions import vol2mol
 
-# def get_molelecular_properties(smiles):
-#   file = Path(__file__).parent.parent / "data" / "molecular_properties.csv"
-#   df = pd.read_csv(file).set_index("smiles")
-#   return df.loc[smiles, :]
 
 class FH:
   r"""
@@ -25,13 +22,11 @@ class FH:
   :param Hmix: mixing enthalpy
   :type Hmix: numpy.ndarray
   """
-  def __init__(self, smiles: list, phi: np.array, Smix: np.array, Hmix: np.array):
-    """ for binary mixtures only!! """
-    self.R = 8.314E-3
+  def __init__(self, smiles: list, phi: np.array, Smix: np.array, Hmix: np.array, V0: np.array):
+    # for binary mixtures only!!
+    self.R = constants.R / 1000  # kJ/(mol*K)
 
-    df_mol_prop = load_molecular_properties(smiles, 'smiles')
-
-    self.V0 = df_mol_prop["molar_vol"].to_numpy()
+    self.V0 = V0
     self.V1, self.V2 = self.V0
     self.N0 = [self.V0[i]/min(self.V0) for i in range(len(self.V0))]
     self.N1, self.N2 = self.N0
@@ -41,41 +36,6 @@ class FH:
     self.Smix = Smix
     self.Hmix = Hmix
     self.phi = phi
-
-  def fit_chi(self, T):
-    r"""
-    Fits the Flory-Huggins interaction parameter (:math:`\chi`) to experimental Gibbs mixing free energy at a given temperature.
-
-    :param T: temperature (K)
-    :type T: float
-    :return: fitted :math:`\chi` parameter
-    :rtype: float
-    """
-    G = self.Hmix - T * self.Smix
-
-    def GM_fit(x, chi, Tx):
-      # for fitting chi
-      return 8.314E-3 * Tx * (x * np.log(x)/self.N1 + (1-x) * np.log(1-x)/self.N2) + chi*x*(1-x)
-
-    GM_fixed_T = partial(GM_fit, Tx=T)
-
-    fit, pcov = curve_fit(GM_fixed_T, xdata=self.phi, ydata=G)
-    chi = fit[0]
-    return chi
-
-  def vol2mol(self, phi):
-    r"""
-    Converts volume fraction to mole fraction, where :math:`V_i` is molar volume of component i.
-
-    .. math::
-      x = \frac{\phi \left(\frac{V_2}{V_1}\right)}{1 - \phi + \phi \left(\frac{V_2}{V_1}\right)}
-    
-    :param phi: volume fraction
-    :type phi: float
-    :return: mol fraction
-    :rtype: float
-    """
-    return phi * (self.V2/self.V1)/(1 - phi + phi*(self.V2/self.V1))
 
   @property
   def phic(self):
@@ -103,7 +63,7 @@ class FH:
     :returns: critical mol fraction
     :rtype: float
     """
-    return vol2mol(self.phic)
+    return vol2mol(self.phic, self.V0)
 
   @property
   def chic(self):
@@ -117,6 +77,32 @@ class FH:
     :rtype: float
     """
     return 0.5 * (1/np.sqrt(self.N1) + 1/np.sqrt(self.N2))**2
+
+  def scaled_Gmix(self, T):
+    r"""
+    Estimates the Gibbs mixing free energy as a function of temperature.
+
+    .. math::
+      \Delta G_{mix} = \Delta H_{mix} - T \Delta S_{mix}
+
+    :param T: temperature (K)
+    :type T: float
+    :return: scaled Gibbs mixing free energy
+    :rtype: float
+    """
+    return self.Hmix - T * self.Smix
+  
+  def chi(self, T):
+    r"""
+    Calculates the Flory-Huggins interaction parameter :math:`\chi` at a given temperature.
+    The interaction parameter is calculated using the Gibbs mixing free energy data.
+
+    :param T: temperature (K)
+    :type T: float
+    :return: Flory-Huggins interaction parameter
+    :rtype: float
+    """
+    return self.fit_Gmix(phi=self.phi, Gmix=self.scaled_Gmix(T), T=T, V0=self.V0)
 
   def GM(self, x, T):
     r"""
@@ -132,8 +118,7 @@ class FH:
     :returns: Gibbs mixing free energy
     :rtype: float or numpy.ndarray
     """
-    chi = self.fit_chi(T)
-    return self.R * T * (x * np.log(x)/self.N1 + (1-x) * np.log(1-x)/self.N2) + chi*x*(1-x)
+    return self.R * T * (x * np.log(x)/self.N1 + (1-x) * np.log(1-x)/self.N2) + self.chi(T)*x*(1-x)
   
   def dGM_dxs(self, x, T):
     r"""
@@ -149,8 +134,7 @@ class FH:
     :returns: first derivative of Gibbs mixing free energy
     :rtype: float or numpy.ndarray
     """
-    chi = self.fit_chi(T)
-    return self.R * T * ((np.log(x) + 1)/self.N1 - (np.log(1-x) + 1)/self.N2) + chi*(1-2*x)
+    return self.R * T * ((np.log(x) + 1)/self.N1 - (np.log(1-x) + 1)/self.N2) + self.chi(T)*(1-2*x)
   
   def det_Hij(self, x, T):
     r"""
@@ -166,8 +150,7 @@ class FH:
     :returns: Hessian of Gibbs mixing free energy
     :rtype: float or numpy.ndarray
     """
-    chi = self.fit_chi(T)
-    return self.R * T * (1/self.N1/x + 1/self.N2/(1-x)) - 2*chi
+    return self.R * T * (1/self.N1/x + 1/self.N2/(1-x)) - 2*self.chi(T)
   
   def Fall(self, x, x0, T):
     r"""
@@ -280,9 +263,52 @@ class FH:
                         jac=self.Jall, bounds=((1e-5, sp1),(sp2,0.99)), method='L-BFGS-B')
 
     # all other thermo packages return mol frac--conver vol2mol frac
-    sp1 = self.vol2mol(sp1)
-    sp2 = self.vol2mol(sp2)
-    bi1 = self.vol2mol(bis.x[0])
-    bi2 = self.vol2mol(bis.x[1])
+    sp1 = self.vol2mol(sp1, self.V0)
+    sp2 = self.vol2mol(sp2, self.V0)
+    bi1 = self.vol2mol(bis.x[0], self.V0)
+    bi2 = self.vol2mol(bis.x[1], self.V0)
 
     return sp1, sp2, bi1, bi2 
+
+  @staticmethod
+  def fGM(phi, chi, T, V0):
+    r"""
+    Calculates the Gibbs free energy of mixing for a binary mixture using the Flory-Huggins model (:func:`GM`).
+
+    :param T: temperature (K)
+    :type T: float
+    :param phi: volume fraction of solute
+    :type phi: float
+    :param V0: molar volumes of components
+    :type V0: numpy.ndarray
+    :param chi: Flory-Huggins interaction parameter
+    :type chi: float
+    :return: Gibbs mixing free energy
+    :rtype: float
+    """
+    R = constants.R / 1000 # kJ/(mol*K)
+    N1, N2 = [V0[i]/min(V0) for i in range(len(V0))]
+    return R * T * (phi * np.log(phi)/N1 + (1-phi) * np.log(1-phi)/N2) + chi*phi*(1-phi)
+
+  @staticmethod
+  def fit_Gmix(phi, Gmix, T, V0):
+    r"""
+    Fits the Flory-Huggins model to the Gibbs free energy of mixing data using relationship in :func:`GM`.
+
+    :param T: temperature (K)
+    :type T: float
+    :param phi: volume fraction of solute
+    :type phi: numpy.ndarray
+    :param Gmix: Gibbs free energy of mixing
+    :type Gmix: numpy.ndarray
+    :param V0: molar volumes of components
+    :type V0: numpy.ndarray
+    :return: fitted :math:`\chi` parameter
+    :rtype: float
+    """
+    fGM_partial = partial(FH.fGM, T=T, V0=V0)
+    fit, pcov = curve_fit(fGM_partial, xdata=phi, ydata=Gmix)
+    chi = fit[0]
+    return chi
+
+  

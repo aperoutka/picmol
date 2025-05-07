@@ -4,14 +4,12 @@ from .fragmentation_models.fragmentation_model import *
 
 
 def correct_problematics(
-  mol_object: Chem.rdchem.Mol,
-  mol_subgroups: dict,
-  model: FragmentationModel,
-) -> dict:
+    mol_object: Chem.rdchem.Mol,
+    mol_subgroups: dict,
+    model: FragmentationModel,
+  ) -> dict:
   
   """
-  Correct problematic structures in mol_object.
-
   Identifies and corrects problematic structural patterns within a molecule
   by adjusting the counts of its subgroups. It uses a fragmentation model to
   determine which substructures are problematic and how their contributions
@@ -24,21 +22,16 @@ def correct_problematics(
       A dictionary containing the initial counts of subgroups in the molecule.
       The keys are subgroup identifiers (e.g., SMARTS strings), and the values
       are their corresponding counts.
-  :type mol_subgroups: dict
+  :type mol_subgroups: dict[str, int]
   :param model:
-      A FragmentationModel object that provides information about problematic
-      structures and their correction factors.  It must have an attribute
-      ``problematic_structures`` which is a pandas DataFrame.  The index of the
-      DataFrame contains SMARTS patterns, and the DataFrame must contain a
-      column named "contribute".  The "contribute" column should contain
-      string representations of dictionaries.  These dictionaries map subgroup
-      identifiers to the contribution factors for each problematic structure.
+      Instance of the FragmentationModel containing the definitions of
+      problematic structures and their contributions to the subgroups.
   :type model: FragmentationModel
 
   :returns: A dictionary representing the corrected subgroup counts.  The keys are
       subgroup identifiers, and the values are their corrected counts.
       Subgroups with a final count of 0 are removed from the dictionary.
-  :rtype: dict
+  :rtype: dict[str, int]
   """
 
   corrected_subgroups = mol_subgroups.copy()

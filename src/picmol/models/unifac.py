@@ -16,14 +16,14 @@ def unifac_version_mapping(map_type: str):
   Map UNIFAC version parameters to their corresponding ID.
 
   This function retrieves a dictionary that maps UNIFAC version parameters
-  to their corresponding IDs or data structures.  The specific mapping
+  to their corresponding IDs or data structures. The specific mapping
   depends on the provided ``map_type``.
 
   :param map_type: identifier to retrieve the desired mapping dictionary. Valid options are:
 
-      * 'version':  dictionary with UNIFAC version strings as keys and version IDs as values.
-      * 'subgroup': dictionary with version IDs as keys and subgroup parameter objects as values.
-      * 'interaction': dictionary with version IDs as keys and interaction parameter objects as values.
+      * `version`:  dictionary with UNIFAC version strings as keys and version IDs as values.
+      * `subgroup`: dictionary with version IDs as keys and subgroup parameter objects as values.
+      * `interaction`: dictionary with version IDs as keys and interaction parameter objects as values.
 
   :type map_type: str
   :return: dictionary containing the mapped UNIFAC version parameters.
@@ -57,19 +57,13 @@ def unifac_version_mapping(map_type: str):
 
 def get_unifac_version(version_str: str, smiles=None):
   r"""
-  Determine the UNIFAC version from a string and optionally SMILES strings.
-
-  This function determines the UNIFAC version based on a provided string
-  and optionally a list of SMILES strings.  It prioritizes detecting
-  "unifac-il" if any of the SMILES strings contain a '.' (indicating an
-  ionic liquid).
+  Determines if ionic liquids are present and sets the UNIFAC version accordingly.
+  It prioritizes detecting "unifac-il" if any of the SMILES strings contain a '.' (indicating an ionic liquid).
 
   :param version_str: a string indicating the UNIFAC version (e.g.,
-                      "unifac", "unifac-il", "unifac-kbi").  Case-insensitive.
+                      "unifac", "unifac-il", "unifac-kbi"). Case-insensitive.
   :type version_str: str
-  :param smiles: an optional list of SMILES strings. If provided, the
-                function checks for '.' in any of the SMILES strings to
-                identify ionic liquids and force the version to "unifac-il".
+  :param smiles: an optional list of SMILES strings to check if ionic liquids are present.
   :type smiles: list, optional
   :returns: A string representing the determined UNIFAC version
             ("unifac", "unifac-il", or "unifac-kbi").
@@ -104,8 +98,18 @@ class UNIFAC:
   :type smiles: list
   :param z: composition array (mol fractions). If None, it defaults to values from PointDisc.
   :type z: numpy.ndarray, optional
-  :param version: UNIFAC version to use for interaction data, as well as R and Q parameters.
+  :param version: UNIFAC version to use for interaction data, as well as R and Q parameters. Options include:
+
+    * `unifac`: standard UNIFAC
+    * `unifac-il`: UNIFAC for ionic liquids
+    * `unifac-kbi`: UNIFAC with regressed parameters from KBI analysis
+
   :type version: str
+
+  :ivar interaction_data: dictionary containing interaction parameters for the specified UNIFAC version.
+  :vartype interaction_data: dict[int, dict[int, float]]
+  :ivar subgroup_data: dictionary containing subgroup parameters for the specified UNIFAC version.
+  :vartype subgroup_data: dict[int, UNIFAC_subgroup]
   """
 
   def __init__(self, T: float, smiles: list, z = None, version = "unifac"):
@@ -207,7 +211,7 @@ class UNIFAC:
   def r(self):
     r"""
     Calculates the relative size of a molecule. 
-    This property is determined by summing the product of each subgroup's r parameter (:math:`r_k`) and its frequency (:math:`\nu_{ki}`) within the molecule (:math:`i`).
+    This property is determined by summing the product of each subgroup's r parameter (:math:`r_k`) and its frequency (:math:`\nu_{ki}`) within molecule :math:`i`.
 
     .. math::
         r_i = \sum_k^N \nu_{ki} r_k
@@ -228,7 +232,7 @@ class UNIFAC:
   def q(self):
     r"""
     Calculates the relative surface area of a molecule. 
-    This property is determined by summing the product of each subgroup's q parameter (:math:`q_k`) and its frequency (:math:`\nu_{ki}`) within the molecule (:math:`i`).
+    This property is determined by summing the product of each subgroup's q parameter (:math:`q_k`) and its frequency (:math:`\nu_{ki}`) within molecule :math:`i`.
 
     .. math::
         q_i = \sum_k^N \nu_{ki} q_k
@@ -248,9 +252,8 @@ class UNIFAC:
 
   def occurance_matrix(self):
     r"""
-    Generates a matrix representing subgroup occurrences in each molecule.
-
-    This method generates a matrix where each row represents a unique subgroup and each column corresponds to a molecule in the mixture. Each element, :math:`\nu_{ji}`, indicates the number of times subgroup :math:`j` appears in molecule :math:`i`.
+    Generates a matrix representing subgroup occurrences in each molecule, where each row represents a unique subgroup and each column corresponds to a molecule in the mixture. 
+    Each element, :math:`\nu_{ji}`, indicates the number of times subgroup :math:`j` appears in molecule :math:`i`.
    
     :return: subgroup occurrence matrix
     :rtype: numpy.ndarray
@@ -270,9 +273,7 @@ class UNIFAC:
 
   def subgroup_matrix(self):
     r"""
-    Generates a matrix representing subgroup IDs for each molecule.
-
-    This method creates a matrix where rows correspond to unique subgroups
+    Generates a matrix representing subgroup IDs for each molecule, where rows correspond to unique subgroups
     and columns correspond to molecules. Each element (:math:`j`, :math:`i`) represents the
     ID of subgroup :math:`j` in molecule :math:`i`. If a molecule does not contain a
     particular subgroup, the corresponding element is 0.
@@ -295,9 +296,7 @@ class UNIFAC:
   
   def Q_matrix(self):
     r"""
-    Generates a matrix of subgroup area parameters (:func:`q` values).
-
-    This method creates a matrix with the same shape as :func:`subgroup_matrix`, where
+    Generates a matrix of subgroup area parameters (:func:`q` values), with the same shape as :func:`subgroup_matrix`, where
     each element (:math:`j`, :math:`i`) represents the ID of subgroup :math:`j` in molecule :math:`i`.
 
     :return: array of subgroup Q values.
@@ -386,9 +385,7 @@ class UNIFAC:
   
   def weighted_number(self):
     r"""
-    Weighted mol fraction matrix.
-
-    This method calculates a matrix, with elements :math:`W_{ijk}`, 
+    Weighted mol fraction matrix, with elements :math:`W_{ijk}`, 
     where each element represents the mol fraction of molecule :math:`i`, 
     weighted by the occurrence of subgroup :math:`j` in molecule :math:`k`.
 
@@ -408,11 +405,7 @@ class UNIFAC:
 
   def group_X(self):
     r"""
-    Mol fraction of each subgroup in the mixture.
-
-    This method calculates :math:`X_j`, the mol fraction of subgroup :math:`j`
-    in the entire mixture considering the contributions from all
-    molecules.
+    Mol fraction of subgroup :math:`j` in the mixture (:math:`X_j`) considering the contributions from all molecules.
 
     .. math::
         X_j = \frac{\sum_i^N x_i \nu_{ji}}{\sum_i^N \sum_k^M x_i \nu_{ki}}
@@ -644,7 +637,8 @@ class UNIFAC:
 
   def lngammas_c(self):
     r"""
-    Calculates the combinatorial contribution (:math:`\gamma_i^c`) to the activity coefficient of molecule :math:`i` in a mixture. The combinatorial contribution accounts for differences in molecular size and shape and is calculated using the following equation:
+    Calculates the combinatorial contribution (:math:`\gamma_i^c`) to the activity coefficient of molecule :math:`i` in a mixture.
+    This accounts for differences in molecular size and shape between molecules.
 
     .. math::
       \ln \gamma_i^c = 1 - V_i + \ln V_i - 5 q_i \left( 1 - \frac{V_i}{A_i} + \ln \frac{V_i}{A_i} \right)
@@ -674,7 +668,8 @@ class UNIFAC:
   
   def lngammas_r(self):
     r"""
-    Calculates residual (:math:`\gamma_i^r`) contribution to activity coefficients of molecule :math:`i` in mixture. The residual contribution accounts for the difference compared to the residual activity coefficient of subgroup :math:`k` in the pure component reference state of molecule :math:`i`.
+    Calculates residual (:math:`\gamma_i^r`) contribution to activity coefficients of molecule :math:`i` in mixture. 
+    This accounts for the difference compared to the residual activity coefficient of subgroup :math:`k` in the pure component reference state of molecule :math:`i`.
 
     .. math::
       \ln \gamma_i^r = \sum_k^M \nu_{ki} \left( \ln \Gamma_k - \ln \Gamma_{ki}  \right)
@@ -786,6 +781,20 @@ class UNIFAC:
     self._GE = (self.Rc * self.T * np.sum(self.z * np.log(self._gammas), axis=1))
     return self._GE
 
+  def Hmix(self):
+    try:
+      self._gammas
+    except AttributeError: 
+      self.gammas()
+    return self.Rc * self.T * np.sum(self.z * self.lngammas_r(), axis=1)
+
+  def Smix(self):
+    try:
+      self._gammas
+    except AttributeError: 
+      self.gammas()
+    return self.Rc * self.T * np.sum(self.z * (self.lngammas_c() + np.log(self.z)) , axis=1)
+
   def GM(self):
     r"""
     Gibbs mixing free energy of the mixture.
@@ -842,7 +851,7 @@ class UNIFAC:
     Calculates the derivative of the residual contribution to the activity coefficients with respect to the mol fractions.
 
     .. math::
-      \frac{\partial \ln \gamma_i^r}{\partial x_j} = \sum_k \nu_{ki} \frac{\partial \ln \Gamma_k}{\partial x_j}
+      \frac{\partial \ln \gamma_i^r}{\partial x_j} = \sum_k^M \nu_{ki} \frac{\partial \ln \Gamma_k}{\partial x_j}
 
     :return: array of the derivatives of the residual activity coefficients with respect to mol fractions
     :rtype: numpy.ndarray
@@ -918,7 +927,7 @@ class UNIFAC:
   def G(self):
     r"""
     Calculates a parameter, :math:`G`, related to the group contributions in the mixture.
-    This method computes :math:`G` as the inverse of the sum of the products of :math:`X_k` and :math:`Q_k` for all subgroups in the mixture.
+    Specifically, :math:`G`, is the inverse of the sum of the products of :math:`X_k` and :math:`Q_k` for all subgroups in the mixture.
 
     .. math::
       G = \frac{1}{\sum_j^M X_j Q_j}
@@ -1366,7 +1375,7 @@ class UNIFAC:
     Calculates the second mol fraction derivatives of volume term with respect to molecule :math:`i` and molecule :math:`j`.
 
     .. math::
-      \frac{\partial^2 V_i}{\partial x_j \partial x_k} = \frac{2 r_i r_j r_k}{\left( \sum_l r_l x_l \right)^3}
+      \frac{\partial^2 V_i}{\partial x_j \partial x_k} = \frac{2 r_i r_j r_k}{\left( \sum_l^N r_l x_l \right)^3}
 
     :return: second derivative of volume terms
     :rtype: numpy.ndarray
@@ -1390,7 +1399,7 @@ class UNIFAC:
     Calculates the second mol fraction derivatives of surface area term with respect to molecule :math:`i` and molecule :math:`j`.
 
     .. math::
-      \frac{\partial^2 A_i}{\partial x_j \partial x_k} = \frac{2 q_i q_j q_k}{ \left( \sum_l q_l x_l \right)^3}
+      \frac{\partial^2 A_i}{\partial x_j \partial x_k} = \frac{2 q_i q_j q_k}{ \left( \sum_l^N q_l x_l \right)^3}
 
     :return: second derivative of surface area terms
     :rtype: numpy.ndarray
@@ -1423,7 +1432,7 @@ class UNIFAC:
 
   def d2lnGammas_subgroups_dxixjs(self):
     r"""
-    Calculate the second mol fraction derivatives of the :math:`\ln \Gamma_k` parameters for the phase with respect to molecule :math:`i` and molecule :math:`j`.
+    Calculate the second mol fraction derivatives of the :math:`\ln \Gamma_k` (for subgroup :math:`k`) parameters for the phase with respect to molecule :math:`i` and molecule :math:`j`.
 
     .. math::
         \frac{\partial^2 \ln \Gamma_k}{\partial x_i \partial x_j} = -Q_k\left(
@@ -1506,10 +1515,10 @@ class UNIFAC:
       \frac{Q_i}{\sum_n^N Q_n (\nu x)_{sum,n}}\left(
       -F(\nu)_{sum,j} \nu_{ik} - F (\nu)_{sum,k}\nu_{ij}
       + 2F^2(\nu)_{sum,j} (\nu)_{sum,k} (\nu x)_{sum,i}
-      + \frac{F (\nu x)_{sum,i}\left[
+      + \frac{F (\nu x)_{sum,i}\left(
       \sum_n^M(-2 F Q_n (\nu)_{sum,j} (\nu)_{sum,k}
       (\nu x)_{sum,n} + Q_n (\nu)_{sum,j} \nu_{nk} + Q_n (\nu)_{sum,k}\nu_{nj}
-      )\right] }
+      )\right) }
       {\sum_n^M Q_n (\nu x)_{sum,n} }
       + \frac{2(\nu x)_{sum,i}(\sum_n^M[-FQ_n (\nu)_{sum,j} (\nu x)_{sum,n} + Q_n \nu_{nj}])
       (\sum_n^M[-FQ_n (\nu)_{sum,k} (\nu x)_{sum,n} + Q_n \nu_{nk}])  }
@@ -1653,7 +1662,7 @@ class UNIFAC:
         + \frac{\partial \ln \gamma_i^r}{\partial x_j}
         + \frac{\partial \ln \gamma_j^c}{\partial x_i}
         + \frac{\partial \ln \gamma_j^r}{\partial x_i}
-        +\sum_k \left(
+        +\sum_k^N \left(
           \frac{\partial^2 \ln \gamma_k^c}{\partial x_i \partial x_j}
           + \frac{\partial^2 \ln \gamma_k^r}{\partial x_i \partial x_j}
         \right)
@@ -1694,7 +1703,7 @@ class UNIFAC:
 
   def dmu_dz(self):
     r"""
-    Calculates the derivative of the chemical potential (:math:`\mu_i`) with respect to the composition (:math:`j`).
+    Calculates the derivative of the chemical potential of molecule :math:`i` (:math:`\mu_i`) with respect to the mol fraction of molecule :math:`j`.
 
     .. math::
       \frac{1}{RT}\frac{\partial \mu_i}{\partial x_j} = 
@@ -1743,7 +1752,7 @@ class UNIFAC:
   
   def Mij(self):
     r"""
-    Calculate the :math:`M` matrix with elements :math:`M_{i,j}` from :func:`dmu_dz`.
+    Calculate the :math:`M` matrix with elements :math:`M_{i,j}` for molecules :math:`i` and :math:`j` from :func:`dmu_dz`.
 
     .. math::
       M_{i,j} = 
@@ -1777,7 +1786,7 @@ class UNIFAC:
 
   def Hij(self):
     r"""
-    Calculate the Hessian (:math:`H`) of Gibbs mixing free energy, with elements :math:`H_{ij}`.
+    Calculate the Hessian (:math:`H`) of Gibbs mixing free energy, with elements :math:`H_{ij}` for molecules :math:`i` and :math:`j`.
 
     .. math::
       H_{i,j} = M_{i,j} - M_{i,N-1} - M_{N-1,j} + M_{N-1,N-1}

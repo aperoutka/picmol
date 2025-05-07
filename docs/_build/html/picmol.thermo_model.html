@@ -208,6 +208,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -279,16 +280,16 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="picmol.thermo_model.spinodal_fn">
 <span class="sig-prename descclassname"><span class="pre">picmol.thermo_model.</span></span><span class="sig-name descname"><span class="pre">spinodal_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hij</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/thermo_model.html#spinodal_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.thermo_model.spinodal_fn" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates mole fractions where the Hessian of the Gibbs mixing free energy is zero, indicating spinodal points.</p>
+<dd><p>Calculates mol fractions where the Hessian of the Gibbs mixing free energy is zero, indicating spinodal points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<em>numpy.ndarray</em>) – mol fraction array with shape <code class="docutils literal notranslate"><span class="pre">(number</span> <span class="pre">of</span> <span class="pre">compositions,</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">components)</span></code>.</p></li>
+<li><p><strong>z</strong> (<em>numpy.ndarray</em>) – mol fraction array with shape <cite>(number of compositions, number of components)</cite>.</p></li>
 <li><p><strong>Hij</strong> (<em>numpy.ndarray</em>) – determinant of Hessian matrix of the Gibbs mixing free energy.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>mol fractions of the spinodal curve. Returns an array of shape <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">components)</span></code> for binary mixtures or <code class="docutils literal notranslate"><span class="pre">None</span></code> if fewer or more than two spinodal points are detected (excluding the first and last 5 points).</p>
+<dd class="field-even"><p>mol fractions of the spinodal curve.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.ndarray or None</p>
@@ -299,7 +300,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="picmol.thermo_model.binodal_fn">
 <span class="sig-prename descclassname"><span class="pre">picmol.thermo_model.</span></span><span class="sig-name descname"><span class="pre">binodal_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">G_mix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_coefs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solute_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bi_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bi_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/thermo_model.html#binodal_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.thermo_model.binodal_fn" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates mole fractions of the coexistence curve (binodal) using the convex envelope method (<code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.cem.CEM</span></code>), which applies the isoactivity criterion.</p>
+<dd><p>Calculates mol fractions of the coexistence curve (binodal) using the convex envelope method (<a class="reference internal" href="picmol.models.cem.html#picmol.models.cem.cem_analysis.CEM" title="picmol.models.cem.cem_analysis.CEM"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.cem.cem_analysis.CEM</span></code></a>), which applies the isoactivity criterion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -307,16 +308,16 @@
 <li><p><strong>rec_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – spacing for the discretization of the composition space.</p></li>
 <li><p><strong>G_mix</strong> (<em>numpy.ndarray</em>) – Gibbs mixing free energy array.</p></li>
 <li><p><strong>activity_coefs</strong> (<em>numpy.ndarray</em>) – array of activity coefficients for each component at each composition in the discretized space.</p></li>
-<li><p><strong>solute_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – index of the solute component for reporting mole fractions (only relevant for binary systems).</p></li>
-<li><p><strong>bi_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – lower bound for mole fractions to be considered for binodals. Defaults to negative infinity.</p></li>
-<li><p><strong>bi_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – upper bound for mole fractions to be considered for binodals. Defaults to positive infinity.</p></li>
+<li><p><strong>solute_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – index of the solute component for reporting mol fractions (only relevant for binary systems).</p></li>
+<li><p><strong>bi_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – lower bound for mol fractions to be considered for binodals. Defaults to negative infinity.</p></li>
+<li><p><strong>bi_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – upper bound for mol fractions to be considered for binodals. Defaults to positive infinity.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>for binary systems, returns a tuple of two floats representing the minimum and maximum binodal mole fractions of the solute. Returns an array for multicomponent systems. Returns <code class="docutils literal notranslate"><span class="pre">(np.nan,</span> <span class="pre">np.nan)</span></code> if no valid binodal points are found for binary systems.</p>
+<dd class="field-even"><p>for binary systems, returns a tuple of two floats representing the minimum and maximum binodal mol fractions of the solute and an array for multicomponent systems.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>] or numpy.ndarray or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[np.nan, np.nan]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>] or numpy.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -360,13 +361,12 @@
 <li><p><span class="math notranslate nohighlight">\(\overline{N^e}\)</span> is the average number of electrons in the mixture.</p></li>
 <li><p><span class="math notranslate nohighlight">\(|H^x|\)</span> is the determinant of the Gibbs mixing free energy Hessian.</p></li>
 <li><p><span class="math notranslate nohighlight">\(k_b\)</span> is the Boltzmann constant.</p></li>
-<li><p><span class="math notranslate nohighlight">\(T\)</span> is the temperature.</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<em>numpy.ndarray</em>) – mol fraction array with shape <code class="docutils literal notranslate"><span class="pre">(number</span> <span class="pre">of</span> <span class="pre">compositions,</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">components)</span></code>.</p></li>
+<li><p><strong>z</strong> (<em>numpy.ndarray</em>) – mol fraction array with shape <cite>(number of compositions, number of components)</cite>.</p></li>
 <li><p><strong>molar_vol</strong> (<em>numpy.ndarray</em>) – array of molar volumes for each component.</p></li>
 <li><p><strong>n_electrons</strong> (<em>numpy.ndarray</em>) – array of the number of electrons for each component.</p></li>
 <li><p><strong>Hij</strong> (<em>numpy.ndarray</em>) – Hessian matrix of the Gibbs mixing free energy.</p></li>
@@ -385,31 +385,30 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="picmol.thermo_model.Tc_search">
 <span class="sig-prename descclassname"><span class="pre">picmol.thermo_model.</span></span><span class="sig-name descname"><span class="pre">Tc_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lle_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unif_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unifac'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/thermo_model.html#Tc_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.thermo_model.Tc_search" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates the critical temperature (K) for a binary system using the UNIFAC model. The critical temperature is identified by finding the temperature at which spinodal points appear (Hessian of Gibbs mixing free energy becomes zero). The calculation can be optimized by specifying the type of LLE.</p>
+<dd><p>Calculates the critical temperature (K) for a binary system using the UNIFAC model. The critical temperature is identified by finding the temperature at which the distance between two spinodal points (Hessian of Gibbs mixing free energy becomes zero) are minimized. The calculation can be optimized by specifying the type of LLE.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of SMILES representations of the two molecules in the binary system.</p></li>
 <li><p><strong>lle_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>type of liquid-liquid equilibrium transition. Options are:</p>
 <ul>
-<li><p>’ucst’: Upper critical solution temperature (critical temperature is the maximum on the phase diagram).</p></li>
-<li><p>’lcst’: Lower critical solution temperature (critical temperature is the minimum on the phase diagram).</p></li>
+<li><p><cite>ucst</cite>: Upper critical solution temperature (critical temperature is the maximum on the phase diagram).</p></li>
+<li><p><cite>lcst</cite>: Lower critical solution temperature (critical temperature is the minimum on the phase diagram).</p></li>
 </ul>
 </p></li>
-<li><p><strong>Tmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – minimum temperature (K) for the search. Required for <code class="docutils literal notranslate"><span class="pre">lle_type='lcst'</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code>. Defaults to 100 K.</p></li>
-<li><p><strong>Tmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – maximum temperature (K) for the search. Required for <code class="docutils literal notranslate"><span class="pre">lle_type='ucst'</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code>. Defaults to 500 K.</p></li>
-<li><p><strong>dT</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – temperature step (K) for the search when <code class="docutils literal notranslate"><span class="pre">lle_type</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>. Defaults to 5 K.</p></li>
-<li><p><strong>unif_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>version of the UNIFAC model to use. Options are:</p>
+<li><p><strong>Tmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – minimum temperature (K) for the search. Required for <code class="docutils literal notranslate"><span class="pre">lle_type</span></code> = <cite>lcst</cite> or <cite>None</cite>. Defaults to <cite>100</cite> K.</p></li>
+<li><p><strong>Tmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – maximum temperature (K) for the search. Required for <code class="docutils literal notranslate"><span class="pre">lle_type</span></code> = <cite>ucst</cite> or <cite>None</cite>. Defaults to <cite>500</cite> K.</p></li>
+<li><p><strong>dT</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – temperature step (K) for the search when <code class="docutils literal notranslate"><span class="pre">lle_type</span></code> is <cite>None</cite>. Defaults to <cite>5</cite> K.</p></li>
+<li><p><strong>unif_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – <p>version of the UNIFAC model to use, defaults to <cite>unifac</cite>. Options are:</p>
 <ul>
-<li><p>’unifac’: Original UNIFAC.</p></li>
-<li><p>’unifac-lle’: Updated parameters for LLE.</p></li>
-<li><p>’unifac-il’: Includes support for ionic liquid molecules.</p></li>
+<li><p><cite>unifac</cite>: Original UNIFAC.</p></li>
+<li><p><cite>unifac-il</cite>: Includes support for ionic liquid molecules.</p></li>
 </ul>
 </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The critical temperature (K). Returns <code class="docutils literal notranslate"><span class="pre">np.nan</span></code> if the critical temperature cannot be found.</p>
+<dd class="field-even"><p>critical temperature (K). Returns <cite>np.nan</cite> if the critical temperature cannot be found.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a> or np.nan</p>
@@ -419,30 +418,30 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="picmol.thermo_model.ThermoModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.thermo_model.</span></span><span class="sig-name descname"><span class="pre">ThermoModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">KBIModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/thermo_model.html#ThermoModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.thermo_model.ThermoModel" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">picmol.thermo_model.</span></span><span class="sig-name descname"><span class="pre">ThermoModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">KBIModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/thermo_model.html#ThermoModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.thermo_model.ThermoModel" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates Gibbs mixing free energy and related mixing properties as a function of temperature for LLE analysis.</p>
 <p>This class provides a framework for applying various thermodynamic models to analyze
 LLE in mixtures. It supports both binary and multicomponent
 systems, depending on the chosen thermodynamic model. The class initializes based on a
-selected model name, a KBI (Kirkwood-Buff Integrals) model object, and a temperature
+selected model name, a KBI (Kirkwood-Buff Integral) model object, and a temperature
 range for analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – <p>thermodynamic model to implement. Available options include:</p>
 <ul>
-<li><p>’quartic’: Numerical model using a 4th order Taylor series expansion (<a class="reference internal" href="picmol.models.numerical.html#picmol.models.numerical.QuarticModel" title="picmol.models.numerical.QuarticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.numerical.QuarticModel</span></code></a>). Supported for multicomponent mixtures.</p></li>
-<li><p>’uniquac’: UNIQUAC (Universal Quasi-Chemical) thermodynamic model (<a class="reference internal" href="picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC" title="picmol.models.uniquac.UNIQUAC"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.uniquac.UNIQUAC</span></code></a>). Supported for multicomponent mixtures.</p></li>
-<li><p>’unifac’: UNIFAC (Universal Functional-group Activity Coefficients) thermodynamic model (<a class="reference internal" href="picmol.models.unifac.html#picmol.models.unifac.UNIFAC" title="picmol.models.unifac.UNIFAC"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.unifac.UNIFAC</span></code></a>). Supported for multicomponent mixtures.</p></li>
-<li><p>’fh’: Flory-Huggins thermodynamic model (<a class="reference internal" href="picmol.models.fh.html#picmol.models.fh.FH" title="picmol.models.fh.FH"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.fh.FH</span></code></a>). Supported for binary systems only.</p></li>
-<li><p>’nrtl’: NRTL (Non-Random Two-Liquid) thermodynamic model (<a class="reference internal" href="picmol.models.nrtl.html#picmol.models.nrtl.NRTL" title="picmol.models.nrtl.NRTL"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.nrtl.NRTL</span></code></a>). Supported for binary systems only.</p></li>
+<li><p><cite>quartic</cite>: Numerical model using a 4th order Taylor series expansion (<a class="reference internal" href="picmol.models.numerical.html#picmol.models.numerical.QuarticModel" title="picmol.models.numerical.QuarticModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.numerical.QuarticModel</span></code></a>). Supported for multicomponent mixtures.</p></li>
+<li><p><cite>uniquac</cite>: UNIQUAC (Universal Quasi-Chemical) thermodynamic model (<a class="reference internal" href="picmol.models.uniquac.html#picmol.models.uniquac.UNIQUAC" title="picmol.models.uniquac.UNIQUAC"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.uniquac.UNIQUAC</span></code></a>). Supported for multicomponent mixtures.</p></li>
+<li><p><cite>unifac</cite>: UNIFAC (Universal Functional-group Activity Coefficients) thermodynamic model (<a class="reference internal" href="picmol.models.unifac.html#picmol.models.unifac.UNIFAC" title="picmol.models.unifac.UNIFAC"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.unifac.UNIFAC</span></code></a>). Supported for multicomponent mixtures.</p></li>
+<li><p><cite>fh</cite>: Flory-Huggins thermodynamic model (<a class="reference internal" href="picmol.models.fh.html#picmol.models.fh.FH" title="picmol.models.fh.FH"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.fh.FH</span></code></a>). Supported for binary systems only.</p></li>
+<li><p><cite>nrtl</cite>: NRTL (Non-Random Two-Liquid) thermodynamic model (<a class="reference internal" href="picmol.models.nrtl.html#picmol.models.nrtl.NRTL" title="picmol.models.nrtl.NRTL"><code class="xref py py-class docutils literal notranslate"><span class="pre">picmol.models.nrtl.NRTL</span></code></a>). Supported for binary systems only.</p></li>
 </ul>
 </p></li>
 <li><p><strong>KBIModel</strong> (<a class="reference internal" href="picmol.kbi.html#picmol.kbi.KBI" title="picmol.kbi.KBI"><em>KBI</em></a>) – KBI class object containing Kirkwood-Buff integrals and related data.
 This object provides information about the mixture components and their interactions.</p></li>
-<li><p><strong>Tmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – minimum temperature (K) for the temperature scaling analysis. Defaults to 100 K.</p></li>
-<li><p><strong>Tmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – maximum temperature (K) for the temperature scaling analysis. Defaults to 400 K.</p></li>
-<li><p><strong>dT</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – temperature step (K) for the temperature scaling analysis. Defaults to 10 K.</p></li>
+<li><p><strong>Tmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – minimum temperature (K) for the temperature scaling analysis. Defaults to <cite>100</cite> K.</p></li>
+<li><p><strong>Tmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – maximum temperature (K) for the temperature scaling analysis. Defaults to <cite>400</cite> K.</p></li>
+<li><p><strong>dT</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – temperature step (K) for the temperature scaling analysis. Defaults to <cite>5</cite> K.</p></li>
 </ul>
 </dd>
 </dl>
@@ -454,22 +453,27 @@ and calculate SAXS I<sub>0</sub> values.</p>
 <p>This method iterates over the defined temperature range to calculate thermodynamic
 properties relevant for LLE. It distinguishes between binary
 and multicomponent systems to apply appropriate calculation methods.</p>
-<p><strong>Attributes (after running this method):</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">GM</span></code> (kJ/mol): Gibbs mixing energy as a function of temperature and composition.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">det_Hij</span></code>: determinant of Hessian of Gibbs mixing energy with respect to composition.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">x_sp</span></code>: mol fractions at spinodal compositions as a function of temperature.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">x_bi</span></code>: mol fractions at binodal compositions as a function of temperature.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">v_sp</span></code>: volume fractions at spinodal compositions as a function of temperature.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">v_bi</span></code>: volume fractions at binodal compositions as a function of temperature.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">GM_sp</span></code> (kJ/mol, binary only): Gibbs mixing energy at spinodal compositions.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">GM_bi</span></code> (kJ/mol, binary only): Gibbs mixing energy at binodal compositions.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">I0_arr</span></code>: Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>GM</strong> (<em>numpy.ndarray</em>) – Gibbs mixing energy (kJ/mol) as a function of temperature and composition.</p></li>
+<li><p><strong>det_Hij</strong> (<em>numpy.ndarray</em>) – Determinant of Hessian of Gibbs mixing energy with respect to composition.</p></li>
+<li><p><strong>x_sp</strong> (<em>numpy.ndarray</em>) – Mol fractions at spinodal compositions as a function of temperature.</p></li>
+<li><p><strong>x_bi</strong> (<em>numpy.ndarray</em>) – Mol fractions at binodal compositions as a function of temperature.</p></li>
+<li><p><strong>v_sp</strong> (<em>numpy.ndarray</em>) – Volume fractions at spinodal compositions as a function of temperature.</p></li>
+<li><p><strong>v_bi</strong> (<em>numpy.ndarray</em>) – Volume fractions at binodal compositions as a function of temperature.</p></li>
+<li><p><strong>GM_sp</strong> (<em>numpy.ndarray</em>) – Gibbs mixing energy at spinodal compositions (kJ/mol). For binary systems only.</p></li>
+<li><p><strong>GM_bi</strong> (<em>numpy.ndarray</em>) – Gibbs mixing energy at binodal compositions (kJ/mol). For binary systems only.</p></li>
+<li><p><strong>I0_arr</strong> (<em>numpy.ndarray</em>) – Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity
 as a function of temperature and composition.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">x_I0_max</span></code>: Widom line compositions in mole fraction as a function of temperature.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">v_I0_max</span></code>: Widom line compositions in volume fraction as a function of temperature.</p></li>
+<li><p><strong>x_I0_max</strong> (<em>numpy.ndarray</em>) – Widom line compositions in mol fraction as a function of temperature.</p></li>
+<li><p><strong>v_I0_max</strong> (<em>numpy.ndarray</em>) – Widom line compositions in volume fraction as a function of temperature.</p></li>
+<li><p><strong>xc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Critical composition in mol fraction. For binary systems only.</p></li>
+<li><p><strong>phic</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Critical volume fraction. For binary systems only.</p></li>
+<li><p><strong>Tc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Critical temperature (K). For binary systems only.</p></li>
 </ul>
-<p>The calculated results are stored as attributes of the <a class="reference internal" href="#picmol.thermo_model.ThermoModel" title="picmol.thermo_model.ThermoModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThermoModel</span></code></a> object.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -477,7 +481,7 @@ as a function of temperature and composition.</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">T_values</span></span><a class="headerlink" href="#picmol.thermo_model.ThermoModel.T_values" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.array of temperature values (K) for scaling</p>
+<dd class="field-odd"><p>array of temperature values (K) for scaling</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
@@ -499,12 +503,12 @@ mixing properties as a function of temperature.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of SMILES strings for each component in the mixture.</p></li>
 <li><p><strong>mol_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – list of names for each component in the mixture.</p></li>
-<li><p><strong>solute_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – index of the solute component in the <code class="docutils literal notranslate"><span class="pre">smiles</span></code> and <code class="docutils literal notranslate"><span class="pre">mol_names</span></code> lists. Defaults to 0.</p></li>
-<li><p><strong>Tmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – minimum temperature (K) for the temperature scaling analysis. Defaults to 100 K.</p></li>
-<li><p><strong>Tmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – maximum temperature (K) for the temperature scaling analysis. Defaults to 400 K.</p></li>
-<li><p><strong>dT</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – temperature step (K) for the temperature scaling analysis. Defaults to 10 K.</p></li>
-<li><p><strong>save_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – directory to save output files (not currently used in the provided code). Defaults to None.</p></li>
-<li><p><strong>unif_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – UNIFAC version to use (e.g., ‘unifac’, ‘unifac-lle’, ‘unifac-il’). Defaults to ‘unifac’.</p></li>
+<li><p><strong>solute_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – index of the solute component in the <code class="docutils literal notranslate"><span class="pre">smiles</span></code> and <code class="docutils literal notranslate"><span class="pre">mol_names</span></code> lists. Defaults to <cite>0</cite>.</p></li>
+<li><p><strong>Tmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – minimum temperature (K) for the temperature scaling analysis. Defaults to <cite>100</cite> K.</p></li>
+<li><p><strong>Tmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – maximum temperature (K) for the temperature scaling analysis. Defaults to <cite>400</cite> K.</p></li>
+<li><p><strong>dT</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – temperature step (K) for the temperature scaling analysis. Defaults to <cite>10</cite> K.</p></li>
+<li><p><strong>save_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – directory to save output files. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>unif_version</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – UNIFAC version to use (e.g., <cite>unifac</cite>, <cite>unifac-lle</cite>, <cite>unifac-il</cite>). Defaults to <cite>unifac</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -514,8 +518,28 @@ mixing properties as a function of temperature.</p>
 <dd><p>Performs temperature scaling analysis using the UNIFAC model.</p>
 <p>This method calculates Gibbs mixing energy, spinodal and binodal compositions as a
 function of temperature. It distinguishes between binary and multicomponent systems
-to apply the appropriate calculation methods. The results are stored as attributes
-of the <a class="reference internal" href="#picmol.thermo_model.UNIFACThermoModel" title="picmol.thermo_model.UNIFACThermoModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">UNIFACThermoModel</span></code></a> object.</p>
+to apply the appropriate calculation methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>GM</strong> (<em>numpy.ndarray</em>) – Gibbs mixing energy (kJ/mol) as a function of temperature and composition.</p></li>
+<li><p><strong>det_Hij</strong> (<em>numpy.ndarray</em>) – Determinant of Hessian of Gibbs mixing energy with respect to composition. For binary systems only.</p></li>
+<li><p><strong>x_sp</strong> (<em>numpy.ndarray</em>) – Mol fractions at spinodal compositions as a function of temperature. For binary systems only.</p></li>
+<li><p><strong>x_bi</strong> (<em>numpy.ndarray</em>) – Mol fractions at binodal compositions as a function of temperature.</p></li>
+<li><p><strong>v_sp</strong> (<em>numpy.ndarray</em>) – Volume fractions at spinodal compositions as a function of temperature. For binary systems only.</p></li>
+<li><p><strong>v_bi</strong> (<em>numpy.ndarray</em>) – Volume fractions at binodal compositions as a function of temperature.</p></li>
+<li><p><strong>GM_sp</strong> (<em>numpy.ndarray</em>) – Gibbs mixing energy at spinodal compositions (kJ/mol). For binary systems only.</p></li>
+<li><p><strong>GM_bi</strong> (<em>numpy.ndarray</em>) – Gibbs mixing energy at binodal compositions (kJ/mol). For binary systems only.</p></li>
+<li><p><strong>I0_arr</strong> (<em>numpy.ndarray</em>) – Small-Angle X-ray Scattering (SAXS) zero-angle scattering intensity
+as a function of temperature and composition.</p></li>
+<li><p><strong>x_I0_max</strong> (<em>numpy.ndarray</em>) – Widom line compositions in mol fraction as a function of temperature.</p></li>
+<li><p><strong>v_I0_max</strong> (<em>numpy.ndarray</em>) – Widom line compositions in volume fraction as a function of temperature.</p></li>
+<li><p><strong>xc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Critical composition in mol fraction. For binary systems only.</p></li>
+<li><p><strong>phic</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Critical volume fraction. For binary systems only.</p></li>
+<li><p><strong>Tc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Critical temperature (K). For binary systems only.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -547,9 +571,14 @@ of the <a class="reference internal" href="#picmol.thermo_model.UNIFACThermoMode
 <dl class="py method">
 <dt class="sig sig-object py" id="picmol.thermo_model.UNIFACThermoModel.compute_rdkit_properties">
 <span class="sig-name descname"><span class="pre">compute_rdkit_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/picmol/thermo_model.html#UNIFACThermoModel.compute_rdkit_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#picmol.thermo_model.UNIFACThermoModel.compute_rdkit_properties" title="Link to this definition">¶</a></dt>
-<dd><p>Computes molecular properties using RDKit.</p>
-<p>This method calculates molecular weight, density, molar volume, number of electrons,
-and molecular charge for each component based on their SMILES strings.</p>
+<dd><p>Computes the following molecular properties using RDKit based on <code class="docutils literal notranslate"><span class="pre">smiles</span></code>, with values stored as attributes in a dictionary:</p>
+<ul class="simple">
+<li><p><cite>mol_wt</cite>: Molar weight (g/mol)</p></li>
+<li><p><cite>density</cite>:  Density (g/cm<sup>3</sup>)</p></li>
+<li><p><cite>molar_vol</cite>: Molar volume (cm<sup>3</sup>/mol)</p></li>
+<li><p><cite>n_electrons</cite>: Number of electrons</p></li>
+<li><p><cite>mol_charge</cite>: Formal charge on molecule</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dicstionary of molecular properties by molecule</p>

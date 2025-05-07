@@ -207,6 +207,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.conversions.html">Conversions (picmol.conversions)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.get_molecular_properties.html">Molecular Properties (picmol.get_molecular_properties)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.kbi.html">Kirkwood-Buff Integral Analysis (picmol.kbi)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../picmol.thermo_model.html">Liquid-Liquid Equilibria (picmol.thermo_model)</a></li>
@@ -277,14 +278,10 @@
 <a class="viewcode-back" href="../../../../../picmol.models.unifac_subgroups.fragmentation.html#picmol.models.unifac_subgroups.fragmentation.groups.Groups">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Groups</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Group class.</span>
-
-<span class="sd">  Stores the solved FragmentationModels subgroups of a molecule.</span>
+<span class="sd">  Group class. Stores the solved FragmentationModels subgroups of a molecule.</span>
 
 <span class="sd">  :param identifier: The molecular identifier (SMILES string or RDKit Mol object).</span>
-<span class="sd">  :type identifier: str</span>
-<span class="sd">  :param identifier_type: The type of identifier used (&#39;smiles&#39; or &#39;mol&#39;).</span>
-<span class="sd">  :type identifier_type: str, optional</span>
+<span class="sd">  :type identifier: str or rdkit.rdchem.Mol</span>
 
 <span class="sd">  :ivar mol_object: The RDKit Mol object representing the molecule.</span>
 <span class="sd">  :vartype mol_object: Chem.rdchem.Mol</span>
@@ -295,13 +292,12 @@
 <span class="sd">  :ivar unifac_IL: The SubgroupModel object for the UNIFAC-IL model.</span>
 <span class="sd">  :vartype unifac_IL: Groups.SubgroupModel</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">identifier_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;smiles&quot;</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">identifier_type</span> <span class="o">=</span> <span class="n">identifier_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">mol_object</span> <span class="o">=</span> <span class="n">instantiate_mol_object</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">identifier_type</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mol_object</span> <span class="o">=</span> <span class="n">instantiate_mol_object</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span> <span class="o">=</span> <span class="n">Descriptors</span><span class="o">.</span><span class="n">MolWt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mol_object</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">unifac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SubgroupModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier_type</span><span class="p">,</span> <span class="n">unifac</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">unifac_IL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SubgroupModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier_type</span><span class="p">,</span> <span class="n">unifac_IL</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">unifac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SubgroupModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">unifac</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">unifac_IL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SubgroupModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">unifac_IL</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">embed_molecule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mol_object</span><span class="p">)</span>
@@ -335,7 +331,7 @@
 <span class="sd">    atomic radii.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">        V_{vdw} = \sum_i \frac{4}{3} \pi r_i^3 \cdot N_A \cdot 10^{-24}</span>
+<span class="sd">        V_{vdw} = N_A \sum_i \frac{4}{3} \pi r_i^3</span>
 
 <span class="sd">    :return: The van der Waals molar volume in cm\ :sup:`3`/mol.</span>
 <span class="sd">    :rtype: float</span>
@@ -354,7 +350,7 @@
 <span class="sd">    atomic radii.</span>
 
 <span class="sd">    .. math::</span>
-<span class="sd">        SA_{vdw} = \sum_i 4 \pi r_i^2 \cdot N_A \cdot 10^{-16}</span>
+<span class="sd">        SA_{vdw} = N_A \sum_i 4 \pi r_i^2</span>
 
 <span class="sd">    :return: The van der Waals surface area in cm\ :sup:`2`/mol.</span>
 <span class="sd">    :rtype: float</span>
@@ -371,34 +367,22 @@
 <a class="viewcode-back" href="../../../../../picmol.models.unifac_subgroups.fragmentation.html#picmol.models.unifac_subgroups.fragmentation.groups.Groups.SubgroupModel">[docs]</a>
   <span class="k">class</span><span class="w"> </span><span class="nc">SubgroupModel</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Handles subgroup-related calculations for a specific model.</span>
-
-<span class="sd">    This class performs calculations related to molecular subgroups,</span>
-<span class="sd">    such as converting subgroup names to IDs and calculating molar</span>
-<span class="sd">    van der Waals volume and surface area parameters.</span>
+<span class="sd">    Handles subgroup-related calculations for a specific UNIFAC model.</span>
 
 <span class="sd">    :param identifier:</span>
-<span class="sd">        The identifier of the molecule.  This could be a SMILES string or</span>
-<span class="sd">        other molecule identifier, depending on the context.</span>
-<span class="sd">    :type identifier: str</span>
-<span class="sd">    :param identifier_type:</span>
-<span class="sd">        The type of the molecule identifier (e.g., &#39;smiles&#39;).</span>
-<span class="sd">        This is case-insensitive.</span>
-<span class="sd">    :type identifier_type: str</span>
-<span class="sd">    :param model:</span>
-<span class="sd">        The fragmentation model instance (e.g., a :class:`GibbsModel`)</span>
-<span class="sd">        containing the subgroup definitions and parameters.</span>
+<span class="sd">        The identifier of the molecule. This could be a SMILES string or</span>
+<span class="sd">        rdkit.rdchem.Mol object.</span>
+<span class="sd">    :type identifier: str or rdkit.rdchem.Mol</span>
+<span class="sd">    :param model: The fragmentation model instance containing the subgroup definitions and parameters.</span>
 <span class="sd">    :type model: FragmentationModel</span>
 
-<span class="sd">    :ivar subgroups:</span>
-<span class="sd">        A dictionary mapping subgroup names to their occurrences in the molecule.</span>
+<span class="sd">    :ivar subgroups: A dictionary mapping subgroup names to their occurrences in the molecule.</span>
 <span class="sd">    :vartype subgroups: dict</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">identifier_type</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">identifier_type</span> <span class="o">=</span> <span class="n">identifier_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span> <span class="o">=</span> <span class="n">get_groups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier_type</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span> <span class="o">=</span> <span class="n">get_groups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_num</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -454,10 +438,10 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">subgroup_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">      </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">      Gets the surface area parameter (Q) for each subgroup. Creates a dictionary mapping subgroup IDs to their surface area parameters (Q).</span>
-
+<span class="sd">      Maps the surface area parameter (:math:`Q_j`) for each subgroup :math:`j` in molecule :math:`i` to its corresponding subgroup ID. </span>
+<span class="sd">      </span>
 <span class="sd">      :return: A dictionary of subgroup IDs and their Q values.</span>
-<span class="sd">      :rtype: dict</span>
+<span class="sd">      :rtype: dict[int, float]</span>
 <span class="sd">      &quot;&quot;&quot;</span>
       <span class="n">q_dict</span> <span class="o">=</span> <span class="p">{}</span>
       <span class="k">for</span> <span class="n">group</span><span class="p">,</span> <span class="n">occurence</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subgroups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

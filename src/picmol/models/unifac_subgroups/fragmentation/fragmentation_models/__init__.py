@@ -1,11 +1,7 @@
-"""fragmentation models module"""
-
 from .fragmentation_model import FragmentationModel
-from .gibbs_model import GibbsModel
-from .models import unifac
+from .models import unifac, unifac_IL
 
 __all__ = [
 	"FragmentationModel",
-	"GibbsModel",
-	"unifac",
+	"unifac", "unifac_IL"
 ]

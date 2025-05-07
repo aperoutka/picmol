@@ -18,28 +18,28 @@ unif = pd.merge(_unif_info, _unif_subgroups, on=['subgroup', 'R', 'Q'], how='inn
 unif_il = pd.merge(_unif_il_info, _unif_il_subgroups, on=['subgroup', "R", "Q"], how='inner').set_index("subgroup_id")
 
 class UNIFAC_subgroup:
-  # Creates object for UNIFAC subgroup parsing.
+  r"""Creates object for UNIFAC subgroup parsing, setting attribtutes for each subgroup with the same name as the parameters.
 
-  # :param group_id: The unique identifier for the subgroup.
-  # :type group_id: int
-  # :param group: The name of the subgroup.
-  # :type group: str
-  # :param main_group_id: The identifier for the main group to which this subgroup belongs.
-  # :type main_group_id: int
-  # :param main_group: The name of the main group to which this subgroup belongs.
-  # :type main_group: str
-  # :param R: The van der Waals volume parameter for the subgroup.
-  # :type R: float
-  # :param Q: The van der Waals surface area parameter for the subgroup.
-  # :type Q: float
-  # :param smarts: The SMARTS pattern for the subgroup (optional).
-  # :type smarts: str, optional
-  # :param priority: The priority of the subgroup in matching (optional).
-  # :type priority: int, optional
-  # :param atoms: List of atoms in the subgroup (optional).
-  # :type atoms: list, optional
-  # :param bonds: List of bonds in the subgroup (optional).
-  # :type bonds: list, optional
+  :param group_id: The unique identifier for the subgroup.
+  :type group_id: int
+  :param group: The name of the subgroup.
+  :type group: str
+  :param main_group_id: The identifier for the main group to which this subgroup belongs.
+  :type main_group_id: int
+  :param main_group: The name of the main group to which this subgroup belongs.
+  :type main_group: str
+  :param R: The van der Waals volume parameter for the subgroup.
+  :type R: float
+  :param Q: The van der Waals surface area parameter for the subgroup.
+  :type Q: float
+  :param smarts: The SMARTS pattern for the subgroup (optional).
+  :type smarts: str, optional
+  :param priority: The priority of the subgroup in matching (optional).
+  :type priority: int, optional
+  :param atoms: List of atoms in the subgroup (optional).
+  :type atoms: list, optional
+  :param bonds: List of bonds in the subgroup (optional).
+  :type bonds: list, optional"""
 
   __slots__ = ['group_id', 'group', 'main_group_id', 'main_group', 'R', 'Q', 'smarts', 'priority', 'atoms', 'bonds']
 

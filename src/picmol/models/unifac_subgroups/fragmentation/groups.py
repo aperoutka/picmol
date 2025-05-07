@@ -9,14 +9,10 @@ from .fragmentation_models.models import *
 
 class Groups:
   """
-  Group class.
-
-  Stores the solved FragmentationModels subgroups of a molecule.
+  Group class. Stores the solved FragmentationModels subgroups of a molecule.
 
   :param identifier: The molecular identifier (SMILES string or RDKit Mol object).
-  :type identifier: str
-  :param identifier_type: The type of identifier used ('smiles' or 'mol').
-  :type identifier_type: str, optional
+  :type identifier: str or rdkit.rdchem.Mol
 
   :ivar mol_object: The RDKit Mol object representing the molecule.
   :vartype mol_object: Chem.rdchem.Mol
@@ -27,13 +23,12 @@ class Groups:
   :ivar unifac_IL: The SubgroupModel object for the UNIFAC-IL model.
   :vartype unifac_IL: Groups.SubgroupModel
   """
-  def __init__(self, identifier: str, identifier_type: str = "smiles"):
-    self.identifier_type = identifier_type.lower()
+  def __init__(self, identifier):
     self.identifier = identifier
-    self.mol_object = instantiate_mol_object(identifier, identifier_type)
+    self.mol_object = instantiate_mol_object(identifier)
     self.molecular_weight = Descriptors.MolWt(self.mol_object)
-    self.unifac = self.SubgroupModel(self.identifier, self.identifier_type, unifac)
-    self.unifac_IL = self.SubgroupModel(self.identifier, self.identifier_type, unifac_IL)
+    self.unifac = self.SubgroupModel(self.identifier, unifac)
+    self.unifac_IL = self.SubgroupModel(self.identifier, unifac_IL)
 
   def embed_molecule(self):
     mol = Chem.AddHs(self.mol_object)
@@ -64,7 +59,7 @@ class Groups:
     atomic radii.
 
     .. math::
-        V_{vdw} = \sum_i \frac{4}{3} \pi r_i^3 \cdot N_A \cdot 10^{-24}
+        V_{vdw} = N_A \sum_i \frac{4}{3} \pi r_i^3
 
     :return: The van der Waals molar volume in cm\ :sup:`3`/mol.
     :rtype: float
@@ -83,7 +78,7 @@ class Groups:
     atomic radii.
 
     .. math::
-        SA_{vdw} = \sum_i 4 \pi r_i^2 \cdot N_A \cdot 10^{-16}
+        SA_{vdw} = N_A \sum_i 4 \pi r_i^2
 
     :return: The van der Waals surface area in cm\ :sup:`2`/mol.
     :rtype: float
@@ -98,34 +93,22 @@ class Groups:
   
   class SubgroupModel:
     """
-    Handles subgroup-related calculations for a specific model.
-
-    This class performs calculations related to molecular subgroups,
-    such as converting subgroup names to IDs and calculating molar
-    van der Waals volume and surface area parameters.
+    Handles subgroup-related calculations for a specific UNIFAC model.
 
     :param identifier:
-        The identifier of the molecule.  This could be a SMILES string or
-        other molecule identifier, depending on the context.
-    :type identifier: str
-    :param identifier_type:
-        The type of the molecule identifier (e.g., 'smiles').
-        This is case-insensitive.
-    :type identifier_type: str
-    :param model:
-        The fragmentation model instance (e.g., a :class:`GibbsModel`)
-        containing the subgroup definitions and parameters.
+        The identifier of the molecule. This could be a SMILES string or
+        rdkit.rdchem.Mol object.
+    :type identifier: str or rdkit.rdchem.Mol
+    :param model: The fragmentation model instance containing the subgroup definitions and parameters.
     :type model: FragmentationModel
 
-    :ivar subgroups:
-        A dictionary mapping subgroup names to their occurrences in the molecule.
+    :ivar subgroups: A dictionary mapping subgroup names to their occurrences in the molecule.
     :vartype subgroups: dict
     """
-    def __init__(self, identifier, identifier_type, model):
+    def __init__(self, identifier, model):
       self.model = model
-      self.identifier_type = identifier_type.lower()
       self.identifier = identifier
-      self.subgroups = get_groups(self.model, self.identifier, self.identifier_type)
+      self.subgroups = get_groups(self.model, self.identifier)
     
     @property
     def to_num(self):
@@ -181,10 +164,10 @@ class Groups:
     @property
     def subgroup_q(self):
       r"""
-      Gets the surface area parameter (Q) for each subgroup. Creates a dictionary mapping subgroup IDs to their surface area parameters (Q).
-
+      Maps the surface area parameter (:math:`Q_j`) for each subgroup :math:`j` in molecule :math:`i` to its corresponding subgroup ID. 
+      
       :return: A dictionary of subgroup IDs and their Q values.
-      :rtype: dict
+      :rtype: dict[int, float]
       """
       q_dict = {}
       for group, occurence in self.subgroups.items():
