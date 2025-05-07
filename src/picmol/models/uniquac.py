@@ -28,7 +28,7 @@ def UNIQUAC_R(smiles: list):
   :return: array containing the r parameters for each molecule
   :rtype: numpy.ndarray
   """
-  g = [Groups(smile, "smiles") for smile in smiles]
+  g = [Groups(smile) for smile in smiles]
   r = np.array([gg.unifac.r for gg in g])
   return r
 
@@ -53,7 +53,7 @@ def UNIQUAC_Q(smiles: list):
   :return: array containing the q parameters for each molecule
   :rtype: numpy.ndarray
   """
-  g = [Groups(smile, "smiles") for smile in smiles]
+  g = [Groups(smile) for smile in smiles]
   q = np.array([gg.unifac.q for gg in g])
   return q
 

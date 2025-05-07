@@ -1,11 +1,5 @@
 import numpy as np
-import pandas as pd
-import os
-import sys
-from pathlib import Path
-from scipy.optimize import curve_fit
 from scipy import constants
-import copy
 
 from .unifac_subgroups.unifac_subgroup_parameters import UFIP, UFSG, UFILIP, UFILSG, UFKBIIP, UFKBISG, UNIFAC_subgroup
 from .unifac_subgroups.fragmentation import Groups
@@ -200,7 +194,7 @@ class UNIFAC:
     """
     subgroup_nums = []
     for smiles in self.smiles:
-      group_obj = Groups(smiles, "smiles")
+      group_obj = Groups(smiles)
       if '.' in smiles:
         subgroup_nums.append(group_obj.unifac_IL.to_num)
       else:
